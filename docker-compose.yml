@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:alpine
+    container_name: unaplauso-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./.db_data:/var/lib/postgresql/data
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    networks:
+      - unaplauso-network
+    restart: always
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    container_name: unaplauso-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    networks:
+      - unaplauso-network
+    restart: always
+
+  gateway:
+    container_name: unaplauso-gateway
+    env_file: ./.env
+    build:
+      context: .
+      target: unaplauso-gateway
+    ports:
+      - '${GATEWAY_PORT}:${GATEWAY_PORT}'
+    networks:
+      - unaplauso-network
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  auth:
+    container_name: unaplauso-auth
+    env_file: ./.env
+    build:
+      context: .
+      target: unaplauso-auth
+    ports:
+      - '${AUTH_PORT}:${AUTH_PORT}'
+    networks:
+      - unaplauso-network
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  audit:
+    container_name: unaplauso-audit
+    env_file: ./.env
+    build:
+      context: .
+      target: unaplauso-audit
+    networks:
+      - unaplauso-network
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+volumes:
+  db_data:
+
+networks:
+  unaplauso-network:
