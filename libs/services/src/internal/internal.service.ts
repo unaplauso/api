@@ -11,10 +11,10 @@ export class InternalService {
     cmd: string,
     body?: unknown,
     emit = false,
-    addToPattern?: any,
+    addToPattern?: object,
   ) {
     return this.client[emit ? 'emit' : 'send']<T>(
-      { ...addToPattern, service, cmd },
+      { service, cmd, ...addToPattern },
       body || {},
     );
   }

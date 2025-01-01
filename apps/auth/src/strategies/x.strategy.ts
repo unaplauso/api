@@ -1,10 +1,12 @@
 import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserInsertDto } from '@unaplauso/database';
-import { Strategy } from 'passport-twitter';
+import { InsertUser } from '@unaplauso/database';
+import { Profile, Strategy } from 'passport-twitter';
+import OauthStrategy from '../oauth-strategy.enum';
+import VerifyCallback from '../types/verify-callback.type';
 
 @Injectable()
-export class XStrategy extends PassportStrategy(Strategy, 'x') {
+export class XStrategy extends PassportStrategy(Strategy, OauthStrategy.X) {
   constructor() {
     super({
       consumerKey: process.env.X_CONSUMER_KEY,
@@ -18,9 +20,9 @@ export class XStrategy extends PassportStrategy(Strategy, 'x') {
   async validate(
     _token: string,
     _tokenSecret: string,
-    profile: any,
-    done: any,
-  ): Promise<UserInsertDto> {
+    profile: Profile,
+    done: VerifyCallback,
+  ): Promise<InsertUser> {
     const id = profile.id;
     const email = profile.emails?.[0]?.value;
 

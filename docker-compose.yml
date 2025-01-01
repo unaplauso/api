@@ -55,8 +55,7 @@ services:
     networks:
       - unaplauso-network
     depends_on:
-      - db
-      - redis
+      - gateway
     restart: always
 
   audit:
@@ -68,8 +67,7 @@ services:
     networks:
       - unaplauso-network
     depends_on:
-      - db
-      - redis
+      - gateway
     restart: always
 
 volumes:

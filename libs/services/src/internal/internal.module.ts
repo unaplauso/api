@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { InternalService } from './internal.service';
 
+@Global()
 @Module({
   imports: [
     ClientsModule.registerAsync([
@@ -12,9 +13,9 @@ import { InternalService } from './internal.service';
         useFactory: async (configService: ConfigService) => ({
           transport: Transport.REDIS,
           options: {
-            host: configService.getOrThrow('REDIS_HOST'),
-            port: configService.getOrThrow('REDIS_PORT'),
-            password: configService.getOrThrow('REDIS_PASSWORD'),
+            host: configService.get('REDIS_HOST'),
+            port: configService.get('REDIS_PORT'),
+            password: configService.get('REDIS_PASSWORD'),
           },
         }),
       },

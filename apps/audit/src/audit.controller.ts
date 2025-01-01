@@ -1,13 +1,32 @@
 import { Controller } from '@nestjs/common';
-import { Pattern, Service } from '@unaplauso/services';
-import { AppService } from './audit.service';
+import { Payload } from '@nestjs/microservices';
+import { InsertReport } from '@unaplauso/database';
+import { AuditService } from './audit.service';
+import { Pattern } from './decorators/pattern.decorator';
 
 @Controller()
 export class AuditController {
-  constructor(private readonly service: AppService) {}
+  constructor(private readonly service: AuditService) {}
 
-  @Pattern(Service.AUDIT, 'health-check')
-  healthCheck() {
+  @Pattern('health_check')
+  async healthCheck() {
     return this.service.healthCheck();
+  }
+
+  @Pattern('create_report')
+  async createReport(@Payload() dto: InsertReport) {
+    return this.service.createReport(dto);
+  }
+
+  @Pattern('read_report')
+  async readReport() {
+    return this.service.readReport();
+  }
+
+  @Pattern('delete_report')
+  async deleteReport(
+    @Payload() { userId, reportedId }: { userId: number; reportedId: number },
+  ) {
+    return this.service.deleteReport(userId, reportedId);
   }
 }

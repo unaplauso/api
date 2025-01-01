@@ -1,6 +1,6 @@
 import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserInsertDto } from '@unaplauso/database';
+import { InsertUser } from '@unaplauso/database';
 import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
 import OauthStrategy from '../oauth-strategy.enum';
 
@@ -23,7 +23,7 @@ export class GoogleStrategy extends PassportStrategy(
     _refreshToken: string,
     profile: Profile,
     done: VerifyCallback,
-  ): Promise<UserInsertDto> {
+  ): Promise<InsertUser> {
     const id = profile.id;
     const email = profile.emails![0];
 

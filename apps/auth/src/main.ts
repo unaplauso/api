@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import * as session from 'express-session';
+import session from 'express-session';
 import { AuthModule } from './auth.module';
 
 (async () => {
@@ -8,7 +8,7 @@ import { AuthModule } from './auth.module';
 
   app.use(
     session({
-      secret: process.env.SESSION_SECRET as string,
+      secret: process.env.SESSION_SECRET ?? 'secret',
       resave: false,
       saveUninitialized: false,
     }),

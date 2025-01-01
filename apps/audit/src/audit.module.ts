@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from '@unaplauso/database';
 import { AuditController } from './audit.controller';
-import { AppService } from './audit.service';
+import { AuditService } from './audit.service';
+import { LocalConfigModule } from '@unaplauso/common/modules';
 
 @Module({
-  imports: [ConfigModule.forRoot()],
+  imports: [LocalConfigModule(), DatabaseModule],
   controllers: [AuditController],
-  providers: [AppService],
+  providers: [AuditService],
 })
 export class AuditModule {}

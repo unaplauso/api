@@ -1,10 +1,15 @@
 import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { UserInsertDto } from '@unaplauso/database';
+import { InsertUser } from '@unaplauso/database';
 import { Profile, Strategy } from 'passport-facebook';
+import OauthStrategy from '../oauth-strategy.enum';
+import VerifyCallback from '../types/verify-callback.type';
 
 @Injectable()
-export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
+export class FacebookStrategy extends PassportStrategy(
+  Strategy,
+  OauthStrategy.FACEBOOK,
+) {
   constructor() {
     super({
       clientID: process.env.FACEBOOK_CLIENT_ID,
@@ -19,8 +24,8 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     _accessToken: string,
     _refreshToken: string,
     profile: Profile,
-    done: (err: any, user: any, info?: any) => void,
-  ): Promise<UserInsertDto> {
+    done: VerifyCallback,
+  ): Promise<InsertUser> {
     const id = profile.id;
     const email = profile.emails![0]?.value;
 
