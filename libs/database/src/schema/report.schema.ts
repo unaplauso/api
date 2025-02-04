@@ -8,7 +8,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
-import { InferInput, pipe, check as vcheck } from 'valibot';
+import * as v from 'valibot';
 import { UserTable } from './user.schema';
 
 export const ReportReasonEnum = pgEnum('report_reason', [
@@ -39,9 +39,11 @@ export const ReportTable = pgTable(
   ],
 );
 
-export const InsertReportSchema = pipe(
-  createInsertSchema(ReportTable),
-  vcheck((x) => Boolean(x.reason ?? x.message)),
+export const InsertReportSchema = v.pipe(
+  createInsertSchema(ReportTable, {
+    userId: () => v.undefined(),
+  }),
+  v.check((x) => Boolean(x.reason ?? x.message)),
 );
 
-export type InsertReport = InferInput<typeof InsertReportSchema>;
+export type InsertReport = v.InferInput<typeof InsertReportSchema>;

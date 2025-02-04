@@ -24,10 +24,9 @@ export class GoogleStrategy extends PassportStrategy(
     profile: Profile,
     done: VerifyCallback,
   ): Promise<InsertUser> {
-    const id = profile.id;
     const email = profile.emails![0];
 
-    if (!email?.value || !email?.verified || !id)
+    if (!email?.value || !email?.verified)
       throw new PreconditionFailedException();
 
     const name =

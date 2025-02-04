@@ -1,6 +1,6 @@
 import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
-import { email, InferInput, pipe } from 'valibot';
+import * as v from 'valibot';
 
 export const UserTable = pgTable('user', {
   id: serial('id').primaryKey(),
@@ -9,23 +9,7 @@ export const UserTable = pgTable('user', {
 });
 
 export const InsertUserSchema = createInsertSchema(UserTable, {
-  email: (schema) => pipe(schema, email()),
+  email: (schema) => v.pipe(schema, v.email()),
 });
 
-export type InsertUser = InferInput<typeof InsertUserSchema>;
-
-/* 
-##### USER
-name: varchar({ length: 128 }),
-- url personal
-- ubicacion
-- fotoId
-- fotoBannerId
-- biografia TEXT
-- datetime de ultima vista de notificaciones
-- mail
-- agradecimientoPersonalizado, para cuando te donan
-- escondeFavoritos boolean
-- URLs de redes sociales
-- valorAplauso
-*/
+export type InsertUser = v.InferInput<typeof InsertUserSchema>;

@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Payload } from '@nestjs/microservices';
+import { UserAction } from '@unaplauso/common/validation';
 import { InsertReport } from '@unaplauso/database';
 import { AuditService } from './audit.service';
 import { Pattern } from './decorators/pattern.decorator';
@@ -14,7 +15,7 @@ export class AuditController {
   }
 
   @Pattern('create_report')
-  async createReport(@Payload() dto: InsertReport) {
+  async createReport(@Payload() dto: UserAction<InsertReport>) {
     return this.service.createReport(dto);
   }
 

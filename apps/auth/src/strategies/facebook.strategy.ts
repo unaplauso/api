@@ -2,8 +2,8 @@ import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InsertUser } from '@unaplauso/database';
 import { Profile, Strategy } from 'passport-facebook';
+import { VerifyCallback } from 'passport-google-oauth20';
 import OauthStrategy from '../oauth-strategy.enum';
-import VerifyCallback from '../types/verify-callback.type';
 
 @Injectable()
 export class FacebookStrategy extends PassportStrategy(
@@ -26,10 +26,8 @@ export class FacebookStrategy extends PassportStrategy(
     profile: Profile,
     done: VerifyCallback,
   ): Promise<InsertUser> {
-    const id = profile.id;
     const email = profile.emails![0]?.value;
-
-    if (!email || !id) throw new PreconditionFailedException();
+    if (!email) throw new PreconditionFailedException();
 
     const name =
       `${profile.name?.givenName ?? ''} ${profile.name?.familyName ?? ''}`.trim() ||

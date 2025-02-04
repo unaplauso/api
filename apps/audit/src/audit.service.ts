@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UserAction } from '@unaplauso/common/validation';
 import { InjectDB, InsertReport, ReportTable } from '@unaplauso/database';
 import { and, eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -11,7 +12,7 @@ export class AuditService {
     return 'OK';
   }
 
-  async createReport(dto: InsertReport) {
+  async createReport(dto: UserAction<InsertReport>) {
     return this.db.insert(ReportTable).values(dto);
   }
 
