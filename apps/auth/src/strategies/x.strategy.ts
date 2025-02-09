@@ -1,10 +1,7 @@
-import {
-  Inject,
-  Injectable,
-  PreconditionFailedException,
-} from '@nestjs/common';
+import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { InjectConfig } from '@unaplauso/common/decorators/inject-config.decorator';
 import { InsertUser } from '@unaplauso/database';
 import { VerifyCallback } from 'passport-google-oauth20';
 import { Profile, Strategy } from 'passport-twitter';
@@ -12,7 +9,7 @@ import OauthStrategy from '../oauth-strategy.enum';
 
 @Injectable()
 export class XStrategy extends PassportStrategy(Strategy, OauthStrategy.X) {
-  constructor(@Inject(ConfigService) readonly config: ConfigService) {
+  constructor(@InjectConfig() readonly config: ConfigService) {
     super({
       consumerKey: config.getOrThrow('X_CONSUMER_KEY'),
       consumerSecret: config.getOrThrow('X_CONSUMER_SECRET'),

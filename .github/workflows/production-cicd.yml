@@ -1,8 +1,5 @@
 name: Production CICD
 
-env:
-  HUSKY: 0
-
 on:
   push:
     branches:

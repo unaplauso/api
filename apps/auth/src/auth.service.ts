@@ -1,6 +1,9 @@
+import { Cache } from '@nestjs/cache-manager';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { InjectCache } from '@unaplauso/common/decorators';
+import { InjectConfig } from '@unaplauso/common/decorators/inject-config.decorator';
 import { InjectDB, InsertUser, UserTable } from '@unaplauso/database';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -12,9 +15,10 @@ export class AuthService {
   private readonly JWT_REFRESH_SECRET: string;
 
   constructor(
-    @Inject(ConfigService) private readonly config: ConfigService,
-    @Inject(JwtService) private readonly jwtService: JwtService,
+    @InjectConfig() private readonly config: ConfigService,
+    @InjectCache() private readonly cache: Cache,
     @InjectDB() private readonly db: NodePgDatabase,
+    @Inject(JwtService) private readonly jwt: JwtService,
   ) {
     this.FRONT_REDIRECT_URL = this.config.getOrThrow('FRONT_REDIRECT_URL');
     this.JWT_REFRESH_SECRET = this.config.get('JWT_REFRESH_SECRET', 'secret');
@@ -22,8 +26,8 @@ export class AuthService {
 
   private async issueTokens(id: number) {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync({ id }),
-      this.jwtService.signAsync(
+      this.jwt.signAsync({ id }),
+      this.jwt.signAsync(
         { id },
         {
           algorithm: 'HS512',
@@ -33,8 +37,8 @@ export class AuthService {
       ),
     ]);
 
-    // TODO: cache token for rotation
-
+    // x * 86400000 = x days
+    await this.cache.set(`${id}`, refreshToken, 30 * 86400000);
     return { accessToken, refreshToken };
   }
 
@@ -44,11 +48,11 @@ export class AuthService {
 
   async refreshToken(token: string) {
     try {
-      const { id } = await this.jwtService.verifyAsync(token, {
+      const { id } = await this.jwt.verifyAsync(token, {
         secret: this.JWT_REFRESH_SECRET,
       });
 
-      // TODO: check if token latest rotated for id
+      if ((await this.cache.get<string>(`${id}`)) !== token) throw new Error();
 
       return this.issueTokens(id);
     } catch {

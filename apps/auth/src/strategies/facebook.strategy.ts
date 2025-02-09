@@ -1,10 +1,7 @@
-import {
-  Inject,
-  Injectable,
-  PreconditionFailedException,
-} from '@nestjs/common';
+import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { InjectConfig } from '@unaplauso/common/decorators/inject-config.decorator';
 import { InsertUser } from '@unaplauso/database';
 import { Profile, Strategy } from 'passport-facebook';
 import { VerifyCallback } from 'passport-google-oauth20';
@@ -15,7 +12,7 @@ export class FacebookStrategy extends PassportStrategy(
   Strategy,
   OauthStrategy.FACEBOOK,
 ) {
-  constructor(@Inject(ConfigService) readonly config: ConfigService) {
+  constructor(@InjectConfig() readonly config: ConfigService) {
     super({
       clientID: config.getOrThrow('FACEBOOK_CLIENT_ID'),
       clientSecret: config.getOrThrow('FACEBOOK_CLIENT_SECRET'),

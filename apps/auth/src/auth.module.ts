@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
-import { LocalConfigModule, LocalJwtModule } from '@unaplauso/common/modules';
+import {
+  LocalCacheModule,
+  LocalConfigModule,
+  LocalJwtModule,
+} from '@unaplauso/common/modules';
 import { DatabaseModule } from '@unaplauso/database';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -9,7 +13,12 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { XStrategy } from './strategies/x.strategy';
 
 @Module({
-  imports: [LocalConfigModule(), DatabaseModule, LocalJwtModule],
+  imports: [
+    LocalConfigModule(),
+    LocalCacheModule({ ttl: 2592000000 }), // 30d
+    DatabaseModule,
+    LocalJwtModule,
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,
