@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { InsertUser } from '@unaplauso/database';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { GetOauthCallback } from './decorators/get-oauth-callback.decorator';
 import { GetOauth } from './decorators/get-oauth.decorator';
 import OauthStrategy from './oauth-strategy.enum';
 import AccessData from './types/access-data.type';
-import { InsertUser } from '@unaplauso/database';
 
 @Controller()
 export class AuthController {
@@ -24,9 +24,6 @@ export class AuthController {
     return res.status(302).redirect(this.service.getRedirectUrl(tokens));
   }
 
-  /* Logout explícito para testing:
-    https://accounts.google.com/Logout?continue=https://appengine.google.com/_ah/logout 
-  */
   @GetOauth(OauthStrategy.GOOGLE) async googleAuth() {}
   @GetOauthCallback(OauthStrategy.GOOGLE) async googleAuthRedirect(
     @Req() { user }: { user: InsertUser },

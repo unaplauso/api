@@ -1,4 +1,9 @@
-import { Injectable, PreconditionFailedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  PreconditionFailedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InsertUser } from '@unaplauso/database';
 import { Profile, Strategy } from 'passport-facebook';
@@ -10,10 +15,10 @@ export class FacebookStrategy extends PassportStrategy(
   Strategy,
   OauthStrategy.FACEBOOK,
 ) {
-  constructor() {
+  constructor(@Inject(ConfigService) readonly config: ConfigService) {
     super({
-      clientID: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      clientID: config.getOrThrow('FACEBOOK_CLIENT_ID'),
+      clientSecret: config.getOrThrow('FACEBOOK_CLIENT_SECRET'),
       callbackURL: '/api/auth/facebook/callback',
       profileFields: ['emails', 'name'],
       scope: 'email',

@@ -15,9 +15,6 @@ services:
     restart: always
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   redis:
     image: redis:alpine
@@ -28,6 +25,9 @@ services:
     networks:
       - unaplauso-network
     restart: always
+    healthcheck:
+      test:
+        ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD}', '--raw', 'incr', 'ping']
 
   gateway:
     container_name: unaplauso-gateway
@@ -40,8 +40,10 @@ services:
     networks:
       - unaplauso-network
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: always
 
   auth:

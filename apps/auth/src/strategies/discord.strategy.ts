@@ -1,4 +1,9 @@
-import { Injectable, PreconditionFailedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  PreconditionFailedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InsertUser } from '@unaplauso/database';
 import Strategy, { Profile } from 'passport-discord';
@@ -10,10 +15,10 @@ export class DiscordStrategy extends PassportStrategy(
   Strategy,
   OauthStrategy.DISCORD,
 ) {
-  constructor() {
+  constructor(@Inject(ConfigService) readonly config: ConfigService) {
     super({
-      clientID: process.env.DISCORD_CLIENT_ID,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET,
+      clientID: config.getOrThrow('DISCORD_CLIENT_ID'),
+      clientSecret: config.getOrThrow('DISCORD_CLIENT_SECRET'),
       callbackURL: '/api/auth/discord/callback',
       scope: ['identify', 'email'],
     });

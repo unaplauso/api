@@ -1,0 +1,29 @@
+name: Production CICD
+
+env:
+  HUSKY: 0
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+
+      - uses: docker/setup-buildx-action@master
+
+      - uses: docker/login-action@master
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - uses: docker/build-push-action@master
+        with:
+          push: true
+          tags: user/api:stable
+
+      # TODO: EC2 send-command pull & reload

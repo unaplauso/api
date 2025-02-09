@@ -1,9 +1,0 @@
-{
-  "envDirName": "tests",
-  "request": {
-    "timeout": 5000
-  },
-  "defaultHeaders": {
-    "x-api-key": "{{SUPER_API_KEY}}"
-  }
-}

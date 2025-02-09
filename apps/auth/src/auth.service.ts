@@ -9,6 +9,7 @@ import AccessData from './types/access-data.type';
 @Injectable()
 export class AuthService {
   private readonly FRONT_REDIRECT_URL: string;
+  private readonly JWT_REFRESH_SECRET: string;
 
   constructor(
     @Inject(ConfigService) private readonly config: ConfigService,
@@ -16,10 +17,7 @@ export class AuthService {
     @InjectDB() private readonly db: NodePgDatabase,
   ) {
     this.FRONT_REDIRECT_URL = this.config.getOrThrow('FRONT_REDIRECT_URL');
-  }
-
-  private getRefreshSecret() {
-    return this.config.get('JWT_REFRESH_SECRET', 'secret');
+    this.JWT_REFRESH_SECRET = this.config.get('JWT_REFRESH_SECRET', 'secret');
   }
 
   private async issueTokens(id: number) {
@@ -29,11 +27,13 @@ export class AuthService {
         { id },
         {
           algorithm: 'HS512',
-          secret: this.getRefreshSecret(),
+          secret: this.JWT_REFRESH_SECRET,
           expiresIn: '30d',
         },
       ),
     ]);
+
+    // TODO: cache token for rotation
 
     return { accessToken, refreshToken };
   }
@@ -45,8 +45,10 @@ export class AuthService {
   async refreshToken(token: string) {
     try {
       const { id } = await this.jwtService.verifyAsync(token, {
-        secret: this.getRefreshSecret(),
+        secret: this.JWT_REFRESH_SECRET,
       });
+
+      // TODO: check if token latest rotated for id
 
       return this.issueTokens(id);
     } catch {
