@@ -1,9 +1,10 @@
+import { Type } from '@nestjs/common';
 import { NestApplicationContextOptions } from '@nestjs/common/interfaces/nest-application-context-options.interface';
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 
 export async function bootstrapService(
-  module: unknown,
+  module: Type<unknown>,
   extraOptions?: NestApplicationContextOptions,
 ) {
   const app = await NestFactory.createMicroservice(module, {

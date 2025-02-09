@@ -1,9 +1,0 @@
-GET {{URL}}/health
-
-###
-
-GET {{URL}}/health/db
-
-###
-
-GET {{URL}}/health/audit
