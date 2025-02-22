@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
 
 @Injectable()
 export class SuperGuard implements CanActivate {
@@ -11,8 +12,7 @@ export class SuperGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     return (
-      request.headers['x-api-key'] === this.SUPER_API_KEY ||
-      process.env.NODE_ENV !== 'production'
+      request.headers['x-api-key'] === this.SUPER_API_KEY || IS_DEVELOPMENT
     );
   }
 }

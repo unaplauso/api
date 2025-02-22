@@ -8,14 +8,14 @@ import { InternalService } from './internal.service';
   imports: [
     ClientsModule.registerAsync([
       {
-        name: 'REDIS_CLIENT',
+        name: 'REDIS_MS_CLIENT',
         inject: [ConfigService],
-        useFactory: async (configService: ConfigService) => ({
+        useFactory: async (config: ConfigService) => ({
           transport: Transport.REDIS,
           options: {
-            host: configService.get('REDIS_HOST'),
-            port: configService.get('REDIS_PORT'),
-            password: configService.get('REDIS_PASSWORD'),
+            host: config.get('REDIS_HOST'),
+            port: config.get('REDIS_PORT'),
+            password: config.get('REDIS_PASSWORD'),
           },
         }),
       },

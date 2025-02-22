@@ -72,6 +72,18 @@ services:
       - gateway
     restart: always
 
+  file:
+    container_name: unaplauso-file
+    env_file: ./.env
+    build:
+      context: .
+      target: unaplauso-file
+    networks:
+      - unaplauso-network
+    depends_on:
+      - gateway
+    restart: always
+
 volumes:
   db_data:
 

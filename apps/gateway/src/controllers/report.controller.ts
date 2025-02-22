@@ -3,9 +3,9 @@ import { VBody } from '@unaplauso/common/validation';
 import { InsertReport, InsertReportSchema } from '@unaplauso/database';
 import { InjectCLI, InternalService, Service } from '@unaplauso/services';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
-import { NoContent } from '../decorators/no-content.decorator';
 import { SuperProtected } from '../decorators/super-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';
+import { NoContent } from '@unaplauso/common/decorators';
 
 @Controller('report')
 export class ReportController {

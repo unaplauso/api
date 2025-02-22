@@ -15,6 +15,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build gateway & \
   pnpm run build auth & \
   pnpm run build audit & \
+  pnpm run build file & \
   wait
 
 FROM base AS prod-deps
@@ -35,4 +36,8 @@ CMD ["node", "dist/main"]
 
 FROM prod-deps AS unaplauso-audit
 COPY --from=build /app/dist/apps/audit dist
+CMD ["node", "dist/main"]
+
+FROM prod-deps AS unaplauso-file
+COPY --from=build /app/dist/apps/file dist
 CMD ["node", "dist/main"]

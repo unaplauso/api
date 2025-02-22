@@ -8,10 +8,6 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 export class AuditService {
   constructor(@InjectDB() private readonly db: NodePgDatabase) {}
 
-  async healthCheck() {
-    return 'OK';
-  }
-
   async createReport(dto: UserAction<InsertReport>) {
     return this.db.insert(ReportTable).values(dto);
   }

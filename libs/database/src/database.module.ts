@@ -23,7 +23,7 @@ export const DATABASE_CONNECTION = 'database_connection';
           }),
           {
             casing: 'snake_case',
-            logger: process.env.NODE_ENV !== 'production',
+            logger: true,
           },
         );
 

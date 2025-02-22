@@ -23,4 +23,10 @@ jobs:
           push: true
           tags: user/api:stable
 
-      # TODO: EC2 send-command pull & reload
+      - uses: appleboy/ssh-action@master
+        with:
+          script: fish -c deploy-stable
+          command_timeout: '2m'
+          username: ec2-user
+          host: ${{ secrets.PRODUCTION_HOST }}
+          key: ${{ secrets.PRODUCTION_KEY }}

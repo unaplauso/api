@@ -3,20 +3,25 @@ import { ClientProxy } from '@nestjs/microservices';
 import { timeout } from 'rxjs';
 import { Service } from '../service.enum';
 
+export type SendOptions = {
+  emit?: boolean;
+  addToPattern?: object;
+  timeout?: number;
+};
+
 @Injectable()
 export class InternalService {
-  constructor(@Inject('REDIS_CLIENT') private client: ClientProxy) {}
+  constructor(@Inject('REDIS_MS_CLIENT') private client: ClientProxy) {}
 
-  async send<T>(
+  async send<TRes = unknown, TReq = unknown>(
     service: Service,
     cmd: string,
-    body?: unknown,
-    emit = false,
-    addToPattern?: object,
+    body?: TReq,
+    op?: SendOptions,
   ) {
-    return this.client[emit ? 'emit' : 'send']<T>(
-      { service, cmd, ...addToPattern },
+    return this.client[op?.emit ? 'emit' : 'send']<TRes>(
+      { service, cmd, ...op?.addToPattern },
       body || {},
-    ).pipe(timeout(5000));
+    ).pipe(timeout(op?.timeout ?? 5000));
   }
 }

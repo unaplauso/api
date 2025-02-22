@@ -9,6 +9,7 @@
 - deQueTrata
 - cualEsElObjetivo
 - activo (es borrador o no)
+- esBorrador
 
 ##### PROJECT_INTERACTION
 Registro algoritmia para vista de proyectos, saber los mas interactuados en el ultimo tiempo

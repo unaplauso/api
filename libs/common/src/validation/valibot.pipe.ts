@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import { GenericSchema, safeParseAsync } from 'valibot';
+import { IS_DEVELOPMENT } from '.';
 
 @Injectable()
 export class ValibotPipe implements PipeTransform {
@@ -10,7 +11,7 @@ export class ValibotPipe implements PipeTransform {
 
     if (!result.success)
       throw new BadRequestException(
-        process.env.NODE_ENV === 'production' ? undefined : result.issues,
+        !IS_DEVELOPMENT ? undefined : result.issues,
       );
 
     return result.output;

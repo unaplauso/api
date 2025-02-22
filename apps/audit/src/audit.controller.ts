@@ -11,7 +11,7 @@ export class AuditController {
 
   @Pattern('health_check')
   async healthCheck() {
-    return this.service.healthCheck();
+    return 'OK';
   }
 
   @Pattern('create_report')

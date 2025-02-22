@@ -1,9 +1,9 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { NoContent } from '@unaplauso/common/decorators';
 import { InjectDB } from '@unaplauso/database';
 import { InjectCLI, InternalService, Service } from '@unaplauso/services';
 import { serviceExists } from '@unaplauso/services/utils';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { NoContent } from '../decorators/no-content.decorator';
 import { SuperProtected } from '../decorators/super-protected.decorator';
 
 @SuperProtected()

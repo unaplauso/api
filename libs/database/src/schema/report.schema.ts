@@ -11,12 +11,17 @@ import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
 import { UserTable } from './user.schema';
 
-export const ReportReasonEnum = pgEnum('report_reason', [
-  'spam',
-  'fraud',
-  'tos_disrespect',
-  'stolen_content',
-]);
+export enum ReportReason {
+  SPAM = 'spam',
+  FRAUD = 'fraud',
+  TOS_DISRESPECT = 'tos_disrespect',
+  STOLEN_CONTENT = 'stolen_content',
+}
+
+export const ReportReasonEnum = pgEnum(
+  'report_reason',
+  Object.values(ReportReason) as [ReportReason],
+);
 
 export const ReportTable = pgTable(
   'report',

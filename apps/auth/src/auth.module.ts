@@ -3,6 +3,7 @@ import {
   LocalCacheModule,
   LocalConfigModule,
   LocalJwtModule,
+  LocalThrottlerModule,
 } from '@unaplauso/common/modules';
 import { DatabaseModule } from '@unaplauso/database';
 import { AuthController } from './auth.controller';
@@ -15,9 +16,10 @@ import { XStrategy } from './strategies/x.strategy';
 @Module({
   imports: [
     LocalConfigModule(),
-    LocalCacheModule({ ttl: 2592000000 }), // 30d
+    LocalCacheModule(),
     DatabaseModule,
-    LocalJwtModule,
+    LocalJwtModule(),
+    LocalThrottlerModule({ blockDuration: 30 * 60000 }),
   ],
   controllers: [AuthController],
   providers: [

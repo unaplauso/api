@@ -1,7 +1,7 @@
 import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { InjectConfig } from '@unaplauso/common/decorators/inject-config.decorator';
+import { InjectConfig } from '@unaplauso/common/decorators';
 import { InsertUser } from '@unaplauso/database';
 import { Profile, Strategy } from 'passport-facebook';
 import { VerifyCallback } from 'passport-google-oauth20';
