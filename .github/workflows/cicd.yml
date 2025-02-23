@@ -56,6 +56,21 @@ jobs:
         with:
           service: audit
 
+      - name: auth build & push
+        uses: ./.github/build-push
+        with:
+          service: auth
+
+      - name: file build & push
+        uses: ./.github/build-push
+        with:
+          service: file
+
+      - name: gateway build & push
+        uses: ./.github/build-push
+        with:
+          service: gateway
+
       - uses: appleboy/ssh-action@master
         if: steps.changes.outputs.any == 'true' || steps.changes.outputs.struct == 'true'
         with:
