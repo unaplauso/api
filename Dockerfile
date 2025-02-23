@@ -1,5 +1,8 @@
 FROM node:alpine AS base
 
+
+#t
+
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 ENV NODE_ENV=${NODE_ENV} PNPM_HOME="/pnpm" PATH="$PNPM_HOME:$PATH"
