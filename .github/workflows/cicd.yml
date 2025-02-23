@@ -52,7 +52,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: audit build & push
-        uses: build-push
+        uses: ./build-push
         with:
           service: audit
 
