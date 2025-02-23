@@ -1,12 +1,17 @@
-name: Testing CICD
+name: CICD
 
 on:
   push:
     branches:
+      - main
       - develop
 
+env:
+  SSH_HOST: ${{ contains(github.ref, 'main') && secrets.SSH_PRODUCTION_HOST || secrets.SSH_TESTING_HOST }}
+  DOCKER_TAG: ${{ contains(github.ref, 'main') && 'stable' || 'latest' }}
+
 jobs:
-  build-and-deploy:
+  cicd:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
@@ -21,25 +26,25 @@ jobs:
       - uses: docker/build-push-action@master
         with:
           push: true
-          tags: unaplauso/api-gateway:latest
+          tags: unaplauso/api-gateway:${{ env.DOCKER_TAG }}
           target: unaplauso-gateway
 
       - uses: docker/build-push-action@master
         with:
           push: true
-          tags: unaplauso/api-auth:latest
+          tags: unaplauso/api-auth:${{ env.DOCKER_TAG }}
           target: unaplauso-auth
 
       - uses: docker/build-push-action@master
         with:
           push: true
-          tags: unaplauso/api-audit:latest
+          tags: unaplauso/api-audit:${{ env.DOCKER_TAG }}
           target: unaplauso-audit
 
       - uses: docker/build-push-action@master
         with:
           push: true
-          tags: unaplauso/api-file:latest
+          tags: unaplauso/api-file:${{ env.DOCKER_TAG }}
           target: unaplauso-file
 
       - uses: appleboy/ssh-action@master
@@ -47,5 +52,5 @@ jobs:
           script: deploy
           command_timeout: '2m'
           username: ec2-user
-          host: ${{ secrets.SSH_TESTING_HOST }}
+          host: ${{ env.SSH_HOST }}
           key: ${{ secrets.SSH_ROOT_KEY }}
