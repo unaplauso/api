@@ -4,8 +4,9 @@ import { InjectDB } from '@unaplauso/database';
 import { InjectCLI, InternalService, Service } from '@unaplauso/services';
 import { serviceExists } from '@unaplauso/services/utils';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { SuperProtected } from '../decorators/super-protected.decorator';
 
-// @SuperProtected()
+@SuperProtected()
 @Controller('health')
 export class HealthController {
   constructor(
