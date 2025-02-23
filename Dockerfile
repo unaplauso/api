@@ -21,7 +21,6 @@ RUN pnpm run build gateway & \
 FROM base AS prod-deps
 ENV POSTGRES_HOST='unaplauso-db' REDIS_HOST='unaplauso-redis'
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline -P
-COPY .env ./
 COPY --from=build /app/libs/database/migrations libs/database/migrations
 
 FROM prod-deps AS unaplauso-gateway
