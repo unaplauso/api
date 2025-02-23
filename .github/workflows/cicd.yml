@@ -5,6 +5,16 @@ on:
     branches:
       - main
       - develop
+    paths:
+      - 'apps/**'
+      - 'libs/**'
+      - 'Dockerfile'
+      - 'nest-cli.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig.json'
+      - 'tsconfig.build.json'
+      - 'webpack.config.js'
 
 env:
   SSH_HOST: ${{ contains(github.ref, 'main') && secrets.SSH_PRODUCTION_HOST || secrets.SSH_TESTING_HOST }}
@@ -20,7 +30,7 @@ jobs:
         id: changes
         with:
           filters: |
-            struct: 
+            any: 
               - 'libs/**'
               - 'Dockerfile'
               - 'nest-cli.json'
@@ -29,52 +39,22 @@ jobs:
               - 'tsconfig.json'
               - 'tsconfig.build.json'
               - 'webpack.config.js'
-            any: 'apps/**'
             audit: 'apps/audit/**'
             auth: 'apps/auth/**'
             file: 'apps/file/**'
             gateway: 'apps/gateway/**'
 
       - uses: docker/setup-buildx-action@master
-        if: steps.changes.outputs.any == 'true' || steps.changes.outputs.struct == 'true'
 
       - uses: docker/login-action@master
-        if: steps.changes.outputs.any == 'true' || steps.changes.outputs.struct == 'true'
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: audit build & push
-        uses: docker/build-push-action@master
-        if: steps.changes.outputs.audit == 'true' || steps.changes.outputs.struct == 'true'
+        uses: ./.github/build-push-action
         with:
-          push: true
-          tags: unaplauso/api-audit:${{ env.DOCKER_TAG }}
-          target: unaplauso-audit
-
-      - name: auth build & push
-        uses: docker/build-push-action@master
-        if: steps.changes.outputs.auth == 'true' || steps.changes.outputs.struct == 'true'
-        with:
-          push: true
-          tags: unaplauso/api-auth:${{ env.DOCKER_TAG }}
-          target: unaplauso-auth
-
-      - name: file build & push
-        uses: docker/build-push-action@master
-        if: steps.changes.outputs.file == 'true' || steps.changes.outputs.struct == 'true'
-        with:
-          push: true
-          tags: unaplauso/api-file:${{ env.DOCKER_TAG }}
-          target: unaplauso-file
-
-      - name: gateway build & push
-        uses: docker/build-push-action@master
-        if: steps.changes.outputs.gateway == 'true' || steps.changes.outputs.struct == 'true'
-        with:
-          push: true
-          tags: unaplauso/api-gateway:${{ env.DOCKER_TAG }}
-          target: unaplauso-gateway
+          service: audit
 
       - uses: appleboy/ssh-action@master
         if: steps.changes.outputs.any == 'true' || steps.changes.outputs.struct == 'true'

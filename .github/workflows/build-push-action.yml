@@ -1,0 +1,15 @@
+name: 'Build & push action'
+
+inputs:
+  service:
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: docker/build-push-action@master
+      if: steps.changes.outputs[inputs.service] == 'true' || steps.changes.outputs.any == 'true'
+      with:
+        push: true
+        tags: unaplauso/api-${{ inputs.service }}:${{ env.DOCKER_TAG }}
+        target: unaplauso-${{ inputs.service }}
