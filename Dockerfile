@@ -23,9 +23,8 @@ ENV POSTGRES_HOST='unaplauso-db' REDIS_HOST='unaplauso-redis'
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline -P
 COPY --from=build /app/libs/database/migrations libs/database/migrations
 
-FROM prod-deps AS unaplauso-gateway
-COPY --from=build /app/dist/apps/gateway dist
-EXPOSE ${GATEWAY_PORT}
+FROM prod-deps AS unaplauso-audit
+COPY --from=build /app/dist/apps/audit dist
 CMD ["node", "dist/main"]
 
 FROM prod-deps AS unaplauso-auth
@@ -33,10 +32,11 @@ COPY --from=build /app/dist/apps/auth dist
 EXPOSE ${AUTH_PORT}
 CMD ["node", "dist/main"]
 
-FROM prod-deps AS unaplauso-audit
-COPY --from=build /app/dist/apps/audit dist
-CMD ["node", "dist/main"]
-
 FROM prod-deps AS unaplauso-file
 COPY --from=build /app/dist/apps/file dist
+CMD ["node", "dist/main"]
+
+FROM prod-deps AS unaplauso-gateway
+COPY --from=build /app/dist/apps/gateway dist
+EXPOSE ${GATEWAY_PORT}
 CMD ["node", "dist/main"]
