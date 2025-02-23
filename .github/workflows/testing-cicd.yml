@@ -1,9 +1,9 @@
-name: Production CICD
+name: Testing CICD
 
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   build-and-deploy:
@@ -21,12 +21,12 @@ jobs:
       - uses: docker/build-push-action@master
         with:
           push: true
-          tags: user/api:stable
+          tags: user/api:latest
 
       - uses: appleboy/ssh-action@master
         with:
           script: deploy
           command_timeout: '2m'
           username: ec2-user
-          host: ${{ secrets.SSH_PRODUCTION_HOST }}
+          host: ${{ secrets.SSH_TESTING_HOST }}
           key: ${{ secrets.SSH_ROOT_KEY }}

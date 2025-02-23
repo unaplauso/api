@@ -1,0 +1,25 @@
+import { Controller } from '@nestjs/common';
+import { Payload } from '@nestjs/microservices';
+import { SyncFile } from '@unaplauso/files/sync/sync-file.type';
+import { Pattern } from './decorators/pattern.decorator';
+import { FileService } from './file.service';
+
+@Controller()
+export class FileController {
+  constructor(private readonly service: FileService) {}
+
+  @Pattern('health_check')
+  async healthCheck() {
+    return 'OK';
+  }
+
+  @Pattern('sync_file')
+  async syncFile(@Payload() data: SyncFile) {
+    return this.service.syncFile(data);
+  }
+
+  @Pattern('delete_file')
+  async deleteFile(@Payload() key: string) {
+    return this.service.deleteFile(key);
+  }
+}
