@@ -10,7 +10,6 @@ import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
 import { AppModule } from './app.module';
 
 /*
-- FIX LOCAL-CONFIG.MODULE, CARGA SERVICE-SPECIFIC
 93 Backend
 94 - Top 10 mas ovaciónnados
 95 - Busqueda de creadores findAll con filters

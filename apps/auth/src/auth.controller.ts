@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { NoContent } from '@unaplauso/common/decorators';
 import { InsertUser } from '@unaplauso/database';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -10,6 +11,8 @@ import AccessData from './types/access-data.type';
 @Controller()
 export class AuthController {
   constructor(private readonly service: AuthService) {}
+
+  @NoContent()
   @Get('health')
   health() {
     return 'OK';

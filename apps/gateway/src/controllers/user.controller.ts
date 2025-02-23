@@ -11,6 +11,8 @@ import { UserId } from '../decorators/user-id.decorator';
 export class UserController {
   constructor(@InjectCLI() private readonly client: InternalService) {}
 
+  // TODO: RE-IMPLEMENT FILES WITH UUID
+
   @JwtProtected()
   @ReceivesFile()
   @Put('profile-pic')
