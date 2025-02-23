@@ -30,15 +30,7 @@ jobs:
         id: changes
         with:
           filters: |
-            any: 
-              - 'libs/**'
-              - 'Dockerfile'
-              - 'nest-cli.json'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'tsconfig.json'
-              - 'tsconfig.build.json'
-              - 'webpack.config.js'
+            any: '!apps/**'
             audit: 'apps/audit/**'
             auth: 'apps/auth/**'
             file: 'apps/file/**'
@@ -52,24 +44,36 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: audit build & push
-        uses: ./.github/build-push
+        uses: docker/build-push-action@master
+        if: steps.changes.outputs.audit == 'true' || steps.changes.outputs.any == 'true'
         with:
-          service: audit
+          push: true
+          tags: unaplauso/api-audit:${{ env.DOCKER_TAG }}
+          target: unaplauso-audit
 
       - name: auth build & push
-        uses: ./.github/build-push
+        uses: docker/build-push-action@master
+        if: steps.changes.outputs.auth == 'true' || steps.changes.outputs.any == 'true'
         with:
-          service: auth
+          push: true
+          tags: unaplauso/api-auth:${{ env.DOCKER_TAG }}
+          target: unaplauso-auth
 
       - name: file build & push
-        uses: ./.github/build-push
+        uses: docker/build-push-action@master
+        if: steps.changes.outputs.file == 'true' || steps.changes.outputs.any == 'true'
         with:
-          service: file
+          push: true
+          tags: unaplauso/api-file:${{ env.DOCKER_TAG }}
+          target: unaplauso-file
 
       - name: gateway build & push
-        uses: ./.github/build-push
+        uses: docker/build-push-action@master
+        if: steps.changes.outputs.gateway == 'true' || steps.changes.outputs.any == 'true'
         with:
-          service: gateway
+          push: true
+          tags: unaplauso/api-gateway:${{ env.DOCKER_TAG }}
+          target: unaplauso-gateway
 
       - uses: appleboy/ssh-action@master
         if: steps.changes.outputs.any == 'true' || steps.changes.outputs.struct == 'true'
