@@ -76,7 +76,6 @@ jobs:
           target: unaplauso-gateway
 
       - uses: appleboy/ssh-action@master
-        if: steps.changes.outputs.any == 'true' || steps.changes.outputs.struct == 'true'
         with:
           script: deploy
           command_timeout: '2m'
