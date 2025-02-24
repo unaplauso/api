@@ -15,7 +15,7 @@ export class HealthController {
   @NoContent()
   @Get()
   async healthCheck() {
-    return 'OK';
+    return true;
   }
 
   @NoContent()

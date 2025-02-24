@@ -10,7 +10,7 @@ export class FileController {
 
   @Pattern('health_check')
   async healthCheck() {
-    return 'OK';
+    return true;
   }
 
   @Pattern('sync_file')

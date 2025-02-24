@@ -15,7 +15,7 @@ export class AuthController {
   @NoContent()
   @Get('health')
   health() {
-    return 'OK';
+    return true;
   }
 
   @Post('refresh-token')
