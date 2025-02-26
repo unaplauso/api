@@ -1,2 +1,9 @@
-# FIXME: Exit 0 if no apps/** || libs/** modifications
-pnpm format && pnpm lint
+#!/bin/sh
+
+git diff --cached --name-only | grep -E '^(apps|libs)/' > /dev/null
+
+if [ $? -eq 0 ]; then
+  pnpm format && pnpm lint
+else
+  echo "No hay cambios en ./apps o ./libs, omitiendo format y lint."
+fi
