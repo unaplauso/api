@@ -1,7 +1,11 @@
 declare HAS_APPS_DIFF=$(git show --name-only -r --stat --oneline HEAD^^..HEAD | grep 'apps/')
 declare HAS_LIBS_DIFF=$(git show --name-only -r --stat --oneline HEAD^^..HEAD | grep 'libs/')
 
+echo $HAS_APPS_DIFF
+echo $HAS_LIBS_DIFF
+
 if [[ $HAS_APPS_DIFF || $HAS_LIBS_DIFF  ]]; then 
+  echo 'xd'
   pnpm format
   pnpm lint
 fi
