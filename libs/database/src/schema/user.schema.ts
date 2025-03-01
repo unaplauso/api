@@ -1,11 +1,18 @@
-import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, serial, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
+import { FileTable } from './file.schema';
 
 export const UserTable = pgTable('user', {
-  id: serial('id').primaryKey(),
+  id: serial().primaryKey(),
   username: varchar({ length: 64 }).unique(),
   email: varchar({ length: 320 }).unique().notNull(),
+  profilePicFileId: uuid().references(() => FileTable.id, {
+    onDelete: 'set null',
+  }),
+  profileBannerFileId: uuid().references(() => FileTable.id, {
+    onDelete: 'set null',
+  }),
 });
 
 export const InsertUserSchema = createInsertSchema(UserTable, {

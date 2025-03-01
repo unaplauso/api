@@ -45,9 +45,7 @@ export const ReportTable = pgTable(
 );
 
 export const InsertReportSchema = v.pipe(
-  createInsertSchema(ReportTable, {
-    userId: () => v.undefined(),
-  }),
+  v.omit(createInsertSchema(ReportTable), ['userId']),
   v.check((x) => Boolean(x.reason ?? x.message)),
 );
 

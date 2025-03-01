@@ -1,13 +1,7 @@
-/* 
-##### TOPIC 
-- id
-- nombre de interes
+import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
 
-##### USER_TOPIC *limite 3 per user?*
-- id user
-- id interest
-
-##### PROJECT_TOPIC *limite 5 per project?
-- id user
-- id interest
-*/
+export const TopicTable = pgTable('topic', {
+  id: serial().primaryKey(),
+  name: varchar({ length: 32 }).unique().notNull(),
+  // picture: ?,
+});

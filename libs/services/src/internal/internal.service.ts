@@ -24,4 +24,13 @@ export class InternalService {
       body || {},
     ).pipe(timeout(op?.timeout ?? 5000));
   }
+
+  async emit<TRes = unknown, TReq = unknown>(
+    service: Service,
+    cmd: string,
+    body?: TReq,
+    op?: SendOptions,
+  ) {
+    return this.send<TRes, TReq>(service, cmd, body, { ...op, emit: true });
+  }
 }

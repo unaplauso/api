@@ -32,6 +32,7 @@ services:
   gateway:
     container_name: unaplauso-gateway
     env_file: ./.env
+    restart: always
     build:
       context: .
       target: unaplauso-gateway
@@ -40,15 +41,13 @@ services:
     networks:
       - unaplauso-network
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    restart: always
+      - db
+      - redis
 
   auth:
     container_name: unaplauso-auth
     env_file: ./.env
+    restart: always
     build:
       context: .
       target: unaplauso-auth
@@ -58,11 +57,11 @@ services:
       - unaplauso-network
     depends_on:
       - gateway
-    restart: always
 
   audit:
     container_name: unaplauso-audit
     env_file: ./.env
+    restart: always
     build:
       context: .
       target: unaplauso-audit
@@ -70,11 +69,11 @@ services:
       - unaplauso-network
     depends_on:
       - gateway
-    restart: always
 
   file:
     container_name: unaplauso-file
     env_file: ./.env
+    restart: always
     build:
       context: .
       target: unaplauso-file
@@ -82,7 +81,6 @@ services:
       - unaplauso-network
     depends_on:
       - gateway
-    restart: always
 
 volumes:
   db_data:

@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { FileController } from './file.controller';
-import { FileService } from './file.service';
 import { LocalConfigModule } from '@unaplauso/common/modules';
 import { DatabaseModule } from '@unaplauso/database';
+import { FileController } from './file.controller';
+import { FileService } from './file.service';
+import { SyncService } from './sync.service';
 
 @Module({
   imports: [LocalConfigModule(), DatabaseModule],
   controllers: [FileController],
-  providers: [FileService],
+  providers: [FileService, SyncService],
 })
 export class FileModule {}

@@ -4,25 +4,28 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, MisdirectedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConfig } from '@unaplauso/common/decorators';
+import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
 import { FileTable, InjectDB, InsertFile } from '@unaplauso/database';
-import { getSyncFileOptions, SyncFile } from '@unaplauso/files';
+import { SyncFile } from '@unaplauso/files';
 import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { SyncService } from './sync.service';
 
 @Injectable()
 export class FileService {
   private readonly s3: S3Client;
-  private readonly bucket: string;
+  private readonly PUBLIC_BUCKET: string;
 
   constructor(
     @InjectConfig() private readonly config: ConfigService,
     @InjectDB() private readonly db: NodePgDatabase,
+    @Inject(SyncService) private readonly sync: SyncService,
   ) {
-    this.bucket = this.config.getOrThrow('S3_AWS_BUCKET');
+    this.PUBLIC_BUCKET = this.config.getOrThrow('S3_AWS_BUCKET_PUBLIC');
     this.s3 = new S3Client({
       region: this.config.get('S3_AWS_REGION', 'sa-east-1'),
       credentials: {
@@ -39,7 +42,7 @@ export class FileService {
     return new Upload({
       client: this.s3,
       params: {
-        Bucket: this.bucket,
+        Bucket: this.PUBLIC_BUCKET,
         ContentType: file.mimetype,
         ContentEncoding: file.encoding,
         Body: Buffer.from(file.buffer),
@@ -48,34 +51,47 @@ export class FileService {
     }).done();
   }
 
-  private async syncToDatabase(key: string, data: SyncFile) {
+  private async syncToDatabase(data: SyncFile) {
     const f: InsertFile = {
-      key,
       type: data.type,
       mimetype: data.file.mimetype,
     };
 
-    await this.db
-      .insert(FileTable)
-      .values(f)
-      .onConflictDoUpdate({
-        target: FileTable.key,
-        set: { mimetype: f.mimetype },
-      });
+    return (
+      await this.db
+        .insert(FileTable)
+        .values(f)
+        .onConflictDoUpdate({
+          target: FileTable.id,
+          set: { mimetype: f.mimetype },
+        })
+        .returning({ id: FileTable.id })
+    )[0].id;
   }
 
   async syncFile(data: SyncFile) {
-    const { dbSyncCallback, ...op } = await getSyncFileOptions(data);
-    const upload = await this.uploadFileToS3(data.file, op);
-    await this.syncToDatabase(op.Key, data);
-    if (dbSyncCallback) await dbSyncCallback();
-    return upload.Location ?? op.Key;
+    const [Key, op] = await Promise.all([
+      this.syncToDatabase(data),
+      this.sync.getOptions(data),
+    ]);
+
+    try {
+      await Promise.all([
+        this.uploadFileToS3(data.file, { ...op, Key }),
+        this.sync.execCallback(Key, data),
+      ]);
+
+      return Key;
+    } catch (e: unknown) {
+      await this.deleteFile(Key, op.Bucket ?? this.PUBLIC_BUCKET);
+      throw new MisdirectedException(IS_DEVELOPMENT ? e : undefined);
+    }
   }
 
-  async deleteFile(Key: string) {
+  async deleteFile(Key: string, Bucket = this.PUBLIC_BUCKET) {
     return Promise.all([
-      this.db.delete(FileTable).where(eq(FileTable.key, Key)),
-      this.s3.send(new DeleteObjectCommand({ Bucket: this.bucket, Key })),
+      this.db.delete(FileTable).where(eq(FileTable.id, Key)),
+      this.s3.send(new DeleteObjectCommand({ Bucket, Key })),
     ]);
   }
 }

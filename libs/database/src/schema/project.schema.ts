@@ -1,3 +1,9 @@
+import { pgTable, serial } from 'drizzle-orm/pg-core';
+
+export const ProjectTable = pgTable('project', {
+  id: serial().primaryKey(),
+});
+
 /*
 ##### PROJECT
 - nxn fotos

@@ -1,23 +1,21 @@
-import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { VBody } from '@unaplauso/common/validation';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { NoContent } from '@unaplauso/common/decorators';
+import { Validate } from '@unaplauso/common/validation';
 import { InsertReport, InsertReportSchema } from '@unaplauso/database';
-import { InjectCLI, InternalService, Service } from '@unaplauso/services';
+import { InjectClient, InternalService, Service } from '@unaplauso/services';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
 import { SuperProtected } from '../decorators/super-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';
-import { NoContent } from '@unaplauso/common/decorators';
 
 @Controller('report')
 export class ReportController {
-  constructor(@InjectCLI() private readonly client: InternalService) {}
+  constructor(@InjectClient() private readonly client: InternalService) {}
 
   @JwtProtected()
   @NoContent()
+  @Validate('body', InsertReportSchema)
   @Post()
-  async createReport(
-    @UserId() userId: number,
-    @VBody(InsertReportSchema) dto: InsertReport,
-  ) {
+  async createReport(@UserId() userId: number, @Body() dto: InsertReport) {
     return this.client.send(Service.AUDIT, 'create_report', { ...dto, userId });
   }
 

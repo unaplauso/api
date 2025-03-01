@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Payload } from '@nestjs/microservices';
-import { SyncFile } from '@unaplauso/files/sync/sync-file.type';
+import { SyncFile } from '@unaplauso/files/sync-file.type';
 import { Pattern } from './decorators/pattern.decorator';
 import { FileService } from './file.service';
 

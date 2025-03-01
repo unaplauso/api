@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
 
@@ -13,7 +13,7 @@ export const FileTypeEnum = pgEnum(
 );
 
 export const FileTable = pgTable('file', {
-  key: varchar({ length: 64 }).primaryKey(),
+  id: uuid().notNull().primaryKey().defaultRandom(),
   type: FileTypeEnum().notNull(),
   mimetype: varchar({ length: 96 }),
 });
