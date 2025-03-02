@@ -1,4 +1,4 @@
-import { pgTable, serial, uuid, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, serial, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
 import { FileTable } from './file.schema';
@@ -13,10 +13,11 @@ export const UserTable = pgTable('user', {
   profileBannerFileId: uuid().references(() => FileTable.id, {
     onDelete: 'set null',
   }),
+  createdAt: timestamp().notNull().defaultNow(),
 });
 
 export const InsertUserSchema = createInsertSchema(UserTable, {
   email: (schema) => v.pipe(schema, v.email()),
 });
 
-export type InsertUser = v.InferInput<typeof InsertUserSchema>;
+export type InsertUser = v.InferOutput<typeof InsertUserSchema>;

@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
+import { LocalConfigModule } from '@unaplauso/common/modules';
 import { DatabaseModule } from '@unaplauso/database';
 import { AuditController } from './audit.controller';
-import { AuditService } from './audit.service';
-import { LocalConfigModule } from '@unaplauso/common/modules';
+import { FavoriteService } from './services/favorite.service';
+import { ReportService } from './services/report.service';
 
 @Module({
   imports: [LocalConfigModule(), DatabaseModule],
   controllers: [AuditController],
-  providers: [AuditService],
+  providers: [ReportService, FavoriteService],
 })
 export class AuditModule {}

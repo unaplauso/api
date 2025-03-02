@@ -1,5 +1,8 @@
-import { HttpCode, HttpStatus } from '@nestjs/common';
-import { IS_DEVELOPMENT } from '../validation';
+import { applyDecorators, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiResponse } from '@nestjs/swagger';
 
 export const NoContent = () =>
-  HttpCode(IS_DEVELOPMENT ? HttpStatus.OK : HttpStatus.NO_CONTENT);
+  applyDecorators(
+    ApiResponse({ status: HttpStatus.NO_CONTENT }),
+    HttpCode(HttpStatus.NO_CONTENT),
+  );

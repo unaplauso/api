@@ -20,9 +20,9 @@ export class HealthController {
 
   @NoContent()
   @Get(':id')
-  async serviceHealthCheck(@Param('id') id: Service | 'db') {
+  async serviceHealthCheck(@Param('id') id: string) {
     if (id === 'db') return this.db.execute('SELECT 1');
     if (!serviceExists(id)) throw new NotFoundException();
-    return this.client.send(id, 'health_check');
+    return this.client.send(id as Service, 'health_check');
   }
 }

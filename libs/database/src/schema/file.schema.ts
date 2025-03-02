@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
 
@@ -16,8 +16,9 @@ export const FileTable = pgTable('file', {
   id: uuid().notNull().primaryKey().defaultRandom(),
   type: FileTypeEnum().notNull(),
   mimetype: varchar({ length: 96 }),
+  createdAt: timestamp().notNull().defaultNow(),
 });
 
 export const InsertFileSchema = createInsertSchema(FileTable);
 
-export type InsertFile = v.InferInput<typeof InsertFileSchema>;
+export type InsertFile = v.InferOutput<typeof InsertFileSchema>;

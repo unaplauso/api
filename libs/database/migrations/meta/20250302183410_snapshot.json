@@ -1,5 +1,5 @@
 {
-  "id": "7d1613e0-7315-458c-8916-650a6b819627",
+  "id": "7fd97ef6-5f7a-4b25-8f9b-ce4916d86765",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -19,6 +19,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -79,6 +86,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -147,6 +161,13 @@
           "type": "varchar(96)",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -226,6 +247,13 @@
           "type": "serial",
           "primaryKey": true,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -236,8 +264,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.report": {
-      "name": "report",
+    "public.report_creator": {
+      "name": "report_creator",
       "schema": "",
       "columns": {
         "user_id": {
@@ -246,15 +274,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "reported_id": {
-          "name": "reported_id",
+        "creator_id": {
+          "name": "creator_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
         "reason": {
           "name": "reason",
-          "type": "report_reason",
+          "type": "report_creator_reason",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
@@ -268,9 +296,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "report_user_id_user_id_fk": {
-          "name": "report_user_id_user_id_fk",
-          "tableFrom": "report",
+        "report_creator_user_id_user_id_fk": {
+          "name": "report_creator_user_id_user_id_fk",
+          "tableFrom": "report_creator",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
@@ -281,12 +309,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "report_reported_id_user_id_fk": {
-          "name": "report_reported_id_user_id_fk",
-          "tableFrom": "report",
+        "report_creator_creator_id_user_id_fk": {
+          "name": "report_creator_creator_id_user_id_fk",
+          "tableFrom": "report_creator",
           "tableTo": "user",
           "columnsFrom": [
-            "reported_id"
+            "creator_id"
           ],
           "columnsTo": [
             "id"
@@ -296,11 +324,11 @@
         }
       },
       "compositePrimaryKeys": {
-        "report_user_id_reported_id_pk": {
-          "name": "report_user_id_reported_id_pk",
+        "report_creator_user_id_creator_id_pk": {
+          "name": "report_creator_user_id_creator_id_pk",
           "columns": [
             "user_id",
-            "reported_id"
+            "creator_id"
           ]
         }
       },
@@ -309,7 +337,85 @@
       "checkConstraints": {
         "reason_or_message": {
           "name": "reason_or_message",
-          "value": "\"report\".\"reason\" IS NOT NULL OR \"report\".\"message\" IS NOT NULL"
+          "value": "\"report_creator\".\"reason\" IS NOT NULL OR \"report_creator\".\"message\" IS NOT NULL"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.report_project": {
+      "name": "report_project",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "report_project_reason",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "report_project_user_id_user_id_fk": {
+          "name": "report_project_user_id_user_id_fk",
+          "tableFrom": "report_project",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "report_project_project_id_project_id_fk": {
+          "name": "report_project_project_id_project_id_fk",
+          "tableFrom": "report_project",
+          "tableTo": "project",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "report_project_user_id_project_id_pk": {
+          "name": "report_project_user_id_project_id_pk",
+          "columns": [
+            "user_id",
+            "project_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "reason_or_message": {
+          "name": "reason_or_message",
+          "value": "\"report_project\".\"reason\" IS NOT NULL OR \"report_project\".\"message\" IS NOT NULL"
         }
       },
       "isRLSEnabled": false
@@ -440,6 +546,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -502,8 +615,18 @@
         "profile_banner"
       ]
     },
-    "public.report_reason": {
-      "name": "report_reason",
+    "public.report_creator_reason": {
+      "name": "report_creator_reason",
+      "schema": "public",
+      "values": [
+        "spam",
+        "fraud",
+        "tos_disrespect",
+        "stolen_content"
+      ]
+    },
+    "public.report_project_reason": {
+      "name": "report_project_reason",
       "schema": "public",
       "values": [
         "spam",

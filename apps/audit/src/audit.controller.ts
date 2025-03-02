@@ -1,33 +1,83 @@
 import { Controller } from '@nestjs/common';
 import { Payload } from '@nestjs/microservices';
-import { UserAction } from '@unaplauso/common/validation';
-import { InsertReport } from '@unaplauso/database';
-import { AuditService } from './audit.service';
+import { WithPagination } from '@unaplauso/common/pagination';
+import {
+  UserToCreatorAction,
+  UserToProjectAction,
+} from '@unaplauso/common/validation';
+import { InsertReportCreator } from '@unaplauso/database';
+import { InsertReportProject } from '@unaplauso/database/schema/report-project.schema';
 import { Pattern } from './decorators/pattern.decorator';
+import { FavoriteService } from './services/favorite.service';
+import { ReportService } from './services/report.service';
 
 @Controller()
 export class AuditController {
-  constructor(private readonly service: AuditService) {}
+  constructor(
+    private readonly report: ReportService,
+    private readonly favorite: FavoriteService,
+  ) {}
 
   @Pattern('health_check')
   async healthCheck() {
     return true;
   }
 
-  @Pattern('create_report')
-  async createReport(@Payload() dto: UserAction<InsertReport>) {
-    return this.service.createReport(dto);
-  }
-
-  @Pattern('read_report')
-  async readReport() {
-    return this.service.readReport();
-  }
-
-  @Pattern('delete_report')
-  async deleteReport(
-    @Payload() { userId, reportedId }: { userId: number; reportedId: number },
+  @Pattern('create_report_creator')
+  async createReportCreator(
+    @Payload() dto: UserToCreatorAction<InsertReportCreator>,
   ) {
-    return this.service.deleteReport(userId, reportedId);
+    return this.report.createReportCreator(dto);
+  }
+
+  @Pattern('create_report_project')
+  async createReportProject(
+    @Payload() dto: UserToProjectAction<InsertReportProject>,
+  ) {
+    return this.report.createReportProject(dto);
+  }
+
+  @Pattern('create_favorite_creator')
+  async createFavoriteCreator(
+    @Payload() { userId, creatorId }: { userId: number; creatorId: number },
+  ) {
+    return this.favorite.createFavoriteCreator(userId, creatorId);
+  }
+
+  @Pattern('delete_favorite_creator')
+  async deleteFavoriteCreator(
+    @Payload() { userId, creatorId }: { userId: number; creatorId: number },
+  ) {
+    return this.favorite.deleteFavoriteCreator(userId, creatorId);
+  }
+
+  @Pattern('list_favorite_creator')
+  async listFavoriteCreator(
+    @Payload()
+    { userId, pagination }: WithPagination<{ userId: number }>,
+  ) {
+    return this.favorite.readFavoriteCreator(userId, pagination);
+  }
+
+  @Pattern('create_favorite_project')
+  async createFavoriteProject(
+    @Payload() { userId, projectId }: { userId: number; projectId: number },
+  ) {
+    return this.favorite.createFavoriteProject(userId, projectId);
+  }
+
+  @Pattern('delete_favorite_project')
+  async deleteFavoriteProject(
+    @Payload() { userId, projectId }: { userId: number; projectId: number },
+  ) {
+    return this.favorite.deleteFavoriteProject(userId, projectId);
+  }
+
+  @Pattern('list_favorite_project')
+  async listFavoriteProject(
+    @Payload()
+    { userId, pagination }: WithPagination<{ userId: number }>,
+  ) {
+    return this.favorite.readFavoriteProject(userId, pagination);
   }
 }

@@ -1,7 +1,8 @@
-import { pgTable, serial } from 'drizzle-orm/pg-core';
+import { pgTable, serial, timestamp } from 'drizzle-orm/pg-core';
 
 export const ProjectTable = pgTable('project', {
   id: serial().primaryKey(),
+  createdAt: timestamp().notNull().defaultNow(),
 });
 
 /*

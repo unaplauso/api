@@ -5,11 +5,11 @@ import { toJsonSchema } from '@valibot/to-json-schema';
 import { GenericSchema } from 'valibot';
 import { ValibotPipe } from './valibot.pipe';
 
-export const Validate = (
+export function Validate(
   paramType: Paramtype,
   genericSchema: GenericSchema,
   paramName = '',
-) => {
+) {
   const schema = toJsonSchema(genericSchema, {
     errorMode: 'ignore',
   }) as SchemaObject;
@@ -19,7 +19,11 @@ export const Validate = (
     paramType === 'body'
       ? ApiBody({ schema })
       : paramType === 'query'
-        ? ApiQuery({ schema })
+        ? ApiQuery({ name: 'query', required: false, schema })
         : ApiParam({ name: paramName, schema }),
   );
-};
+}
+
+export function ValidateParam(paramKey: string, genericSchema: GenericSchema) {
+  return Validate('param', genericSchema, paramKey);
+}

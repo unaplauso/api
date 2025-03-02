@@ -1,4 +1,4 @@
-import { integer, pgTable, primaryKey } from 'drizzle-orm/pg-core';
+import { integer, pgTable, primaryKey, timestamp } from 'drizzle-orm/pg-core';
 import { UserTable } from './user.schema';
 
 export const FavoriteCreatorTable = pgTable(
@@ -10,6 +10,7 @@ export const FavoriteCreatorTable = pgTable(
     creatorId: integer()
       .notNull()
       .references(() => UserTable.id, { onDelete: 'cascade' }),
+    createdAt: timestamp().notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.userId, table.creatorId] })],
 );

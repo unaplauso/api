@@ -1,10 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { NoContent } from '@unaplauso/common/decorators';
 import { Validate } from '@unaplauso/common/validation';
-import { InsertReport, InsertReportSchema } from '@unaplauso/database';
+import {
+  InsertReportCreator,
+  InsertReportCreatorSchema,
+} from '@unaplauso/database';
+import {
+  InsertReportProject,
+  InsertReportProjectSchema,
+} from '@unaplauso/database/schema/report-project.schema';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
-import { SuperProtected } from '../decorators/super-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';
 
 @Controller('report')
@@ -13,28 +19,33 @@ export class ReportController {
 
   @JwtProtected()
   @NoContent()
-  @Validate('body', InsertReportSchema)
-  @Post()
-  async createReport(@UserId() userId: number, @Body() dto: InsertReport) {
-    return this.client.send(Service.AUDIT, 'create_report', { ...dto, userId });
-  }
-
-  @SuperProtected()
-  @Get()
-  async readReport() {
-    return this.client.send(Service.AUDIT, 'read_report');
-  }
-
-  @SuperProtected()
-  @NoContent()
-  @Delete(':userId/:reportedId')
-  async deleteReport(
-    @Param('userId') userId: string,
-    @Param('reportedId') reportedId: string,
+  @Validate('body', InsertReportCreatorSchema)
+  @Post('creator/:id')
+  async createReportCreator(
+    @UserId() userId: number,
+    @Param('id', ParseIntPipe) creatorId: number,
+    @Body() dto: InsertReportCreator,
   ) {
-    return this.client.send(Service.AUDIT, 'delete_report', {
+    return this.client.send(Service.AUDIT, 'create_report_creator', {
+      ...dto,
       userId,
-      reportedId,
+      creatorId,
+    });
+  }
+
+  @JwtProtected()
+  @NoContent()
+  @Validate('body', InsertReportProjectSchema)
+  @Post('project/:id')
+  async createReportProject(
+    @UserId() userId: number,
+    @Param('id', ParseIntPipe) projectId: number,
+    @Body() dto: InsertReportProject,
+  ) {
+    return this.client.send(Service.AUDIT, 'create_report_project', {
+      ...dto,
+      userId,
+      projectId,
     });
   }
 }

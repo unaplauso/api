@@ -9,34 +9,35 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
+import { ProjectTable } from './project.schema';
 import { UserTable } from './user.schema';
 
-export enum ReportReason {
+export enum ReportProjectReason {
   SPAM = 'spam',
   FRAUD = 'fraud',
   TOS_DISRESPECT = 'tos_disrespect',
   STOLEN_CONTENT = 'stolen_content',
 }
 
-export const ReportReasonEnum = pgEnum(
-  'report_reason',
-  Object.values(ReportReason) as [ReportReason],
+export const ReportProjectReasonEnum = pgEnum(
+  'report_project_reason',
+  Object.values(ReportProjectReason) as [ReportProjectReason],
 );
 
-export const ReportTable = pgTable(
-  'report',
+export const ReportProjectTable = pgTable(
+  'report_project',
   {
     userId: integer()
       .notNull()
       .references(() => UserTable.id, { onDelete: 'cascade' }),
-    reportedId: integer()
+    projectId: integer()
       .notNull()
-      .references(() => UserTable.id, { onDelete: 'cascade' }),
-    reason: ReportReasonEnum(),
+      .references(() => ProjectTable.id, { onDelete: 'cascade' }),
+    reason: ReportProjectReasonEnum(),
     message: varchar({ length: 500 }),
   },
   (table) => [
-    primaryKey({ columns: [table.userId, table.reportedId] }),
+    primaryKey({ columns: [table.userId, table.projectId] }),
     check(
       'reason_or_message',
       sql`${table.reason} IS NOT NULL OR ${table.message} IS NOT NULL`,
@@ -44,9 +45,11 @@ export const ReportTable = pgTable(
   ],
 );
 
-export const InsertReportSchema = v.pipe(
-  v.omit(createInsertSchema(ReportTable), ['userId']),
+export const InsertReportProjectSchema = v.pipe(
+  v.omit(createInsertSchema(ReportProjectTable), ['userId', 'projectId']),
   v.check((x) => Boolean(x.reason ?? x.message)),
 );
 
-export type InsertReport = v.InferInput<typeof InsertReportSchema>;
+export type InsertReportProject = v.InferOutput<
+  typeof InsertReportProjectSchema
+>;

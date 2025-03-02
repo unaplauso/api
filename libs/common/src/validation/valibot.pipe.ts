@@ -12,15 +12,15 @@ import { IS_DEVELOPMENT } from '.';
 export class ValibotPipe implements PipeTransform {
   constructor(
     private readonly schema: GenericSchema,
-    private readonly type: Paramtype = 'body',
+    private readonly type: Paramtype = 'param',
   ) {}
 
   async transform(value: unknown, metadata: ArgumentMetadata) {
+    if (metadata.type !== this.type) return value;
+
     const v = metadata.data
       ? (value as Record<string, unknown>)[metadata.data]
       : value;
-
-    if (metadata.type !== this.type) return v;
 
     const result = await safeParseAsync(this.schema, v);
 
