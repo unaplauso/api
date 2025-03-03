@@ -16,6 +16,8 @@ RUN pnpm run build gateway & \
   pnpm run build auth & \
   pnpm run build audit & \
   pnpm run build file & \
+  pnpm run build open & \
+  pnpm run build event & \
   wait
 
 FROM base AS prod-deps
@@ -34,6 +36,14 @@ CMD ["node", "dist/main"]
 
 FROM prod-deps AS unaplauso-file
 COPY --from=build /app/dist/apps/file dist
+CMD ["node", "dist/main"]
+
+FROM prod-deps AS unaplauso-open
+COPY --from=build /app/dist/apps/open dist
+CMD ["node", "dist/main"]
+
+FROM prod-deps AS unaplauso-event
+COPY --from=build /app/dist/apps/event dist
 CMD ["node", "dist/main"]
 
 FROM prod-deps AS unaplauso-gateway

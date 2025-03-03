@@ -14,5 +14,5 @@ import { AuthModule } from './auth.module';
     }),
   );
 
-  await app.listen(process.env.AUTH_PORT ?? 3001);
+  await app.listen(process.env.AUTH_PORT ?? 5001);
 })();

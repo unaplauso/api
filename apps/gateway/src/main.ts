@@ -11,15 +11,13 @@ import { AppModule } from './app.module';
 
 /* TODO
 - Busqueda de creadores findAll con filters
-- Endpoint de proyectos destacados
+- Endpoint de proyectos destacados + user destacados (tops)
 - Endpoint: api/user/notifications (GET, Last check: date + pagination + default entre 5 y 10 not>
-- Endpoint: api/favorites (GET, ?type="creators”|”projects” + pagination(futuro) + id usuarios )
 - Endpoint: api/creator/:id
 - Endpoint: api/projects (GET ?userId ?projectId ?relatedProjectsId)
-- Endpoint: api/claps (GET ?userId ?projectId)
+- Endpoint: api/applauses (GET ?userId ?projectId)
 - Endpoint: api/comments (GET ?userId  ?projectId paginated)
-- Endpoint: api/categories (GET)
-- Endpoint: api/projects (POST batch)
+- Endpoint: api/projects
 - Dashboard que sirvan realmente las analíticas y que no sea por poner algo
 */
 
@@ -50,5 +48,5 @@ import { AppModule } from './app.module';
     );
   }
 
-  await app.listen(process.env.GATEWAY_PORT ?? 3000, '0.0.0.0');
+  await app.listen(process.env.GATEWAY_PORT ?? 5000, '0.0.0.0');
 })();

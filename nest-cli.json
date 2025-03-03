@@ -46,6 +46,15 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
+    "event": {
+      "type": "application",
+      "root": "apps/event",
+      "entryFile": "main",
+      "sourceRoot": "apps/event/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/event/tsconfig.app.json"
+      }
+    },
     "file": {
       "type": "application",
       "root": "apps/file",
@@ -71,6 +80,15 @@
       "sourceRoot": "apps/gateway/src",
       "compilerOptions": {
         "tsConfigPath": "apps/gateway/tsconfig.app.json"
+      }
+    },
+    "open": {
+      "type": "application",
+      "root": "apps/open",
+      "entryFile": "main",
+      "sourceRoot": "apps/open/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/open/tsconfig.app.json"
       }
     },
     "services": {

@@ -10,6 +10,7 @@ import { InternalModule } from '@unaplauso/services';
 import { FavoriteController } from './controllers/favorite.controller';
 import { HealthController } from './controllers/health.controller';
 import { ReportController } from './controllers/report.controller';
+import { TopicController } from './controllers/topic.controller';
 import { UserController } from './controllers/user.controller';
 
 @Module({
@@ -26,6 +27,7 @@ import { UserController } from './controllers/user.controller';
     ReportController,
     UserController,
     FavoriteController,
+    TopicController,
   ],
 })
 export class AppModule {}

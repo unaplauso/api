@@ -22,6 +22,12 @@ CREATE TABLE "file" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "project_interaction" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"project_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+
 CREATE TABLE "project_topic" (
 	"project_id" integer NOT NULL,
 	"topic_id" integer NOT NULL,
@@ -57,6 +63,12 @@ CREATE TABLE "topic" (
 	CONSTRAINT "topic_name_unique" UNIQUE("name")
 );
 
+CREATE TABLE "user_interaction" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+
 CREATE TABLE "user_topic" (
 	"user_id" integer NOT NULL,
 	"topic_id" integer NOT NULL,
@@ -78,12 +90,14 @@ ALTER TABLE "favorite_creator" ADD CONSTRAINT "favorite_creator_user_id_user_id_
 ALTER TABLE "favorite_creator" ADD CONSTRAINT "favorite_creator_creator_id_user_id_fk" FOREIGN KEY ("creator_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "favorite_project" ADD CONSTRAINT "favorite_project_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "favorite_project" ADD CONSTRAINT "favorite_project_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "project_interaction" ADD CONSTRAINT "project_interaction_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "project_topic" ADD CONSTRAINT "project_topic_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "project_topic" ADD CONSTRAINT "project_topic_topic_id_topic_id_fk" FOREIGN KEY ("topic_id") REFERENCES "public"."topic"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "report_creator" ADD CONSTRAINT "report_creator_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "report_creator" ADD CONSTRAINT "report_creator_creator_id_user_id_fk" FOREIGN KEY ("creator_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "report_project" ADD CONSTRAINT "report_project_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "report_project" ADD CONSTRAINT "report_project_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "user_interaction" ADD CONSTRAINT "user_interaction_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "user_topic" ADD CONSTRAINT "user_topic_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "user_topic" ADD CONSTRAINT "user_topic_topic_id_topic_id_fk" FOREIGN KEY ("topic_id") REFERENCES "public"."topic"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "user" ADD CONSTRAINT "user_profile_pic_file_id_file_id_fk" FOREIGN KEY ("profile_pic_file_id") REFERENCES "public"."file"("id") ON DELETE set null ON UPDATE no action;

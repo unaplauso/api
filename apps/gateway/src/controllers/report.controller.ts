@@ -4,11 +4,9 @@ import { Validate } from '@unaplauso/common/validation';
 import {
   InsertReportCreator,
   InsertReportCreatorSchema,
-} from '@unaplauso/database';
-import {
   InsertReportProject,
   InsertReportProjectSchema,
-} from '@unaplauso/database/schema/report-project.schema';
+} from '@unaplauso/database';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';

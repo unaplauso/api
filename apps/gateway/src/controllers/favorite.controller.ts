@@ -13,18 +13,13 @@ import {
   Pagination,
 } from '@unaplauso/common/pagination';
 import { Validate } from '@unaplauso/common/validation';
-import { InjectDB } from '@unaplauso/database';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';
 
 @Controller('favorite')
 export class FavoriteController {
-  constructor(
-    @InjectClient() private readonly client: InternalService,
-    @InjectDB() private readonly db: NodePgDatabase,
-  ) {}
+  constructor(@InjectClient() private readonly client: InternalService) {}
 
   @JwtProtected()
   @NoContent()

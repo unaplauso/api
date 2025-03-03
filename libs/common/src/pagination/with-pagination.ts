@@ -9,6 +9,6 @@ export function withPagination<T extends PgSelect>(
 ) {
   return qb
     .orderBy(dto.order === 'asc' ? asc(column) : desc(column))
-    .limit(dto.pageSize ?? 10)
-    .offset(((dto.page ?? 1) - 1) * (dto.pageSize ?? 10));
+    .limit(dto.pageSize)
+    .offset((dto.page - 1) * dto.pageSize);
 }

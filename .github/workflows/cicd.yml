@@ -36,6 +36,8 @@ jobs:
             auth: 'apps/auth/**'
             file: 'apps/file/**'
             gateway: 'apps/gateway/**'
+            open: 'apps/open/**'
+            event: 'apps/event/**'
 
       - uses: docker/setup-buildx-action@master
 
@@ -75,6 +77,22 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:${{ env.DOCKER_TAG }}
           target: unaplauso-gateway
+
+      - name: open build & push
+        uses: docker/build-push-action@master
+        if: steps.changes.outputs.open == 'true' || steps.changes.outputs.any == 'true'
+        with:
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-open:${{ env.DOCKER_TAG }}
+          target: unaplauso-open
+
+      - name: event build & push
+        uses: docker/build-push-action@master
+        if: steps.changes.outputs.event == 'true' || steps.changes.outputs.any == 'true'
+        with:
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-event:${{ env.DOCKER_TAG }}
+          target: unaplauso-event
 
       - uses: appleboy/ssh-action@master
         with:

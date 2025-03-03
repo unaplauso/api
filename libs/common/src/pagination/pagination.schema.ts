@@ -12,7 +12,7 @@ export const CreatePaginationSchema = <T extends string>(
   v.object({
     orderBy: v.optional(
       v.union(keys.map((s) => v.literal(s))),
-      defaults?.orderBy ?? keys[0],
+      defaults?.orderBy ?? keys.at(0),
     ),
     order: v.optional(
       v.union([v.literal('asc'), v.literal('desc')]),

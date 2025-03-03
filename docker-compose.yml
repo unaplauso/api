@@ -82,6 +82,30 @@ services:
     depends_on:
       - gateway
 
+  open:
+    container_name: unaplauso-open
+    env_file: ./.env
+    restart: always
+    build:
+      context: .
+      target: unaplauso-open
+    networks:
+      - unaplauso-network
+    depends_on:
+      - gateway
+
+  event:
+    container_name: unaplauso-event
+    env_file: ./.env
+    restart: always
+    build:
+      context: .
+      target: unaplauso-event
+    networks:
+      - unaplauso-network
+    depends_on:
+      - gateway
+
 volumes:
   db_data:
 

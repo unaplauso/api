@@ -6,12 +6,10 @@ import {
 import {
   InjectDB,
   InsertReportCreator,
-  ReportCreatorTable,
-} from '@unaplauso/database';
-import {
   InsertReportProject,
+  ReportCreatorTable,
   ReportProjectTable,
-} from '@unaplauso/database/schema/report-project.schema';
+} from '@unaplauso/database';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Injectable()

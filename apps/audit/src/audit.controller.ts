@@ -5,8 +5,7 @@ import {
   UserToCreatorAction,
   UserToProjectAction,
 } from '@unaplauso/common/validation';
-import { InsertReportCreator } from '@unaplauso/database';
-import { InsertReportProject } from '@unaplauso/database/schema/report-project.schema';
+import { InsertReportCreator, InsertReportProject } from '@unaplauso/database';
 import { Pattern } from './decorators/pattern.decorator';
 import { FavoriteService } from './services/favorite.service';
 import { ReportService } from './services/report.service';

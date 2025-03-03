@@ -1,20 +1,16 @@
-import { Controller, Delete, NotFoundException, Put } from '@nestjs/common';
+import { Controller, Delete, Put } from '@nestjs/common';
 import { NoContent } from '@unaplauso/common/decorators';
-import { FileType, InjectDB, UserTable } from '@unaplauso/database';
+import { FileType } from '@unaplauso/database';
 import { File, FileExt, ReceivesFile, SyncFile } from '@unaplauso/files';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
 import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
-import { eq } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { firstValueFrom } from 'rxjs';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';
 
 @Controller('user')
 export class UserController {
-  constructor(
-    @InjectClient() private readonly client: InternalService,
-    @InjectDB() private readonly db: NodePgDatabase,
-  ) {}
+  constructor(@InjectClient() private readonly client: InternalService) {}
 
   @JwtProtected()
   @ReceivesFile()
@@ -35,16 +31,11 @@ export class UserController {
   @NoContent()
   @Delete('profile-pic')
   async deleteProfilePic(@UserId() userId: number) {
-    const { id } = (
-      await this.db
-        .select({ id: UserTable.profilePicFileId })
-        .from(UserTable)
-        .where(eq(UserTable.id, userId))
-    )[0];
+    const id = await firstValueFrom<string>(
+      await this.client.send(Service.OPEN, 'read_user_profile_pic', userId),
+    );
 
-    if (!id) throw new NotFoundException();
-
-    return this.client.send(Service.FILE, 'delete_file', id);
+    return !id ? true : this.client.send(Service.FILE, 'delete_file', id);
   }
 
   @JwtProtected()
@@ -66,15 +57,10 @@ export class UserController {
   @NoContent()
   @Delete('profile-banner')
   async deleteProfileBanner(@UserId() userId: number) {
-    const { id } = (
-      await this.db
-        .select({ id: UserTable.profileBannerFileId })
-        .from(UserTable)
-        .where(eq(UserTable.id, userId))
-    )[0];
+    const id = await firstValueFrom<string>(
+      await this.client.send(Service.OPEN, 'read_user_profile_banner', userId),
+    );
 
-    if (!id) throw new NotFoundException();
-
-    return this.client.send(Service.FILE, 'delete_file', id);
+    return !id ? true : this.client.send(Service.FILE, 'delete_file', id);
   }
 }
