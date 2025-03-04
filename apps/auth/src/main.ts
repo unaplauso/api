@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
 import session from 'express-session';
 import { AuthModule } from './auth.module';
-import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
 
 (async () => {
   const app = await NestFactory.create<NestExpressApplication>(AuthModule);
   app.setGlobalPrefix('api/auth');
 
-  if (!IS_DEVELOPMENT) app.set('trust proxy', 1);
+  if (!IS_DEVELOPMENT) app.set('trust proxy', true);
 
   app.use(
     session({
