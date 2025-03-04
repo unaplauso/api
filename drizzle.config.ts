@@ -16,7 +16,7 @@ export default defineConfig({
   breakpoints: false,
   strict: true,
 
-  extensionsFilters: ['postgis'],
+  // extensionsFilters: ['postgis'],
 
   dbCredentials: {
     host: process.env.POSTGRES_HOST ?? '127.0.0.1',

@@ -8,8 +8,10 @@ export const CreatePaginationSchema = <T extends string>(
     page?: number;
     pageSize?: number;
   },
+  extend?: v.ObjectEntries,
 ) =>
   v.object({
+    ...extend,
     orderBy: v.optional(
       v.union(keys.map((s) => v.literal(s))),
       defaults?.orderBy ?? keys.at(0),

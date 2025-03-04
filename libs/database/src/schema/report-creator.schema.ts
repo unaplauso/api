@@ -38,7 +38,7 @@ export const ReportCreatorTable = pgTable(
   (table) => [
     primaryKey({ columns: [table.userId, table.creatorId] }),
     check(
-      'reason_or_message',
+      'reason_or_message_check',
       sql`${table.reason} IS NOT NULL OR ${table.message} IS NOT NULL`,
     ),
   ],

@@ -1,8 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import {
-  DefaultPaginationSchema,
-  Pagination,
+  DefaultPaginationWithSearchSchema,
+  PaginationWithSearch,
 } from '@unaplauso/common/pagination';
+
 import { Validate } from '@unaplauso/common/validation';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
 
@@ -10,9 +11,9 @@ import { InjectClient, InternalService, Service } from '@unaplauso/services';
 export class TopicController {
   constructor(@InjectClient() private readonly client: InternalService) {}
 
-  @Validate('query', DefaultPaginationSchema)
+  @Validate('query', DefaultPaginationWithSearchSchema)
   @Get()
-  async listTopic(@Query() pagination: Pagination) {
+  async listTopic(@Query() pagination: PaginationWithSearch) {
     return this.client.send(Service.OPEN, 'list_topic', pagination);
   }
 }

@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectCache, InjectConfig } from '@unaplauso/common/decorators';
 import { InjectDB, InsertUser, UserTable } from '@unaplauso/database';
-import { eq } from 'drizzle-orm';
+import { lowerEq } from '@unaplauso/database/utils';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import AccessData from './types/access-data.type';
 
@@ -61,10 +61,12 @@ export class AuthService {
 
   async handleOauth(user: InsertUser) {
     const { id } =
-      (await this.db
-        .select({ id: UserTable.id })
-        .from(UserTable)
-        .where(eq(UserTable.email, user.email)))![0] ??
+      (
+        await this.db
+          .select({ id: UserTable.id })
+          .from(UserTable)
+          .where(lowerEq(UserTable.email, user.email))
+      ).at(0) ??
       (
         await this.db
           .insert(UserTable)

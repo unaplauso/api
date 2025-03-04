@@ -1,5 +1,5 @@
 {
-  "id": "a437e995-69ea-4987-8bf0-9d9563721bb2",
+  "id": "b5635977-55a3-42bd-847d-d99ec0c8cf9e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -184,7 +184,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "bigserial",
           "primaryKey": true,
           "notNull": true
         },
@@ -381,8 +381,8 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "reason_or_message": {
-          "name": "reason_or_message",
+        "reason_or_message_check": {
+          "name": "reason_or_message_check",
           "value": "\"report_creator\".\"reason\" IS NOT NULL OR \"report_creator\".\"message\" IS NOT NULL"
         }
       },
@@ -459,8 +459,8 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {
-        "reason_or_message": {
-          "name": "reason_or_message",
+        "reason_or_message_check": {
+          "name": "reason_or_message_check",
           "value": "\"report_project\".\"reason\" IS NOT NULL OR \"report_project\".\"message\" IS NOT NULL"
         }
       },
@@ -472,7 +472,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "smallserial",
           "primaryKey": true,
           "notNull": true
         },
@@ -481,9 +481,46 @@
           "type": "varchar(32)",
           "primaryKey": false,
           "notNull": true
+        },
+        "aliases": {
+          "name": "aliases",
+          "type": "varchar(320)",
+          "primaryKey": false,
+          "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "topic_aliases_trgm": {
+          "name": "topic_aliases_trgm",
+          "columns": [
+            {
+              "expression": "\"aliases\" gin_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "topic_name_unique_lower": {
+          "name": "topic_name_unique_lower",
+          "columns": [
+            {
+              "expression": "lower(\"name\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -505,7 +542,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "bigserial",
           "primaryKey": true,
           "notNull": true
         },
@@ -647,7 +684,53 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_username_unique_lower": {
+          "name": "user_username_unique_lower",
+          "columns": [
+            {
+              "expression": "lower(\"username\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_username_trgm": {
+          "name": "user_username_trgm",
+          "columns": [
+            {
+              "expression": "\"username\" gist_trgm_ops",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gist",
+          "with": {}
+        },
+        "user_email_unique_lower": {
+          "name": "user_email_unique_lower",
+          "columns": [
+            {
+              "expression": "lower(\"email\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "user_profile_pic_file_id_file_id_fk": {
           "name": "user_profile_pic_file_id_file_id_fk",
@@ -677,24 +760,14 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_username_unique": {
-          "name": "user_username_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
-        },
-        "user_email_unique": {
-          "name": "user_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "username_format_check": {
+          "name": "username_format_check",
+          "value": "\"user\".\"username\" ~ '^[a-zA-Z0-9_-]+$'"
         }
       },
-      "policies": {},
-      "checkConstraints": {},
       "isRLSEnabled": false
     }
   },
