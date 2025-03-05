@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Elastic-2.0
+ * Copyright (C) 2025 Un Aplauso
+ */
+
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { IS_DEVELOPMENT } from '@unaplauso/common/validation';

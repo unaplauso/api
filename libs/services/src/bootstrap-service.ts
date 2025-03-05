@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Elastic-2.0
+ * Copyright (C) 2025 Un Aplauso
+ */
+
 import { Type } from '@nestjs/common';
 import { NestApplicationContextOptions } from '@nestjs/common/interfaces/nest-application-context-options.interface';
 import { NestFactory } from '@nestjs/core';

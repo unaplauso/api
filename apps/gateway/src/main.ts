@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Elastic-2.0
+ * Copyright (C) 2025 Un Aplauso
+ */
+
 import fastifyHelmet from '@fastify/helmet';
 import fastifyMultipart from '@fastify/multipart';
 import { NestFactory } from '@nestjs/core';
