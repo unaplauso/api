@@ -2,7 +2,8 @@ SPDX-License-Identifier: Elastic-2.0
 
 Elastic License 2.0
 
-This work is licensed under the Elastic License 2.0. You may not use this work except in compliance with the Elastic License 2.0.
+This work is licensed under the Elastic License 2.0. You may not
+use this work except in compliance with the Elastic License 2.0.
 
 You may obtain a copy of the Elastic License 2.0 at
 
@@ -15,9 +16,11 @@ See the Elastic License 2.0 for the specific language governing
 permissions and limitations under the Elastic License 2.0.
 
 -------------------------------------------------------------------------------
+
 NOTICES
 
 Copyright (C) 2025 Un Aplauso
 
 This software ("Un Aplauso API") is provided by Un Aplauso.
+
 -------------------------------------------------------------------------------
