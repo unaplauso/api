@@ -1,4 +1,4 @@
-# Un Aplauso - API
+# Un Aplauso API
 
 ## Licencia
 
