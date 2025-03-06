@@ -6,7 +6,7 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
-import session from 'express-session';
+import session from 'cookie-session';
 import { AuthModule } from './auth.module';
 
 (async () => {
@@ -18,8 +18,6 @@ import { AuthModule } from './auth.module';
   app.use(
     session({
       secret: process.env.SESSION_SECRET ?? 'secret',
-      resave: false,
-      saveUninitialized: false,
     }),
   );
 
