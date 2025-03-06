@@ -9,7 +9,7 @@ import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
 
 export enum FileExt {
   IMAGE = 'image/(jpeg|png|gif|webp|bmp|svg\\+xml)',
-  ALL = '*',
+  ALL = '.*',
 }
 
 export type FileOptions = {
