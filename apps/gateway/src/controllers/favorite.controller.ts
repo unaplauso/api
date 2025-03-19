@@ -8,12 +8,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { NoContent } from '@unaplauso/common/decorators';
-import {
-  DefaultPaginationSchema,
-  Pagination,
-} from '@unaplauso/common/pagination';
-import { Validate } from '@unaplauso/common/validation';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
+import { Validate } from '@unaplauso/validation';
+import { Pagination, PaginationSchema } from '@unaplauso/validation/dtos';
+import { omit } from 'valibot';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';
 
@@ -48,11 +46,11 @@ export class FavoriteController {
   }
 
   @JwtProtected()
-  @Validate('query', DefaultPaginationSchema)
+  @Validate('query', omit(PaginationSchema, ['order', 'search']))
   @Get('creator')
   async listFavoriteCreator(
     @UserId() userId: number,
-    @Query() pagination: Pagination,
+    @Query() pagination: Omit<Pagination, 'order' | 'search'>,
   ) {
     return this.client.send(Service.AUDIT, 'list_favorite_creator', {
       userId,
@@ -87,7 +85,7 @@ export class FavoriteController {
   }
 
   @JwtProtected()
-  @Validate('query', DefaultPaginationSchema)
+  @Validate('query', omit(PaginationSchema, ['order', 'search']))
   @Get('project')
   async listFavoriteProject(
     @UserId() userId: number,

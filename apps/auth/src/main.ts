@@ -5,7 +5,7 @@
 
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
+import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import session from 'cookie-session';
 import { AuthModule } from './auth.module';
 

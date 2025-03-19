@@ -1,19 +1,16 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import {
-  DefaultPaginationWithSearchSchema,
-  PaginationWithSearch,
-} from '@unaplauso/common/pagination';
-
-import { Validate } from '@unaplauso/common/validation';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
+import { Validate } from '@unaplauso/validation';
+import { Pagination, PaginationSchema } from '@unaplauso/validation/dtos';
+import { omit } from 'valibot';
 
 @Controller('topic')
 export class TopicController {
   constructor(@InjectClient() private readonly client: InternalService) {}
 
-  @Validate('query', DefaultPaginationWithSearchSchema)
+  @Validate('query', omit(PaginationSchema, ['order']))
   @Get()
-  async listTopic(@Query() pagination: PaginationWithSearch) {
-    return this.client.send(Service.OPEN, 'list_topic', pagination);
+  async listTopic(@Query() dto: Omit<Pagination, 'order'>) {
+    return this.client.send(Service.OPEN, 'list_topic', dto);
   }
 }

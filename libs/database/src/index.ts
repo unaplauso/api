@@ -1,5 +1,3 @@
-export * from './database.module';
-export * from './inject-db.decorator';
 export * from './schema/favorite-creator.schema';
 export * from './schema/favorite-project.schema';
 export * from './schema/file.schema';

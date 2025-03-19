@@ -11,7 +11,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
+import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import { AppModule } from './app.module';
 
 /* TODO

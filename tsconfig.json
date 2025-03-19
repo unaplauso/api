@@ -41,6 +41,12 @@
       ],
       "@unaplauso/services/*": [
         "libs/services/src/*"
+      ],
+      "@unaplauso/validation": [
+        "libs/validation/src"
+      ],
+      "@unaplauso/validation/*": [
+        "libs/validation/src/*"
       ]
     }
   }

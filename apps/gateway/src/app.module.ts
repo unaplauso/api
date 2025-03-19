@@ -5,7 +5,7 @@ import {
   LocalJwtModule,
   LocalThrottlerModule,
 } from '@unaplauso/common/modules';
-import { DatabaseModule } from '@unaplauso/database';
+import { DatabaseModule } from '@unaplauso/database/module';
 import { InternalModule } from '@unaplauso/services';
 import { FavoriteController } from './controllers/favorite.controller';
 import { HealthController } from './controllers/health.controller';

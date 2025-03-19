@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
+import { IS_DEVELOPMENT } from '@unaplauso/validation';
 
 @Injectable()
 export class SuperGuard implements CanActivate {

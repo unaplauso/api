@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import {
-  UserToCreatorAction,
-  UserToProjectAction,
-} from '@unaplauso/common/validation';
-import {
-  InjectDB,
   InsertReportCreator,
   InsertReportProject,
   ReportCreatorTable,
   ReportProjectTable,
 } from '@unaplauso/database';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { Database, InjectDB } from '@unaplauso/database/module';
+import {
+  UserToCreatorAction,
+  UserToProjectAction,
+} from '@unaplauso/validation';
 
 @Injectable()
 export class ReportService {
-  constructor(@InjectDB() private readonly db: NodePgDatabase) {}
+  constructor(@InjectDB() private readonly db: Database) {}
 
   async createReportCreator(dto: UserToCreatorAction<InsertReportCreator>) {
     return this.db

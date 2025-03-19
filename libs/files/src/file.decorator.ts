@@ -5,7 +5,7 @@ import {
   Type,
   UploadedFile,
 } from '@nestjs/common';
-import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
+import { IS_DEVELOPMENT } from '@unaplauso/validation';
 
 export enum FileExt {
   IMAGE = 'image/(jpeg|png|gif|webp|bmp|svg\\+xml)',

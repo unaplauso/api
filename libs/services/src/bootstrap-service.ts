@@ -5,9 +5,9 @@
 
 import { Type } from '@nestjs/common';
 import { NestApplicationContextOptions } from '@nestjs/common/interfaces/nest-application-context-options.interface';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
-import { UndefinedToNullInterceptor } from './interceptors/undefined-to-null.interceptor';
+import { ValidResponseInterceptor } from './interceptors/valid-response.interceptor';
 
 export async function bootstrapService(
   module: Type<unknown>,
@@ -24,7 +24,7 @@ export async function bootstrapService(
     ...extraOptions,
   });
 
-  app.useGlobalInterceptors(new UndefinedToNullInterceptor());
+  app.useGlobalInterceptors(new ValidResponseInterceptor(new Reflector()));
 
   await app.listen();
 }

@@ -7,12 +7,12 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { Inject, Injectable, MisdirectedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectConfig } from '@unaplauso/common/decorators';
-import { IS_DEVELOPMENT } from '@unaplauso/common/validation';
-import { FileTable, InjectDB, InsertFile } from '@unaplauso/database';
+import { FileTable, InsertFile } from '@unaplauso/database';
+import { Database, InjectDB } from '@unaplauso/database/module';
 import { SyncFile } from '@unaplauso/files';
+import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 import { eq } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { SyncService } from './sync.service';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class FileService {
 
   constructor(
     @InjectConfig() private readonly config: ConfigService,
-    @InjectDB() private readonly db: NodePgDatabase,
+    @InjectDB() private readonly db: Database,
     @Inject(SyncService) private readonly sync: SyncService,
   ) {
     this.PUBLIC_BUCKET = this.config.getOrThrow('S3_AWS_BUCKET_PUBLIC');

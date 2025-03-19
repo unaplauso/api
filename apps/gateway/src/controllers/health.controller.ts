@@ -1,14 +1,13 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { NoContent } from '@unaplauso/common/decorators';
-import { InjectDB } from '@unaplauso/database';
+import { Database, InjectDB } from '@unaplauso/database/module';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
 import { serviceExists } from '@unaplauso/services/utils';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Controller('health')
 export class HealthController {
   constructor(
-    @InjectDB() private readonly db: NodePgDatabase,
+    @InjectDB() private readonly db: Database,
     @InjectClient() private readonly client: InternalService,
   ) {}
 

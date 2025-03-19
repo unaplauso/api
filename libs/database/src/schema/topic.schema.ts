@@ -1,5 +1,5 @@
 import { pgTable, smallserial, varchar } from 'drizzle-orm/pg-core';
-import { lowerIndex, trgmIndex } from '../utils';
+import { trgmIndex } from '../functions';
 
 export const TopicTable = pgTable(
   'topic',
@@ -8,5 +8,5 @@ export const TopicTable = pgTable(
     name: varchar({ length: 32 }).unique().notNull(),
     aliases: varchar({ length: 320 }).notNull(),
   },
-  (table) => [trgmIndex(table.aliases), lowerIndex(table.name)],
+  (table) => [trgmIndex(table.aliases), trgmIndex(table.name)],
 );

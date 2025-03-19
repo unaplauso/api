@@ -7,7 +7,7 @@ import {
   ThrottlerModule,
   ThrottlerOptions,
 } from '@nestjs/throttler';
-import { IS_DEVELOPMENT } from '../validation';
+import { IS_DEVELOPMENT } from '../../../validation/src';
 
 export const GlobalThrottlerProvider: Provider = {
   provide: APP_GUARD,

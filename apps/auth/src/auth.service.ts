@@ -3,9 +3,9 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectCache, InjectConfig } from '@unaplauso/common/decorators';
-import { InjectDB, InsertUser, UserTable } from '@unaplauso/database';
-import { lowerEq } from '@unaplauso/database/utils';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { InsertUser, UserTable } from '@unaplauso/database';
+import { lowerEq } from '@unaplauso/database/functions';
+import { Database, InjectDB } from '@unaplauso/database/module';
 import AccessData from './types/access-data.type';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class AuthService {
   constructor(
     @InjectConfig() private readonly config: ConfigService,
     @InjectCache() private readonly cache: Cache,
-    @InjectDB() private readonly db: NodePgDatabase,
+    @InjectDB() private readonly db: Database,
     @Inject(JwtService) private readonly jwt: JwtService,
   ) {
     this.FRONT_REDIRECT_URL = this.config.getOrThrow('FRONT_REDIRECT_URL');

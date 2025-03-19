@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
-import { IS_DEVELOPMENT } from '../validation';
+import { IS_DEVELOPMENT } from '../../../validation/src';
 
 export const LocalJwtModule = (op?: JwtModuleOptions) =>
   JwtModule.registerAsync({

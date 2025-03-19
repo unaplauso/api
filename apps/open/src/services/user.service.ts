@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDB, UserTable } from '@unaplauso/database';
+import { UserTable } from '@unaplauso/database';
+import { Database, InjectDB } from '@unaplauso/database/module';
 import { eq } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectDB() private readonly db: NodePgDatabase) {}
+  constructor(@InjectDB() private readonly db: Database) {}
 
   async readUserProfilePic(userId: number) {
     return (

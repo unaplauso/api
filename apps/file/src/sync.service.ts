@@ -1,13 +1,13 @@
 import { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
-import { FileType, InjectDB, UserTable } from '@unaplauso/database';
+import { FileType, UserTable } from '@unaplauso/database';
+import { Database, InjectDB } from '@unaplauso/database/module';
 import { SyncFile } from '@unaplauso/files';
 import { eq } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 @Injectable()
 export class SyncService {
-  constructor(@InjectDB() private readonly db: NodePgDatabase) {}
+  constructor(@InjectDB() private readonly db: Database) {}
 
   private async profilePicCallback(id: string, userId: number) {
     return this.db

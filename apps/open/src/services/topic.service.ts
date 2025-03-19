@@ -1,36 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import {
-  PaginationWithSearch,
-  withPagination,
-} from '@unaplauso/common/pagination';
-import { InjectDB, TopicTable } from '@unaplauso/database';
-import { lower, wordSimilarity } from '@unaplauso/database/utils';
-import { gte, like } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { TopicTable } from '@unaplauso/database';
+import { wordSimilarity } from '@unaplauso/database/functions';
+import { Database, InjectDB } from '@unaplauso/database/module';
+import { Pagination } from '@unaplauso/validation/dtos';
+import { asc, desc, gte } from 'drizzle-orm';
 
 @Injectable()
 export class TopicService {
-  constructor(@InjectDB() private readonly db: NodePgDatabase) {}
+  constructor(@InjectDB() private readonly db: Database) {}
 
-  async listTopic(dto: PaginationWithSearch) {
-    const considerTrgm = Boolean(dto.search?.length ?? 0 >= 3);
-
-    return withPagination(
-      considerTrgm
-        ? wordSimilarity(TopicTable.aliases, dto.search as string)
-        : TopicTable.name,
-      { ...dto, order: considerTrgm ? 'desc' : 'asc' },
-      this.db
-        .select({ id: TopicTable.id, name: TopicTable.name })
-        .from(TopicTable)
-        .where(
-          considerTrgm
-            ? gte(wordSimilarity(TopicTable.aliases, dto.search as string), 0.4)
-            : dto.search
-              ? like(lower(TopicTable.name), `%${dto.search.toLowerCase()}%`)
-              : undefined,
-        )
-        .$dynamic(),
-    );
+  async listTopic(dto: Omit<Pagination, 'order'>) {
+    return this.db
+      .select({ id: TopicTable.id, name: TopicTable.name })
+      .from(TopicTable)
+      .where(
+        dto.search
+          ? gte(
+              wordSimilarity(TopicTable.aliases, dto.search),
+              Math.min(Math.exp(dto.search.length * 0.1) * 0.275, 0.7),
+            )
+          : undefined,
+      )
+      .orderBy(
+        ...(dto.search
+          ? [
+              desc(wordSimilarity(TopicTable.aliases, dto.search)),
+              desc(wordSimilarity(TopicTable.name, dto.search)),
+            ]
+          : [asc(TopicTable.name)]),
+      )
+      .limit(dto.pageSize)
+      .offset((dto.page - 1) * dto.pageSize);
   }
 }

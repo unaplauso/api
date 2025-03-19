@@ -1,6 +1,5 @@
 import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { NoContent } from '@unaplauso/common/decorators';
-import { Validate } from '@unaplauso/common/validation';
 import {
   InsertReportCreator,
   InsertReportCreatorSchema,
@@ -8,6 +7,7 @@ import {
   InsertReportProjectSchema,
 } from '@unaplauso/database';
 import { InjectClient, InternalService, Service } from '@unaplauso/services';
+import { Validate } from '@unaplauso/validation';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
 import { UserId } from '../decorators/user-id.decorator';
 

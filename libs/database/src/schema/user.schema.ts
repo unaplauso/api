@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   check,
   pgTable,
@@ -9,13 +9,15 @@ import {
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
-import { lowerIndex, trgmIndex } from '../utils';
+import { lowerIndex, trgmIndex } from '../functions';
 import { FileTable } from './file.schema';
+import { UserTopicTable } from './user-topic.schema';
 
 export const UserTable = pgTable(
   'user',
   {
     id: serial().primaryKey(),
+    displayName: varchar({ length: 64 }),
     username: varchar({ length: 64 }),
     email: varchar({ length: 320 }).notNull(),
     profilePicFileId: uuid().references(() => FileTable.id, {
@@ -33,6 +35,10 @@ export const UserTable = pgTable(
     lowerIndex(table.email),
   ],
 );
+
+export const UserRelations = relations(UserTable, ({ many }) => ({
+  userTopics: many(UserTopicTable),
+}));
 
 export const InsertUserSchema = createInsertSchema(UserTable, {
   email: (schema) => v.pipe(schema, v.email()),

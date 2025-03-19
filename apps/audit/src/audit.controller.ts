@@ -1,11 +1,12 @@
 import { Controller } from '@nestjs/common';
 import { Payload } from '@nestjs/microservices';
-import { WithPagination } from '@unaplauso/common/pagination';
+import { InsertReportCreator, InsertReportProject } from '@unaplauso/database';
+import { NoContent } from '@unaplauso/services';
 import {
   UserToCreatorAction,
   UserToProjectAction,
-} from '@unaplauso/common/validation';
-import { InsertReportCreator, InsertReportProject } from '@unaplauso/database';
+} from '@unaplauso/validation';
+import { Pagination } from '@unaplauso/validation/dtos';
 import { Pattern } from './decorators/pattern.decorator';
 import { FavoriteService } from './services/favorite.service';
 import { ReportService } from './services/report.service';
@@ -17,11 +18,13 @@ export class AuditController {
     private readonly favorite: FavoriteService,
   ) {}
 
+  @NoContent()
   @Pattern('health_check')
   async healthCheck() {
     return true;
   }
 
+  @NoContent()
   @Pattern('create_report_creator')
   async createReportCreator(
     @Payload() dto: UserToCreatorAction<InsertReportCreator>,
@@ -29,6 +32,7 @@ export class AuditController {
     return this.report.createReportCreator(dto);
   }
 
+  @NoContent()
   @Pattern('create_report_project')
   async createReportProject(
     @Payload() dto: UserToProjectAction<InsertReportProject>,
@@ -36,6 +40,7 @@ export class AuditController {
     return this.report.createReportProject(dto);
   }
 
+  @NoContent()
   @Pattern('create_favorite_creator')
   async createFavoriteCreator(
     @Payload() { userId, creatorId }: { userId: number; creatorId: number },
@@ -43,6 +48,7 @@ export class AuditController {
     return this.favorite.createFavoriteCreator(userId, creatorId);
   }
 
+  @NoContent()
   @Pattern('delete_favorite_creator')
   async deleteFavoriteCreator(
     @Payload() { userId, creatorId }: { userId: number; creatorId: number },
@@ -53,11 +59,15 @@ export class AuditController {
   @Pattern('list_favorite_creator')
   async listFavoriteCreator(
     @Payload()
-    { userId, pagination }: WithPagination<{ userId: number }>,
+    dto: {
+      userId: number;
+      pagination: Omit<Pagination, 'order' | 'search'>;
+    },
   ) {
-    return this.favorite.readFavoriteCreator(userId, pagination);
+    return this.favorite.readFavoriteCreator(dto.userId, dto.pagination);
   }
 
+  @NoContent()
   @Pattern('create_favorite_project')
   async createFavoriteProject(
     @Payload() { userId, projectId }: { userId: number; projectId: number },
@@ -65,6 +75,7 @@ export class AuditController {
     return this.favorite.createFavoriteProject(userId, projectId);
   }
 
+  @NoContent()
   @Pattern('delete_favorite_project')
   async deleteFavoriteProject(
     @Payload() { userId, projectId }: { userId: number; projectId: number },
@@ -75,8 +86,11 @@ export class AuditController {
   @Pattern('list_favorite_project')
   async listFavoriteProject(
     @Payload()
-    { userId, pagination }: WithPagination<{ userId: number }>,
+    dto: {
+      userId: number;
+      pagination: Omit<Pagination, 'order' | 'search'>;
+    },
   ) {
-    return this.favorite.readFavoriteProject(userId, pagination);
+    return this.favorite.readFavoriteProject(dto.userId, dto.pagination);
   }
 }

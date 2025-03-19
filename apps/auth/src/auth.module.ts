@@ -5,7 +5,7 @@ import {
   LocalJwtModule,
   LocalThrottlerModule,
 } from '@unaplauso/common/modules';
-import { DatabaseModule } from '@unaplauso/database';
+import { DatabaseModule } from '@unaplauso/database/module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { DiscordStrategy } from './strategies/discord.strategy';

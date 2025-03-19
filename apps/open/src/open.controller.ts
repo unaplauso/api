@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { Payload } from '@nestjs/microservices';
-import { Pagination } from '@unaplauso/common/pagination';
+import { NoContent } from '@unaplauso/services';
+import { Pagination } from '@unaplauso/validation/dtos';
 import { Pattern } from './decorators/pattern.decorator';
 import { TopicService } from './services/topic.service';
 import { UserService } from './services/user.service';
@@ -12,6 +13,7 @@ export class OpenController {
     private readonly topic: TopicService,
   ) {}
 
+  @NoContent()
   @Pattern('health_check')
   async healthCheck() {
     return true;
@@ -28,7 +30,7 @@ export class OpenController {
   }
 
   @Pattern('list_topic')
-  async listTopic(@Payload() pagination: Pagination) {
-    return this.topic.listTopic(pagination);
+  async listTopic(@Payload() dto: Omit<Pagination, 'order'>) {
+    return this.topic.listTopic(dto);
   }
 }

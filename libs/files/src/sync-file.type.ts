@@ -1,4 +1,4 @@
-import { FileType } from '@unaplauso/database/schema/file.schema';
+import { FileType } from '@unaplauso/database';
 import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 
 export type SyncFile =

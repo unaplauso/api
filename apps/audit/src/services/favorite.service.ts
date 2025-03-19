@@ -1,16 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Pagination, withPagination } from '@unaplauso/common/pagination';
 import {
   FavoriteCreatorTable,
   FavoriteProjectTable,
-  InjectDB,
+  TopicTable,
+  UserTable,
+  UserTopicTable,
 } from '@unaplauso/database';
-import { and, eq } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import {
+  coalesce,
+  jsonAgg,
+  jsonBuildObject,
+  sqlJsonArray,
+} from '@unaplauso/database/functions';
+import { Database, InjectDB } from '@unaplauso/database/module';
+import { Pagination } from '@unaplauso/validation/dtos';
+import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
 
 @Injectable()
 export class FavoriteService {
-  constructor(@InjectDB() private readonly db: NodePgDatabase) {}
+  constructor(@InjectDB() private readonly db: Database) {}
 
   async createFavoriteCreator(userId: number, creatorId: number) {
     return this.db
@@ -30,16 +38,42 @@ export class FavoriteService {
       );
   }
 
-  async readFavoriteCreator(id: number, pagination: Pagination) {
-    return withPagination(
-      FavoriteCreatorTable.createdAt,
-      pagination,
-      this.db
-        .select({ creatorId: FavoriteCreatorTable.creatorId })
-        .from(FavoriteCreatorTable)
-        .where(eq(FavoriteCreatorTable.userId, id))
-        .$dynamic(),
-    );
+  readFavoriteCreatorQuery = this.db
+    .select({
+      id: UserTable.id,
+      favoritedAt: FavoriteCreatorTable.createdAt,
+      displayName: UserTable.displayName,
+      username: UserTable.username,
+      profilePicFileId: UserTable.profilePicFileId,
+      profileBannerFileId: UserTable.profileBannerFileId,
+      topics: coalesce(
+        jsonAgg(
+          jsonBuildObject({ id: TopicTable.id, name: TopicTable.name }),
+          isNotNull(TopicTable.id),
+        ),
+        sqlJsonArray,
+      ),
+    })
+    .from(FavoriteCreatorTable)
+    .innerJoin(UserTable, eq(UserTable.id, FavoriteCreatorTable.creatorId))
+    .leftJoin(UserTopicTable, eq(UserTopicTable.userId, UserTable.id))
+    .leftJoin(TopicTable, eq(TopicTable.id, UserTopicTable.topicId))
+    .where(eq(FavoriteCreatorTable.userId, sql.placeholder('userId')))
+    .groupBy(UserTable.id, FavoriteCreatorTable.createdAt)
+    .orderBy(desc(FavoriteCreatorTable.createdAt))
+    .limit(sql.placeholder('limit'))
+    .offset(sql.placeholder('offset'))
+    .prepare('read_favorite_creator_query');
+
+  async readFavoriteCreator(
+    userId: number,
+    dto: Omit<Pagination, 'order' | 'search'>,
+  ) {
+    return this.readFavoriteCreatorQuery.execute({
+      userId,
+      limit: dto.pageSize,
+      offset: (dto.page - 1) * dto.pageSize,
+    });
   }
 
   async createFavoriteProject(userId: number, projectId: number) {
@@ -60,15 +94,10 @@ export class FavoriteService {
       );
   }
 
-  async readFavoriteProject(id: number, pagination: Pagination) {
-    return withPagination(
-      FavoriteProjectTable.createdAt,
-      pagination,
-      this.db
-        .select({ creatorId: FavoriteProjectTable.projectId })
-        .from(FavoriteProjectTable)
-        .where(eq(FavoriteProjectTable.userId, id))
-        .$dynamic(),
-    );
+  async readFavoriteProject(
+    id: number,
+    dto: Omit<Pagination, 'order' | 'search'>,
+  ) {
+    return { id, dto };
   }
 }
