@@ -6,8 +6,8 @@ import { FileService } from './file.service';
 import { SyncService } from './sync.service';
 
 @Module({
-  imports: [LocalConfigModule(), DatabaseModule],
-  controllers: [FileController],
-  providers: [FileService, SyncService],
+	imports: [LocalConfigModule(), DatabaseModule],
+	controllers: [FileController],
+	providers: [FileService, SyncService],
 })
 export class FileModule {}

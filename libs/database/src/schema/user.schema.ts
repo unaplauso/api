@@ -1,48 +1,49 @@
-import { relations, sql } from 'drizzle-orm';
+import { USERNAME_REGEX, matchRegex } from '@unaplauso/validation/utils';
 import {
-  check,
-  pgTable,
-  serial,
-  timestamp,
-  uuid,
-  varchar,
+	check,
+	pgTable,
+	serial,
+	timestamp,
+	uuid,
+	varchar,
 } from 'drizzle-orm/pg-core';
-import { createInsertSchema } from 'drizzle-valibot';
-import * as v from 'valibot';
 import { lowerIndex, trgmIndex } from '../functions';
 import { FileTable } from './file.schema';
-import { UserTopicTable } from './user-topic.schema';
 
 export const UserTable = pgTable(
-  'user',
-  {
-    id: serial().primaryKey(),
-    displayName: varchar({ length: 64 }),
-    username: varchar({ length: 64 }),
-    email: varchar({ length: 320 }).notNull(),
-    profilePicFileId: uuid().references(() => FileTable.id, {
-      onDelete: 'set null',
-    }),
-    profileBannerFileId: uuid().references(() => FileTable.id, {
-      onDelete: 'set null',
-    }),
-    createdAt: timestamp().notNull().defaultNow(),
-  },
-  (table) => [
-    check('username_format_check', sql`${table.username} ~ '^[a-zA-Z0-9_-]+$'`),
-    lowerIndex(table.username),
-    trgmIndex(table.username, 'gist'),
-    lowerIndex(table.email),
-  ],
+	'user',
+	{
+		id: serial().primaryKey(),
+		username: varchar({ length: 32 }),
+		displayName: varchar({ length: 64 }),
+		email: varchar({ length: 320 }).notNull(),
+		profilePicFileId: uuid().references(() => FileTable.id, {
+			onDelete: 'set null',
+		}),
+		profileBannerFileId: uuid().references(() => FileTable.id, {
+			onDelete: 'set null',
+		}),
+		createdAt: timestamp().notNull().defaultNow(),
+	},
+	(table) => [
+		check(
+			'username_format_check',
+			matchRegex(table.username, USERNAME_REGEX, true),
+		),
+		lowerIndex(table.username),
+		trgmIndex(table.username, 'gist'),
+		lowerIndex(table.email),
+	],
 );
 
-export const UserRelations = relations(UserTable, ({ many }) => ({
-  userTopics: many(UserTopicTable),
-}));
+/* -- TRIGGERS
+CREATE TRIGGER update_user_profile_pic_file
+AFTER UPDATE OF profile_pic_file_id ON "user"
+FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_pic_file_id');
 
-export const InsertUserSchema = createInsertSchema(UserTable, {
-  email: (schema) => v.pipe(schema, v.email()),
-  username: v.optional(v.pipe(v.string(), v.regex(/^[a-zA-Z0-9_-]+$/))),
-});
+CREATE TRIGGER update_user_profile_banner_file
+AFTER UPDATE OF profile_banner_file_id ON "user"
+FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_banner_file_id');
+*/
 
-export type InsertUser = v.InferOutput<typeof InsertUserSchema>;
+export type InsertUser = typeof UserTable.$inferInsert;

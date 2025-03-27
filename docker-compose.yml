@@ -1,113 +1,90 @@
+x-defaults: &defaults
+  env_file: ./.env
+  restart: always
+  networks:
+    - unaplauso-network
+
+x-build-defaults: &build-defaults
+  context: .
+
+x-service-defaults: &service-defaults
+  <<: *defaults
+  build:
+    <<: *build-defaults
+  depends_on:
+    - gateway
+
 services:
   db:
+    <<: *defaults
     image: postgres:alpine
-    container_name: unaplauso-db
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - '${POSTGRES_PORT}:${POSTGRES_PORT}'
-    networks:
-      - unaplauso-network
     volumes:
-      - ./.db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
 
   redis:
+    <<: *defaults
     image: redis:alpine
-    container_name: unaplauso-redis
-    restart: always
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
       - '${REDIS_PORT}:${REDIS_PORT}'
-    networks:
-      - unaplauso-network
     healthcheck:
-      test:
-        ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD}', '--raw', 'incr', 'ping']
+      test: ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD}', '--raw', 'incr', 'ping']
+
+  audit:
+    <<: *service-defaults
+    build:
+      <<: *build-defaults
+      target: audit
+
+  auth:
+    <<: *service-defaults
+    build:
+      <<: *build-defaults
+      target: auth
+    ports:
+      - '${AUTH_PORT}:${AUTH_PORT}'
+
+  event:
+    <<: *service-defaults
+    build:
+      <<: *build-defaults
+      target: event
+
+  file:
+    <<: *service-defaults
+    build:
+      <<: *build-defaults
+      target: file
 
   gateway:
-    container_name: unaplauso-gateway
-    env_file: ./.env
-    restart: always
+    <<: *defaults
     build:
-      context: .
-      target: unaplauso-gateway
+      <<: *build-defaults
+      target: gateway
     ports:
       - '${GATEWAY_PORT}:${GATEWAY_PORT}'
-    networks:
-      - unaplauso-network
     depends_on:
       - db
       - redis
 
-  auth:
-    container_name: unaplauso-auth
-    env_file: ./.env
-    restart: always
-    build:
-      context: .
-      target: unaplauso-auth
-    ports:
-      - '${AUTH_PORT}:${AUTH_PORT}'
-    networks:
-      - unaplauso-network
-    depends_on:
-      - gateway
-
-  audit:
-    container_name: unaplauso-audit
-    env_file: ./.env
-    restart: always
-    build:
-      context: .
-      target: unaplauso-audit
-    networks:
-      - unaplauso-network
-    depends_on:
-      - gateway
-
-  file:
-    container_name: unaplauso-file
-    env_file: ./.env
-    restart: always
-    build:
-      context: .
-      target: unaplauso-file
-    networks:
-      - unaplauso-network
-    depends_on:
-      - gateway
-
   open:
-    container_name: unaplauso-open
-    env_file: ./.env
-    restart: always
+    <<: *service-defaults
     build:
-      context: .
-      target: unaplauso-open
-    networks:
-      - unaplauso-network
-    depends_on:
-      - gateway
+      <<: *build-defaults
+      target: open
 
-  event:
-    container_name: unaplauso-event
-    env_file: ./.env
-    restart: always
+  payment:
+    <<: *service-defaults
     build:
-      context: .
-      target: unaplauso-event
-    networks:
-      - unaplauso-network
-    depends_on:
-      - gateway
-
-volumes:
-  db_data:
+      <<: *build-defaults
+      target: payment
 
 networks:
   unaplauso-network:
+
+volumes:
+  db_data:

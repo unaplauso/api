@@ -1,41 +1,87 @@
-import { PutObjectCommandInput } from '@aws-sdk/client-s3';
+import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
-import { FileType, UserTable } from '@unaplauso/database';
-import { Database, InjectDB } from '@unaplauso/database/module';
-import { SyncFile } from '@unaplauso/files';
+import {
+	FileTable,
+	FileType,
+	ProjectFileTable,
+	ProjectTable,
+	type S3Bucket,
+	UserTable,
+} from '@unaplauso/database';
+import { type Database, InjectDB } from '@unaplauso/database/module';
+import type { SyncDeleteFile, SyncFile } from '@unaplauso/files';
 import { eq } from 'drizzle-orm';
+import type { QueryResult } from 'pg';
 
 @Injectable()
 export class SyncService {
-  constructor(@InjectDB() private readonly db: Database) {}
+	constructor(@InjectDB() private readonly db: Database) {}
 
-  private async profilePicCallback(id: string, userId: number) {
-    return this.db
-      .update(UserTable)
-      .set({ profilePicFileId: id })
-      .where(eq(UserTable.id, userId));
-  }
+	private async profilePicCallback(fileId: string, userId: number) {
+		return this.db
+			.update(UserTable)
+			.set({ profilePicFileId: fileId })
+			.where(eq(UserTable.id, userId));
+	}
 
-  private async profileBannerCallback(id: string, userId: number) {
-    return this.db
-      .update(UserTable)
-      .set({ profileBannerFileId: id })
-      .where(eq(UserTable.id, userId));
-  }
+	private async profileBannerCallback(fileId: string, userId: number) {
+		return this.db
+			.update(UserTable)
+			.set({ profileBannerFileId: fileId })
+			.where(eq(UserTable.id, userId));
+	}
 
-  async execCallback(id: string, data: SyncFile): Promise<unknown> {
-    if (data.type === FileType.PROFILE_PIC)
-      return this.profilePicCallback(id, data.userId);
-    else if (data.type === FileType.PROFILE_BANNER)
-      return this.profileBannerCallback(id, data.userId);
-    else return data.type;
-  }
+	private async projectFileCallback(fileId: string, projectId: number) {
+		return this.db.insert(ProjectFileTable).values({ fileId, projectId });
+	}
 
-  async getOptions({
-    type: t,
-  }: SyncFile): Promise<Partial<PutObjectCommandInput>> {
-    if (t === FileType.PROFILE_PIC) return {};
-    else if (t === FileType.PROFILE_BANNER) return {};
-    else return t;
-  }
+	private async projectThumbnailCallback(fileId: string, projectId: number) {
+		return this.db
+			.update(ProjectTable)
+			.set({ thumbnailFileId: fileId })
+			.where(eq(ProjectTable.id, projectId));
+	}
+
+	async execCallback(id: string, data: SyncFile): Promise<QueryResult> {
+		if (data.type === FileType.PROFILE_PIC)
+			return this.profilePicCallback(id, data.userId);
+		if (data.type === FileType.PROFILE_BANNER)
+			return this.profileBannerCallback(id, data.userId);
+		if (data.type === FileType.PROJECT_FILE)
+			return this.projectFileCallback(id, data.projectId);
+		if (data.type === FileType.PROJECT_THUMBNAIL)
+			return this.projectThumbnailCallback(id, data.projectId);
+		return data.type;
+	}
+
+	async getOptions({
+		type: t,
+	}: SyncFile): Promise<Partial<PutObjectCommandInput & { Bucket: S3Bucket }>> {
+		if (t === FileType.PROFILE_PIC) return {};
+		if (t === FileType.PROFILE_BANNER) return {};
+		if (t === FileType.PROJECT_FILE) return {};
+		if (t === FileType.PROJECT_THUMBNAIL) return {};
+		return t;
+	}
+
+	async execDelete(data: SyncDeleteFile): Promise<QueryResult> {
+		if (data.type === FileType.PROFILE_PIC)
+			return this.db
+				.update(UserTable)
+				.set({ profilePicFileId: null })
+				.where(eq(UserTable.id, data.userId));
+		if (data.type === FileType.PROFILE_BANNER)
+			return this.db
+				.update(UserTable)
+				.set({ profileBannerFileId: null })
+				.where(eq(UserTable.id, data.userId));
+		if (data.type === FileType.PROJECT_FILE)
+			return this.db.delete(FileTable).where(eq(FileTable.id, data.fileId));
+		if (data.type === FileType.PROJECT_THUMBNAIL)
+			return this.db
+				.update(ProjectTable)
+				.set({ thumbnailFileId: null })
+				.where(eq(ProjectTable.id, data.projectId));
+		return data.type;
+	}
 }

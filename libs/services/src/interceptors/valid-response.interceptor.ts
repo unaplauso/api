@@ -1,28 +1,28 @@
 import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  NestInterceptor,
+	type CallHandler,
+	type ExecutionContext,
+	Injectable,
+	type NestInterceptor,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
+import type { Reflector } from '@nestjs/core';
+import { NO_CONTENT_KEY } from '@unaplauso/common/decorators';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { NO_CONTENT_KEY } from '../no-content.decorator';
 
 @Injectable()
 export class ValidResponseInterceptor<T = unknown> implements NestInterceptor {
-  constructor(private reflector: Reflector) {}
+	constructor(private reflector: Reflector) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<T> {
-    const noContent = this.reflector.get<boolean>(
-      NO_CONTENT_KEY,
-      context.getHandler(),
-    );
+	intercept(context: ExecutionContext, next: CallHandler): Observable<T> {
+		const noContent = this.reflector.get<boolean>(
+			NO_CONTENT_KEY,
+			context.getHandler(),
+		);
 
-    return next
-      .handle()
-      .pipe(
-        map((data) => (noContent ? true : data === undefined ? null : data)),
-      );
-  }
+		return next
+			.handle()
+			.pipe(
+				map((data) => (noContent ? true : data === undefined ? null : data)),
+			);
+	}
 }

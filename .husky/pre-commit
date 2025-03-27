@@ -1,2 +1,1 @@
-# FIXME: Exit 0 if no apps/** || libs/** modifications
-pnpm format && pnpm lint
+pnpm biome check --write --staged

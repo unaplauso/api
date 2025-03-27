@@ -1,12 +1,17 @@
 import * as v from 'valibot';
 
 export const vStringInt = v.pipe(
-  v.union([v.string(), v.number()]),
-  v.transform(parseInt),
-  v.integer(),
+	v.union([v.string(), v.number()]),
+	v.transform(Number.parseInt),
+	v.integer(),
 );
 
 export const vStringFloat = v.pipe(
-  v.union([v.string(), v.number()]),
-  v.transform(parseFloat),
+	v.union([v.string(), v.number()]),
+	v.transform(Number.parseFloat),
+);
+
+export const vStringBoolean = v.pipe(
+	v.union([v.picklist(['true', 'false'] as const), v.boolean()]),
+	v.transform((x) => x !== 'false' && Boolean(x)),
 );

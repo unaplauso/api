@@ -3,23 +3,39 @@
  * Copyright (C) 2025 Un Aplauso
  */
 
+// biome-ignore lint/suspicious/noExplicitAny: Webpack module
+declare const module: any;
+
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import session from 'cookie-session';
 import { AuthModule } from './auth.module';
 
 (async () => {
-  const app = await NestFactory.create<NestExpressApplication>(AuthModule);
-  app.setGlobalPrefix('api/auth');
+	const app = await NestFactory.create<NestExpressApplication>(AuthModule);
+	app.setGlobalPrefix('api/auth');
 
-  if (!IS_DEVELOPMENT) app.set('trust proxy', true);
+	if (!IS_DEVELOPMENT) app.set('trust proxy', true);
+	else {
+		SwaggerModule.setup(
+			'api/auth/docs',
+			app,
+			SwaggerModule.createDocument(app, new DocumentBuilder().build()),
+		);
 
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET ?? 'secret',
-    }),
-  );
+		if (module.hot) {
+			module.hot.accept();
+			module.hot.dispose(() => app.close());
+		}
+	}
 
-  await app.listen(process.env.AUTH_PORT ?? 5001);
+	app.use(
+		session({
+			secret: process.env.SESSION_SECRET ?? 'secret',
+		}),
+	);
+
+	await app.listen(process.env.AUTH_PORT ?? 5001);
 })();
