@@ -21,9 +21,7 @@ export const UpdateUserSchema = v.omit(
 			instagramUser: v.nullish(
 				v.pipe(v.string(), v.regex(INSTAGRAM_USER_REGEX)),
 			),
-			facebookUser: v.nullish(
-				v.pipe(v.string(), v.regex(FACEBOOK_USER_REGEX)),
-			),
+			facebookUser: v.nullish(v.pipe(v.string(), v.regex(FACEBOOK_USER_REGEX))),
 			xUser: v.nullish(v.pipe(v.string(), v.regex(X_USER_REGEX))),
 			tiktokUser: v.nullish(v.pipe(v.string(), v.regex(TIKTOK_USER_REGEX))),
 			githubUser: v.nullish(v.pipe(v.string(), v.regex(GITHUB_USER_REGEX))),

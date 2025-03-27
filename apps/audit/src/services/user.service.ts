@@ -15,8 +15,8 @@ export class UserService {
 		username,
 		...details
 	}: UserAction<TUpdateUser>) {
-    // FIXME: Tira dos queries?
-    // Terminar & refinar
+		// FIXME: Tira dos queries?
+		// Terminar & refinar
 		return this.db.transaction(
 			async (tx) =>
 				await Promise.all([
