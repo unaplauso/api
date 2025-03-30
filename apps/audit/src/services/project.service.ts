@@ -13,14 +13,13 @@ export class ProjectService {
 	constructor(@InjectDB() private readonly db: Database) {}
 
 	// TODO: files
-	// FIXME: dates
+	// deadline timestamp not working, string?
 	// with insert?
 	async createProject({
 		topicIds,
 		userId: creatorId,
 		...dto
 	}: UserAction<TCreateProject>) {
-		console.log({ dto, topicIds });
 		return this.db.transaction(async (tx) => {
 			const { projectId } = (
 				await tx
@@ -43,7 +42,7 @@ export class ProjectService {
 
 	// TODO: con delete project files, categories, etc
 	async updateProject(dto: UserAction<TUpdateProject>) {
-		return 'dx';
+		return 'test';
 	}
 
 	async deleteProject(projectId: number, userId: number) {

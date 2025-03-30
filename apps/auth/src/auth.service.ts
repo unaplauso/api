@@ -42,6 +42,7 @@ export class AuthService {
 	}
 
 	getRedirectUrl(token: AccessData) {
+		// TODO: Agregar boolean de si ya existia la cuenta
 		return `${this.FRONT_REDIRECT_URL}${JSON.stringify(token)}`;
 	}
 

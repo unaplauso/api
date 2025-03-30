@@ -20,7 +20,7 @@ on:
 env:
   SSH_HOST: ${{ contains(github.ref, 'main') && secrets.SSH_PRODUCTION_HOST || secrets.SSH_TESTING_HOST }}
   IMAGE_TAG: ${{ contains(github.ref, 'main') && 'stable' || 'latest' }}
-  REGISTRY_HOST: 908027417939.dkr.ecr.sa-east-1.amazonaws.com 
+  REGISTRY_HOST: 908027417939.dkr.ecr.sa-east-1.amazonaws.com
 
 jobs:
   ci:

@@ -7,7 +7,7 @@ export const CreateProjectSchema = v.omit(
 	v.strictObject({
 		...createInsertSchema(Project, {
 			title: (schema) => v.pipe(schema, v.trim()),
-			deadline: (schema) => v.optional(schema),
+			// deadline: (schema) => v.optional(schema),
 			quotation: v.optional(vStringFloat),
 			goal: v.optional(vStringFloat),
 		}).entries,
