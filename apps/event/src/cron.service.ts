@@ -23,7 +23,7 @@ export class CronService {
 
 	@Cron(CronExpression.EVERY_DAY_AT_9PM)
 	async refreshCreatorTop() {
-		await this.db.refreshMaterialized(CreatorTopMat);
+		await this.db.refreshMaterializedView(CreatorTopMat);
 		const top = await this.db.select().from(CreatorTopMat).limit(10);
 		return this.cache.set('creator_top_10', top, days(1));
 	}
