@@ -1,7 +1,7 @@
 import { pgTable, smallserial, varchar } from 'drizzle-orm/pg-core';
 import { trgmIndex } from '../functions';
 
-export const TopicTable = pgTable(
+export const Topic = pgTable(
 	'topic',
 	{
 		id: smallserial().primaryKey(),

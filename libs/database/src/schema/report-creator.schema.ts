@@ -7,7 +7,7 @@ import {
 	primaryKey,
 	varchar,
 } from 'drizzle-orm/pg-core';
-import { UserTable } from './user.schema';
+import { User } from './user.schema';
 
 export enum ReportCreatorReason {
 	SPAM = 'spam',
@@ -28,15 +28,15 @@ export const ReportCreatorReasonEnum = pgEnum(
 	Object.values(ReportCreatorReason) as [ReportCreatorReason],
 );
 
-export const ReportCreatorTable = pgTable(
+export const ReportCreator = pgTable(
 	'report_creator',
 	{
 		userId: integer()
 			.notNull()
-			.references(() => UserTable.id, { onDelete: 'cascade' }),
+			.references(() => User.id, { onDelete: 'cascade' }),
 		creatorId: integer()
 			.notNull()
-			.references(() => UserTable.id, { onDelete: 'cascade' }),
+			.references(() => User.id, { onDelete: 'cascade' }),
 		reason: ReportCreatorReasonEnum(),
 		message: varchar({ length: 500 }),
 	},

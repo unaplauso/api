@@ -1,9 +1,7 @@
 const nodeExternals = require('webpack-node-externals');
 const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin');
 
-const swcDefaultConfig =
-	require('@nestjs/cli/lib/compiler/defaults/swc-defaults').swcDefaultsFactory()
-		.swcOptions;
+// "start:dev": "nest start --webpack --webpackPath webpack-hmr.config.js --watch",
 
 module.exports = (options, webpack) => ({
 	...options,
@@ -24,6 +22,11 @@ module.exports = (options, webpack) => ({
 			autoRestart: false,
 		}),
 	],
+	/*
+	const swcDefaultConfig =
+	require('@nestjs/cli/lib/compiler/defaults/swc-defaults').swcDefaultsFactory()
+		.swcOptions;
+
 	module: {
 		rules: [
 			{
@@ -36,4 +39,5 @@ module.exports = (options, webpack) => ({
 			},
 		],
 	},
+	*/
 });

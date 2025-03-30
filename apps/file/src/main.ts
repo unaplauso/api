@@ -11,9 +11,9 @@ bootstrapService(FileModule, async (app) => {
 	await client.query('LISTEN file_deleted');
 	client.on(
 		'notification',
-		async (v) =>
-			v.channel === 'file_deleted' &&
-			v.payload &&
-			fileService.deleteFileFromS3(JSON.parse(v.payload)),
+		async (x) =>
+			x.channel === 'file_deleted' &&
+			x.payload &&
+			fileService.deleteFileFromS3(JSON.parse(x.payload)),
 	);
 });

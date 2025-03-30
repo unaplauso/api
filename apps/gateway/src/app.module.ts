@@ -23,7 +23,7 @@ import { UserController } from './controllers/user.controller';
 		LocalConfigModule(),
 		InternalModule,
 		DatabaseModule,
-		LocalCacheModule({ ttl: seconds(15) }),
+		LocalCacheModule({ ttl: seconds(45) }),
 		LocalJwtModule(),
 		LocalThrottlerModule(),
 	],

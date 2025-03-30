@@ -11,7 +11,8 @@ import type { NestApplicationContextOptions } from '@nestjs/common/interfaces/ne
 import { NestFactory, Reflector } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { IS_DEVELOPMENT } from '@unaplauso/validation';
-import { ValidResponseInterceptor } from './interceptors/valid-response.interceptor';
+import { DatabaseErrorFilter } from './middlewares/database-error.filter';
+import { ValidResponseInterceptor } from './middlewares/valid-response.interceptor';
 
 export async function bootstrapService(
 	mainModule: Type<unknown>,
@@ -37,6 +38,7 @@ export async function bootstrapService(
 	}
 
 	app.useGlobalInterceptors(new ValidResponseInterceptor(new Reflector()));
+	app.useGlobalFilters(new DatabaseErrorFilter());
 	if (callback) await callback(app);
 	await app.listen();
 }

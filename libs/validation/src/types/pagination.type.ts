@@ -11,7 +11,7 @@ export const CreatePaginationSchema = <T extends string | never>(
 		search?: string;
 	},
 ) =>
-	v.object({
+	v.strictObject({
 		orderBy: v.optional(
 			v.picklist(orderKeys ?? []),
 			defaults?.orderBy ?? orderKeys?.at(0),
@@ -30,6 +30,7 @@ export const CreatePaginationSchema = <T extends string | never>(
 				v.string(),
 				v.nonEmpty(),
 				v.transform((s) => s.trim().toLowerCase()),
+				v.trim(),
 			),
 		),
 	});

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ReportCreatorTable, ReportProjectTable } from '@unaplauso/database';
+import { ReportCreator, ReportProject } from '@unaplauso/database';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type {
 	UserToCreatorAction,
@@ -16,20 +16,20 @@ export class ReportService {
 
 	async createReportCreator(dto: UserToCreatorAction<TCreateReportCreator>) {
 		return this.db
-			.insert(ReportCreatorTable)
+			.insert(ReportCreator)
 			.values(dto)
 			.onConflictDoUpdate({
-				target: [ReportCreatorTable.userId, ReportCreatorTable.creatorId],
+				target: [ReportCreator.userId, ReportCreator.creatorId],
 				set: { message: dto.message, reason: dto.reason },
 			});
 	}
 
 	async createReportProject(dto: UserToProjectAction<TCreateReportProject>) {
 		return this.db
-			.insert(ReportProjectTable)
+			.insert(ReportProject)
 			.values(dto)
 			.onConflictDoUpdate({
-				target: [ReportProjectTable.userId, ReportProjectTable.projectId],
+				target: [ReportProject.userId, ReportProject.projectId],
 				set: { message: dto.message, reason: dto.reason },
 			});
 	}

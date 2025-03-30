@@ -5,19 +5,19 @@ import {
 	TIKTOK_USER_REGEX,
 	URL_REGEX,
 	X_USER_REGEX,
-	matchRegex,
 } from '@unaplauso/validation/utils';
 import Big from 'big.js';
 import { check, integer, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';
-import { UserTable } from './user.schema';
+import { matchRegex } from '../functions';
+import { User } from './user.schema';
 
-export const UserDetailTable = pgTable(
+export const UserDetail = pgTable(
 	'user_detail',
 	{
 		id: integer()
 			.notNull()
 			.primaryKey()
-			.references(() => UserTable.id, { onDelete: 'cascade' }),
+			.references(() => User.id, { onDelete: 'cascade' }),
 		description: varchar({ length: 10000 }),
 		customThanks: varchar({ length: 1000 }),
 		location: varchar({ length: 64 }),

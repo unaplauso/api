@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { InjectConfig, InjectHttp } from '@unaplauso/common/decorators';
 import {
-	CreatorInteractionTable,
-	FileTable,
-	ProjectInteractionTable,
+	CreatorInteraction,
+	File,
+	ProjectInteraction,
 	type S3Bucket,
 } from '@unaplauso/database';
 import { type Database, InjectDB } from '@unaplauso/database/module';
@@ -43,19 +43,19 @@ export class EventService {
 
 			if (data.isNsfw)
 				return this.db
-					.update(FileTable)
+					.update(File)
 					.set({ isNsfw: true })
-					.where(eq(FileTable.id, uuid));
+					.where(eq(File.id, uuid));
 		}
 
 		return true;
 	}
 
 	async projectRead(projectId: number) {
-		return this.db.insert(ProjectInteractionTable).values({ projectId });
+		return this.db.insert(ProjectInteraction).values({ projectId });
 	}
 
 	async creatorRead(creatorId: number) {
-		return this.db.insert(CreatorInteractionTable).values({ creatorId });
+		return this.db.insert(CreatorInteraction).values({ creatorId });
 	}
 }

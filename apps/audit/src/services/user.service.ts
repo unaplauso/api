@@ -1,13 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { UserDetailTable, UserTable } from '@unaplauso/database';
+import { User, UserDetail } from '@unaplauso/database';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { UserAction } from '@unaplauso/validation';
 import type { TUpdateUser } from '@unaplauso/validation/types';
-import { eq } from 'drizzle-orm';
+import { eq, getTableColumns } from 'drizzle-orm';
 
 @Injectable()
 export class UserService {
 	constructor(@InjectDB() private readonly db: Database) {}
+
+	async readUser(userId: number) {
+		const [userSelection, userDetailSelection] = [
+			getTableColumns(User),
+			getTableColumns(UserDetail),
+		];
+
+		return (
+			await this.db
+				.select({ ...userSelection, ...userDetailSelection })
+				.from(User)
+				.leftJoin(UserDetail, eq(UserDetail.id, User.id))
+				.where(eq(User.id, userId))
+		).at(0);
+	}
 
 	async updateUser({
 		userId,
@@ -15,21 +30,16 @@ export class UserService {
 		username,
 		...details
 	}: UserAction<TUpdateUser>) {
-		// FIXME: Tira dos queries?
-		// Terminar & refinar
 		return this.db.transaction(
 			async (tx) =>
 				await Promise.all([
 					(displayName || username) &&
 						tx
-							.update(UserTable)
+							.update(User)
 							.set({ displayName, username })
-							.where(eq(UserTable.id, userId)),
+							.where(eq(User.id, userId)),
 					Object.keys(details).length &&
-						tx
-							.update(UserDetailTable)
-							.set(details)
-							.where(eq(UserDetailTable.id, userId)),
+						tx.update(UserDetail).set(details).where(eq(UserDetail.id, userId)),
 				]),
 		);
 	}

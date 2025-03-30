@@ -4,7 +4,7 @@ import type { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { days } from '@nestjs/throttler';
 import { InjectCache, InjectConfig } from '@unaplauso/common/decorators';
-import { type InsertUser, UserTable } from '@unaplauso/database';
+import { type InsertUser, User } from '@unaplauso/database';
 import { lowerEq } from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type AccessData from './types/access-data.type';
@@ -63,16 +63,11 @@ export class AuthService {
 		const { id } =
 			(
 				await this.db
-					.select({ id: UserTable.id })
-					.from(UserTable)
-					.where(lowerEq(UserTable.email, user.email))
+					.select({ id: User.id })
+					.from(User)
+					.where(lowerEq(User.email, user.email))
 			).at(0) ??
-			(
-				await this.db
-					.insert(UserTable)
-					.values(user)
-					.returning({ id: UserTable.id })
-			)[0];
+			(await this.db.insert(User).values(user).returning({ id: User.id }))[0];
 
 		return this.issueTokens(id);
 	}

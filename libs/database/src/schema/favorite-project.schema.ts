@@ -1,16 +1,16 @@
 import { integer, pgTable, primaryKey, timestamp } from 'drizzle-orm/pg-core';
-import { ProjectTable } from './project.schema';
-import { UserTable } from './user.schema';
+import { Project } from './project.schema';
+import { User } from './user.schema';
 
-export const FavoriteProjectTable = pgTable(
+export const FavoriteProject = pgTable(
 	'favorite_project',
 	{
 		userId: integer()
 			.notNull()
-			.references(() => UserTable.id, { onDelete: 'cascade' }),
+			.references(() => User.id, { onDelete: 'cascade' }),
 		projectId: integer()
 			.notNull()
-			.references(() => ProjectTable.id, { onDelete: 'cascade' }),
+			.references(() => Project.id, { onDelete: 'cascade' }),
 		createdAt: timestamp().notNull().defaultNow(),
 	},
 	(table) => [primaryKey({ columns: [table.userId, table.projectId] })],

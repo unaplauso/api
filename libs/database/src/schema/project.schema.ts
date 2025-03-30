@@ -1,5 +1,6 @@
 import Big from 'big.js';
 import {
+	boolean,
 	integer,
 	numeric,
 	pgTable,
@@ -8,22 +9,30 @@ import {
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
-import { FileTable } from './file.schema';
-import { UserTable } from './user.schema';
+import { File } from './file.schema';
+import { User } from './user.schema';
 
-export const ProjectTable = pgTable('project', {
+export enum ProjectStatus {
+	OPEN = 'open',
+	CANCELED = 'canceled',
+	FAILED = 'failed',
+	COMPLETED = 'completed',
+}
+
+export const Project = pgTable('project', {
 	id: serial().primaryKey(),
 	title: varchar({ length: 64 }).notNull(),
 	creatorId: integer()
 		.notNull()
-		.references(() => UserTable.id, { onDelete: 'cascade' }),
+		.references(() => User.id, { onDelete: 'cascade' }),
 	deadline: timestamp(),
 	quotation: numeric().notNull().default(Big(1).toPrecision()),
 	goal: numeric(),
-	thumbnailFileId: uuid().references(() => FileTable.id, {
+	thumbnailFileId: uuid().references(() => File.id, {
 		onDelete: 'set null',
 	}),
 	description: varchar({ length: 10000 }),
+	isCanceled: boolean().notNull().default(false),
 	createdAt: timestamp().notNull().defaultNow(),
 });
 

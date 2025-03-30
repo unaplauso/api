@@ -1,13 +1,13 @@
 import { integer, pgTable } from 'drizzle-orm/pg-core';
-import { DonationTable } from './donation.schema';
-import { UserTable } from './user.schema';
+import { Donation } from './donation.schema';
+import { User } from './user.schema';
 
-export const CreatorDonationTable = pgTable('creator_donation', {
+export const CreatorDonation = pgTable('creator_donation', {
 	donationId: integer()
 		.notNull()
 		.primaryKey()
-		.references(() => DonationTable.id, { onDelete: 'cascade' }),
+		.references(() => Donation.id, { onDelete: 'cascade' }),
 	creatorId: integer()
 		.notNull()
-		.references(() => UserTable.id, { onDelete: 'set null' }),
+		.references(() => User.id, { onDelete: 'set null' }),
 });

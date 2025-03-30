@@ -16,25 +16,8 @@ import {
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import { AppModule } from './app.module';
-
-/* TODO
-- www.figma.com/design/Uc99uG5Boh7OjGca5SCUBs/Un-Aplauso---UI-MVP-(Luka-%26-Valen)?node-id=325-2956&p=f&t=ghLKPnaOUw7byRq0-0
--
-- DESCARTADOS DEL MVP:
-- Dashboard que sirvan realmente las analíticas y que no sea por poner algo
-- listNotifications
-- Borrar cuenta (jwt protected no alcanza, AWS SES?) + aplicar protocolo para borrar proyecto
-- Favoritos en privado
-- Borradores de proyectos
--
-- PARA SEGUIR POST-MVP:
-- Protocolo de baneo de mails
-- Integración OAuth con streamlabs + events al recibir donations
-- Login con apple + linkedin
-- Sesiones propias (no oauth) -> + SMTP config
-- Administration microservice (endpoints con @SuperGuard) + admin panel
-- Integración Payway/astropay o algún sistema internacional
-*/
+import { ClientErrorFilter } from './middlewares/client-error.filter';
+import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 
 (async () => {
 	const app = await NestFactory.create<NestFastifyApplication>(
@@ -50,6 +33,9 @@ import { AppModule } from './app.module';
 	await app.register(fastifyHelmet as any);
 	// biome-ignore lint/suspicious/noExplicitAny: @types version mismatch
 	await app.register(fastifyMultipart as any);
+
+	app.useGlobalInterceptors(new NotFoundInterceptor());
+	app.useGlobalFilters(new ClientErrorFilter());
 
 	if (IS_DEVELOPMENT) {
 		SwaggerModule.setup(

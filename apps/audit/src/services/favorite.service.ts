@@ -1,39 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import {
-	CreatorDonationTable,
-	DonationTable,
-	FavoriteCreatorTable,
-	FavoriteProjectTable,
-	ProjectDonationTable,
-	ProjectTable,
-	ProjectTopicTable,
-	TopicTable,
-	UserTable,
-	UserTopicTable,
+	CreatorDonation,
+	Donation,
+	FavoriteCreator,
+	FavoriteProject,
+	ProjectTop,
+	Topic,
+	User,
+	UserTopic,
 } from '@unaplauso/database';
 import {
-	ProfileBannerFileTable,
-	ProfilePicFileTable,
-	ProjectThumbnailFileTable,
-} from '@unaplauso/database/aliases';
+	ProfileBannerFile,
+	ProfilePicFile,
+} from '@unaplauso/database/helpers/aliases';
 
 import {
 	caseWhenNull,
 	coalesce,
-	emptiableJsonAgg,
+	jsonAgg,
 	jsonBuildObject,
-	sqlNow,
+	sqlJsonArray,
 } from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { TPagination } from '@unaplauso/validation/types';
 import {
-	type SQL,
 	and,
 	desc,
 	eq,
-	gte,
+	getViewSelectedFields,
 	isNotNull,
-	or,
 	sql,
 	sum,
 } from 'drizzle-orm';
@@ -44,78 +39,72 @@ export class FavoriteService {
 
 	async createFavoriteCreator(userId: number, creatorId: number) {
 		return this.db
-			.insert(FavoriteCreatorTable)
+			.insert(FavoriteCreator)
 			.values({ userId, creatorId })
 			.onConflictDoNothing();
 	}
 
 	async deleteFavoriteCreator(userId: number, creatorId: number) {
 		return this.db
-			.delete(FavoriteCreatorTable)
+			.delete(FavoriteCreator)
 			.where(
 				and(
-					eq(FavoriteCreatorTable.userId, userId),
-					eq(FavoriteCreatorTable.creatorId, creatorId),
+					eq(FavoriteCreator.userId, userId),
+					eq(FavoriteCreator.creatorId, creatorId),
 				),
 			);
 	}
 
 	listFavoriteCreatorQuery = this.db
 		.select({
-			id: UserTable.id,
-			favoritedAt: FavoriteCreatorTable.createdAt,
-			displayName: UserTable.displayName,
-			username: UserTable.username,
+			id: User.id,
+			favoritedAt: FavoriteCreator.createdAt,
+			displayName: User.displayName,
+			username: User.username,
 			profilePic: caseWhenNull(
-				UserTable.profilePicFileId,
+				User.profilePicFileId,
 				jsonBuildObject({
-					id: ProfilePicFileTable.id,
-					bucket: ProfilePicFileTable.bucket,
-					isNsfw: ProfilePicFileTable.isNsfw,
+					id: ProfilePicFile.id,
+					bucket: ProfilePicFile.bucket,
+					isNsfw: ProfilePicFile.isNsfw,
 				}),
 			),
 			profileBanner: caseWhenNull(
-				UserTable.profileBannerFileId,
+				User.profileBannerFileId,
 				jsonBuildObject({
-					id: ProfileBannerFileTable.id,
-					bucket: ProfileBannerFileTable.bucket,
-					isNsfw: ProfileBannerFileTable.isNsfw,
+					id: ProfileBannerFile.id,
+					bucket: ProfileBannerFile.bucket,
+					isNsfw: ProfileBannerFile.isNsfw,
 				}),
 			),
-			topics: emptiableJsonAgg(
-				jsonBuildObject({ id: TopicTable.id, name: TopicTable.name }),
-				isNotNull(TopicTable.id),
+			topics: coalesce(
+				jsonAgg(
+					jsonBuildObject({ id: Topic.id, name: Topic.name }),
+					isNotNull(Topic.id),
+				),
+				sqlJsonArray,
 			),
-			donations: coalesce(sum(DonationTable.amount), sql`0`),
+			donations: coalesce(sum(Donation.amount), sql`0`),
 		})
-		.from(FavoriteCreatorTable)
-		.innerJoin(UserTable, eq(UserTable.id, FavoriteCreatorTable.creatorId))
+		.from(FavoriteCreator)
+		.innerJoin(User, eq(User.id, FavoriteCreator.creatorId))
+		.leftJoin(ProfilePicFile, eq(ProfilePicFile.id, User.profilePicFileId))
 		.leftJoin(
-			ProfilePicFileTable,
-			eq(ProfilePicFileTable.id, UserTable.profilePicFileId),
+			ProfileBannerFile,
+			eq(ProfileBannerFile.id, User.profileBannerFileId),
 		)
-		.leftJoin(
-			ProfileBannerFileTable,
-			eq(ProfileBannerFileTable.id, UserTable.profileBannerFileId),
-		)
-		.leftJoin(UserTopicTable, eq(UserTopicTable.userId, UserTable.id))
-		.leftJoin(TopicTable, eq(TopicTable.id, UserTopicTable.topicId))
-		.leftJoin(
-			CreatorDonationTable,
-			eq(CreatorDonationTable.creatorId, UserTable.id),
-		)
-		.leftJoin(
-			DonationTable,
-			eq(DonationTable.id, CreatorDonationTable.donationId),
-		)
-		.where(eq(FavoriteCreatorTable.userId, sql.placeholder('userId')))
+		.leftJoin(UserTopic, eq(UserTopic.userId, User.id))
+		.leftJoin(Topic, eq(Topic.id, UserTopic.topicId))
+		.leftJoin(CreatorDonation, eq(CreatorDonation.creatorId, User.id))
+		.leftJoin(Donation, eq(Donation.id, CreatorDonation.donationId))
+		.where(eq(FavoriteCreator.userId, sql.placeholder('userId')))
 		.groupBy(
-			UserTable.id,
-			FavoriteCreatorTable.createdAt,
-			ProfilePicFileTable.id,
-			ProfileBannerFileTable.id,
+			User.id,
+			FavoriteCreator.createdAt,
+			ProfilePicFile.id,
+			ProfileBannerFile.id,
 		)
-		.orderBy(desc(FavoriteCreatorTable.createdAt))
+		.orderBy(desc(FavoriteCreator.createdAt))
 		.limit(sql.placeholder('limit'))
 		.offset(sql.placeholder('offset'))
 		.prepare('list_favorite_creator_query');
@@ -133,112 +122,46 @@ export class FavoriteService {
 
 	async createFavoriteProject(userId: number, projectId: number) {
 		return this.db
-			.insert(FavoriteProjectTable)
+			.insert(FavoriteProject)
 			.values({ userId, projectId })
 			.onConflictDoNothing();
 	}
 
 	async deleteFavoriteProject(userId: number, projectId: number) {
 		return this.db
-			.delete(FavoriteProjectTable)
+			.delete(FavoriteProject)
 			.where(
 				and(
-					eq(FavoriteProjectTable.userId, userId),
-					eq(FavoriteProjectTable.projectId, projectId),
+					eq(FavoriteProject.userId, userId),
+					eq(FavoriteProject.projectId, projectId),
 				),
 			);
 	}
-
-	listFavoriteProjectQuery = this.db
-		.select({
-			id: ProjectTable.id,
-			title: ProjectTable.title,
-			favoritedAt: FavoriteProjectTable.createdAt,
-			createdAt: ProjectTable.createdAt,
-			deadline: ProjectTable.deadline,
-			goal: ProjectTable.goal,
-			donations: coalesce(sum(DonationTable.amount), sql`0`),
-			finished: coalesce<boolean>(
-				or(
-					gte(ProjectTable.goal, sum(DonationTable.amount)),
-					gte(ProjectTable.deadline, sqlNow),
-				) as SQL<boolean>,
-				sql`false`,
-			),
-			creator: jsonBuildObject({
-				id: UserTable.id,
-				username: UserTable.username,
-				displayName: UserTable.displayName,
-				profilePic: caseWhenNull(
-					UserTable.profilePicFileId,
-					jsonBuildObject({
-						id: ProfilePicFileTable.id,
-						bucket: ProfilePicFileTable.bucket,
-						isNsfw: ProfilePicFileTable.isNsfw,
-					}),
-				),
-			}),
-			thumbnail: caseWhenNull(
-				ProjectTable.thumbnailFileId,
-				jsonBuildObject({
-					id: ProjectThumbnailFileTable.id,
-					bucket: ProjectThumbnailFileTable.bucket,
-					isNsfw: ProjectThumbnailFileTable.isNsfw,
-				}),
-			),
-			topics: emptiableJsonAgg(
-				jsonBuildObject({ id: TopicTable.id, name: TopicTable.name }),
-				isNotNull(TopicTable.id),
-			),
-		})
-		.from(FavoriteProjectTable)
-		.innerJoin(
-			ProjectTable,
-			eq(ProjectTable.id, FavoriteProjectTable.projectId),
-		)
-		.leftJoin(
-			ProjectThumbnailFileTable,
-			eq(ProjectThumbnailFileTable.id, ProjectTable.thumbnailFileId),
-		)
-		.leftJoin(
-			ProjectTopicTable,
-			eq(ProjectTopicTable.projectId, ProjectTable.id),
-		)
-		.leftJoin(TopicTable, eq(TopicTable.id, ProjectTopicTable.topicId))
-		.innerJoin(UserTable, eq(UserTable.id, ProjectTable.creatorId))
-		.leftJoin(
-			ProfilePicFileTable,
-			eq(ProfilePicFileTable.id, UserTable.profilePicFileId),
-		)
-		.leftJoin(
-			ProjectDonationTable,
-			eq(ProjectDonationTable.projectId, ProjectTable.id),
-		)
-		.leftJoin(
-			DonationTable,
-			eq(DonationTable.id, ProjectDonationTable.donationId),
-		)
-		.where(eq(FavoriteProjectTable.userId, sql.placeholder('userId')))
-		.groupBy(
-			ProjectTable.id,
-			FavoriteProjectTable.createdAt,
-			UserTable.id,
-			ProfilePicFileTable.id,
-			ProjectThumbnailFileTable.id,
-		)
-		.orderBy(desc(FavoriteProjectTable.createdAt))
-		.limit(sql.placeholder('limit'))
-		.offset(sql.placeholder('offset'))
-		.prepare('list_favorite_project_query');
 
 	async listFavoriteProject(
 		userId: number,
 		dto: Omit<TPagination, 'order' | 'search'>,
 	) {
-		return this.listFavoriteProjectQuery.execute({
-			userId,
-			limit: dto.pageSize,
-			offset: (dto.page - 1) * dto.pageSize,
-		});
+		const {
+			description,
+			createdAt,
+			deadline,
+			quotation,
+			donationsValue,
+			creatorId,
+			topicIds,
+			files,
+			interactions,
+			...selection
+		} = getViewSelectedFields(ProjectTop);
+
+		return this.db
+			.select({ favoritedAt: FavoriteProject.createdAt, ...selection })
+			.from(FavoriteProject)
+			.innerJoin(ProjectTop, eq(ProjectTop.id, FavoriteProject.projectId))
+			.where(eq(FavoriteProject.userId, userId))
+			.limit(dto.pageSize)
+			.offset((dto.page - 1) * dto.pageSize)
+			.orderBy(desc(FavoriteProject.createdAt));
 	}
 }

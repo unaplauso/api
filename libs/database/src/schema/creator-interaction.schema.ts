@@ -5,15 +5,15 @@ import {
 	pgTable,
 	timestamp,
 } from 'drizzle-orm/pg-core';
-import { UserTable } from './user.schema';
+import { User } from './user.schema';
 
-export const CreatorInteractionTable = pgTable(
+export const CreatorInteraction = pgTable(
 	'creator_interaction',
 	{
 		id: bigserial({ mode: 'number' }).primaryKey(),
 		creatorId: integer()
 			.notNull()
-			.references(() => UserTable.id, { onDelete: 'cascade' }),
+			.references(() => User.id, { onDelete: 'cascade' }),
 		createdAt: timestamp().notNull().defaultNow(),
 	},
 	(table) => [

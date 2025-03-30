@@ -1,16 +1,16 @@
 import { integer, pgTable, primaryKey } from 'drizzle-orm/pg-core';
-import { ProjectTable } from './project.schema';
-import { TopicTable } from './topic.schema';
+import { Project } from './project.schema';
+import { Topic } from './topic.schema';
 
-export const ProjectTopicTable = pgTable(
+export const ProjectTopic = pgTable(
 	'project_topic',
 	{
 		projectId: integer()
 			.notNull()
-			.references(() => ProjectTable.id, { onDelete: 'cascade' }),
+			.references(() => Project.id, { onDelete: 'cascade' }),
 		topicId: integer()
 			.notNull()
-			.references(() => TopicTable.id, { onDelete: 'cascade' }),
+			.references(() => Topic.id, { onDelete: 'cascade' }),
 	},
 	(table) => [primaryKey({ columns: [table.projectId, table.topicId] })],
 );

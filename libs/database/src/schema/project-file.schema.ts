@@ -1,15 +1,15 @@
 import { integer, pgTable, uuid } from 'drizzle-orm/pg-core';
-import { FileTable } from './file.schema';
-import { ProjectTable } from './project.schema';
+import { File } from './file.schema';
+import { Project } from './project.schema';
 
-export const ProjectFileTable = pgTable('project_file', {
+export const ProjectFile = pgTable('project_file', {
 	fileId: uuid()
 		.notNull()
 		.primaryKey()
-		.references(() => FileTable.id, {
+		.references(() => File.id, {
 			onDelete: 'cascade',
 		}),
 	projectId: integer()
 		.notNull()
-		.references(() => ProjectTable.id, { onDelete: 'cascade' }),
+		.references(() => Project.id, { onDelete: 'cascade' }),
 });

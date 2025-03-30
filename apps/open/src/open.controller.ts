@@ -21,6 +21,11 @@ export class OpenController {
 		return true;
 	}
 
+	@Pattern('read_project')
+	async readProject(@Payload() id: number) {
+		return this.project.readProject(id);
+	}
+
 	@Pattern('read_user_profile_pic')
 	async readUserProfilePic(@Payload() userId: number) {
 		return this.user.readUserProfilePic(userId);

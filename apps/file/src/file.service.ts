@@ -7,7 +7,7 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { Inject, Injectable, MisdirectedException } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { InjectConfig } from '@unaplauso/common/decorators';
-import { FileTable, S3Bucket } from '@unaplauso/database';
+import { File, S3Bucket } from '@unaplauso/database';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { SyncFile } from '@unaplauso/files';
 import { IS_DEVELOPMENT } from '@unaplauso/validation';
@@ -52,18 +52,18 @@ export class FileService {
 	private async syncToDatabase(data: SyncFile, bucket?: S3Bucket) {
 		return (
 			await this.db
-				.insert(FileTable)
+				.insert(File)
 				.values({
 					type: data.type,
 					mimetype: data.file.mimetype,
 					bucket,
 				})
-				.returning({ id: FileTable.id, bucket: FileTable.bucket })
+				.returning({ id: File.id, bucket: File.bucket })
 		)[0];
 	}
 
 	private async deleteFile(Key: string) {
-		return this.db.delete(FileTable).where(eq(FileTable.id, Key));
+		return this.db.delete(File).where(eq(File.id, Key));
 	}
 
 	async syncFile(data: SyncFile) {

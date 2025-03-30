@@ -7,9 +7,11 @@ import type {
 	UserToProjectAction,
 } from '@unaplauso/validation';
 import type {
+	TCreateProject,
 	TCreateReportCreator,
 	TCreateReportProject,
 	TPagination,
+	TUpdateProject,
 	TUpdateUser,
 } from '@unaplauso/validation/types';
 import { Pattern } from './decorators/pattern.decorator';
@@ -31,6 +33,12 @@ export class AuditController {
 	@Pattern('health_check')
 	async healthCheck() {
 		return true;
+	}
+
+	@NoContent()
+	@Pattern('create_project')
+	async createProject(@Payload() dto: UserAction<TCreateProject>) {
+		return this.project.createProject(dto);
 	}
 
 	@NoContent()
@@ -61,10 +69,21 @@ export class AuditController {
 		return this.favorite.createFavoriteProject(dto.userId, dto.projectId);
 	}
 
+	@Pattern('read_user')
+	async readUser(@Payload() userId: number) {
+		return this.user.readUser(userId);
+	}
+
 	@NoContent()
 	@Pattern('update_user')
 	async updateUser(@Payload() dto: UserAction<TUpdateUser>) {
 		return this.user.updateUser(dto);
+	}
+
+	@NoContent()
+	@Pattern('update_project')
+	async updateProject(@Payload() dto: UserAction<TUpdateProject>) {
+		return this.project.updateProject(dto);
 	}
 
 	@NoContent()

@@ -28,7 +28,9 @@ export class ValibotPipe implements PipeTransform {
 				? (value as Record<string, unknown>)[metadata.data]
 				: value;
 
-		const result = await safeParseAsync(this.schema, v);
+		const result = await safeParseAsync(this.schema, v, {
+			abortEarly: !IS_DEVELOPMENT,
+		});
 
 		if (!result.success)
 			throw new BadRequestException(

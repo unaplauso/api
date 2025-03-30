@@ -37,6 +37,12 @@ import { UserId } from '../decorators/user-id.decorator';
 export class UserController {
 	constructor(@InjectClient() private readonly client: InternalService) {}
 
+	@JwtProtected()
+	@Get()
+	async readUser(@UserId() userId: number) {
+		return this.client.send(Service.AUDIT, 'read_user', userId);
+	}
+
 	@ValidateParam('username', v.pipe(v.string(), v.regex(USERNAME_REGEX)))
 	@Get('exists/:username')
 	async readUserExists(@Param('username') username: string) {

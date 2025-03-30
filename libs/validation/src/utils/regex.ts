@@ -1,13 +1,3 @@
-import type { TTableObj } from '@unaplauso/database/t-table-obj.type';
-import { sql } from 'drizzle-orm';
-
-export const sqlRegex = (rgx: RegExp) => sql.raw(`'${rgx.source}'`);
-
-export const matchRegex = (v: TTableObj, rgx: RegExp, isNullable = false) =>
-	isNullable
-		? sql<boolean>`${v} IS NULL OR ${v} ~ ${sqlRegex(rgx)}`
-		: sql<boolean>`${v} ~ ${sqlRegex(rgx)}`;
-
 export const USERNAME_REGEX = /^[a-zA-Z0-9_-]{2,32}$/;
 
 export const URL_REGEX =

@@ -28,7 +28,7 @@ export const S3BucketEnum = pgEnum(
 	Object.values(S3Bucket) as [S3Bucket],
 );
 
-export const FileTable = pgTable('file', {
+export const File = pgTable('file', {
 	id: uuid().notNull().primaryKey().defaultRandom(),
 	bucket: S3BucketEnum().notNull().default(S3Bucket.PUBLIC),
 	type: FileTypeEnum().notNull(),

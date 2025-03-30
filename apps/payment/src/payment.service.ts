@@ -18,6 +18,7 @@ export class PaymentService {
 	}
 
 	async createPayment(body: PaymentCreateRequest) {
+		// Realizar + algun protocolo de cambiar porcentaje para cierto user/project
 		const payment = await new Payment(this.mercadoPago).create({ body });
 	}
 }

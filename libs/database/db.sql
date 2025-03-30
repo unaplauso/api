@@ -6,7 +6,7 @@ NO TIENE UNA FORMA MÁS AMIGABLE DE HACERLO AÚN :(
 */
 
 -- EXTENSIONES
-CREATE EXTENSION pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- delete_old_file():
 -- Para borrar archivos viejos cuando se updatea su referencia

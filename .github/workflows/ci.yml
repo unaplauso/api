@@ -20,6 +20,7 @@ on:
 env:
   SSH_HOST: ${{ contains(github.ref, 'main') && secrets.SSH_PRODUCTION_HOST || secrets.SSH_TESTING_HOST }}
   DOCKER_TAG: ${{ contains(github.ref, 'main') && 'stable' || 'latest' }}
+  REGISTRY_HOST: 908027417939.dkr.ecr.sa-east-1.amazonaws.com 
 
 jobs:
   ci:
@@ -44,15 +45,16 @@ jobs:
 
       - uses: docker/login-action@master
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          registry: ${{ env.REGISTRY_HOST }}
+          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: audit build & push
         uses: docker/build-push-action@master
         if: steps.changes.outputs.audit == 'true' || steps.changes.outputs.any == 'true'
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-audit:${{ env.DOCKER_TAG }}
+          tags: ${{ env.REGISTRY_HOST }}/unaplauso/api-audit:${{ env.IMAGE_TAG }}
           target: audit
 
       - name: auth build & push
@@ -60,7 +62,7 @@ jobs:
         if: steps.changes.outputs.auth == 'true' || steps.changes.outputs.any == 'true'
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-auth:${{ env.DOCKER_TAG }}
+          tags: ${{ env.REGISTRY_HOST }}/unaplauso/api-auth:${{ env.DOCKER_TAG }}
           target: auth
 
       - name: file build & push
@@ -68,7 +70,7 @@ jobs:
         if: steps.changes.outputs.file == 'true' || steps.changes.outputs.any == 'true'
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-file:${{ env.DOCKER_TAG }}
+          tags: ${{ env.REGISTRY_HOST }}/unaplauso/api-file:${{ env.DOCKER_TAG }}
           target: file
 
       - name: gateway build & push
@@ -76,7 +78,7 @@ jobs:
         if: steps.changes.outputs.gateway == 'true' || steps.changes.outputs.any == 'true'
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-gateway:${{ env.DOCKER_TAG }}
+          tags: ${{ env.REGISTRY_HOST }}/unaplauso/api-gateway:${{ env.DOCKER_TAG }}
           target: gateway
 
       - name: open build & push
@@ -84,7 +86,7 @@ jobs:
         if: steps.changes.outputs.open == 'true' || steps.changes.outputs.any == 'true'
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-open:${{ env.DOCKER_TAG }}
+          tags: ${{ env.REGISTRY_HOST }}/unaplauso/api-open:${{ env.DOCKER_TAG }}
           target: open
 
       - name: event build & push
@@ -92,7 +94,7 @@ jobs:
         if: steps.changes.outputs.event == 'true' || steps.changes.outputs.any == 'true'
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-event:${{ env.DOCKER_TAG }}
+          tags: ${{ env.REGISTRY_HOST }}/unaplauso/api-event:${{ env.DOCKER_TAG }}
           target: event
 
       - name: payment build & push
@@ -100,7 +102,7 @@ jobs:
         if: steps.changes.outputs.payment == 'true' || steps.changes.outputs.any == 'true'
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-payment:${{ env.DOCKER_TAG }}
+          tags: ${{ env.REGISTRY_HOST }}/unaplauso/api-payment:${{ env.DOCKER_TAG }}
           target: payment
 
       - uses: appleboy/ssh-action@master

@@ -1,4 +1,4 @@
-import { UserDetailTable, UserTable } from '@unaplauso/database';
+import { User, UserDetail } from '@unaplauso/database';
 import { createUpdateSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
 import {
@@ -9,22 +9,32 @@ import {
 	URL_REGEX,
 	USERNAME_REGEX,
 	X_USER_REGEX,
+	vStringFloat,
 } from '../../utils';
 
 export const UpdateUserSchema = v.omit(
-	v.object({
-		...createUpdateSchema(UserTable, {
-			username: v.pipe(v.string(), v.regex(USERNAME_REGEX)),
-		}).entries,
-		...createUpdateSchema(UserDetailTable, {
-			personalUrl: v.nullish(v.pipe(v.string(), v.regex(URL_REGEX))),
-			instagramUser: v.nullish(
-				v.pipe(v.string(), v.regex(INSTAGRAM_USER_REGEX)),
+	v.strictObject({
+		...createUpdateSchema(User, {
+			username: v.optional(
+				v.pipe(v.string(), v.trim(), v.regex(USERNAME_REGEX)),
 			),
-			facebookUser: v.nullish(v.pipe(v.string(), v.regex(FACEBOOK_USER_REGEX))),
-			xUser: v.nullish(v.pipe(v.string(), v.regex(X_USER_REGEX))),
-			tiktokUser: v.nullish(v.pipe(v.string(), v.regex(TIKTOK_USER_REGEX))),
-			githubUser: v.nullish(v.pipe(v.string(), v.regex(GITHUB_USER_REGEX))),
+		}).entries,
+		...createUpdateSchema(UserDetail, {
+			quotation: v.optional(vStringFloat),
+			personalUrl: v.optional(v.pipe(v.string(), v.trim(), v.regex(URL_REGEX))),
+			instagramUser: v.optional(
+				v.pipe(v.string(), v.trim(), v.regex(INSTAGRAM_USER_REGEX)),
+			),
+			facebookUser: v.optional(
+				v.pipe(v.string(), v.trim(), v.regex(FACEBOOK_USER_REGEX)),
+			),
+			xUser: v.optional(v.pipe(v.string(), v.trim(), v.regex(X_USER_REGEX))),
+			tiktokUser: v.optional(
+				v.pipe(v.string(), v.trim(), v.regex(TIKTOK_USER_REGEX)),
+			),
+			githubUser: v.optional(
+				v.pipe(v.string(), v.trim(), v.regex(GITHUB_USER_REGEX)),
+			),
 		}).entries,
 	}),
 	['createdAt', 'id', 'email', 'profileBannerFileId', 'profilePicFileId'],
