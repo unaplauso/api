@@ -24,7 +24,7 @@ export class AuthService {
 		this.JWT_REFRESH_SECRET = this.config.get('JWT_REFRESH_SECRET', 'secret');
 	}
 
-	private async issueTokens(id: number) {
+	private async issueTokens(id: number, isNew = false) {
 		const [accessToken, refreshToken] = await Promise.all([
 			this.jwt.signAsync({ id }),
 			this.jwt.signAsync(
@@ -38,11 +38,10 @@ export class AuthService {
 		]);
 
 		await this.cache.set(`${id}`, refreshToken, days(30));
-		return { accessToken, refreshToken };
+		return { accessToken, refreshToken, isNew };
 	}
 
 	getRedirectUrl(token: AccessData) {
-		// TODO: Agregar boolean de si ya existia la cuenta
 		return `${this.FRONT_REDIRECT_URL}${JSON.stringify(token)}`;
 	}
 
@@ -60,16 +59,19 @@ export class AuthService {
 		}
 	}
 
-	async handleOauth(user: InsertUser) {
-		const { id } =
-			(
-				await this.db
-					.select({ id: User.id })
-					.from(User)
-					.where(lowerEq(User.email, user.email))
-			).at(0) ??
-			(await this.db.insert(User).values(user).returning({ id: User.id }))[0];
+	async handleOauth(user: InsertUser): Promise<AccessData> {
+		const existingUser = (
+			await this.db
+				.select({ id: User.id })
+				.from(User)
+				.where(lowerEq(User.email, user.email))
+		).at(0);
 
-		return this.issueTokens(id);
+		return this.issueTokens(
+			existingUser?.id ??
+				(await this.db.insert(User).values(user).returning({ id: User.id }))[0]
+					.id,
+			Boolean(existingUser?.id),
+		);
 	}
 }

@@ -22,14 +22,14 @@ export class CronService {
 	) {}
 
 	@Cron(CronExpression.EVERY_DAY_AT_9PM)
-	async refreshCreatorTop() {
+	async refreshTopCreator() {
 		await this.db.refreshMaterializedView(CreatorTopMat);
 		const top = await this.db.select().from(CreatorTopMat).limit(10);
 		return this.cache.set('creator_top_10', top, days(1));
 	}
 
 	@Cron(CronExpression.EVERY_10_MINUTES)
-	async refreshTopProjectCache() {
+	async refreshTopProject() {
 		const {
 			description,
 			createdAt,
@@ -37,6 +37,7 @@ export class CronService {
 			quotation,
 			donationsValue,
 			creatorId,
+			topicIds,
 			files,
 			interactions,
 			...selection
@@ -49,7 +50,7 @@ export class CronService {
 			.orderBy(desc(ProjectTop.interactions))
 			.limit(10);
 
-		return this.cache.set('project_top_10', data);
+		return this.cache.set('top_project', data);
 	}
 
 	@Cron(CronExpression.EVERY_4_HOURS)

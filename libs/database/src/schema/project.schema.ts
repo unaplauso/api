@@ -1,6 +1,8 @@
 import Big from 'big.js';
+import { type SQL, gte, isNull, or } from 'drizzle-orm';
 import {
 	boolean,
+	check,
 	integer,
 	numeric,
 	pgTable,
@@ -19,25 +21,36 @@ export enum ProjectStatus {
 	COMPLETED = 'completed',
 }
 
-export const Project = pgTable('project', {
-	id: serial().primaryKey(),
-	title: varchar({ length: 64 }).notNull(),
-	creatorId: integer()
-		.notNull()
-		.references(() => User.id, { onDelete: 'cascade' }),
-	deadline: timestamp(),
-	quotation: numeric().notNull().default(Big(1).toPrecision()),
-	goal: numeric(),
-	thumbnailFileId: uuid().references(() => File.id, {
-		onDelete: 'set null',
-	}),
-	description: varchar({ length: 10000 }),
-	isCanceled: boolean().notNull().default(false),
-	createdAt: timestamp().notNull().defaultNow(),
-});
+export const Project = pgTable(
+	'project',
+	{
+		id: serial().primaryKey(),
+		title: varchar({ length: 64 }).notNull(),
+		creatorId: integer()
+			.notNull()
+			.references(() => User.id, { onDelete: 'cascade' }),
+		deadline: timestamp({ mode: 'string', precision: 0 }),
+		quotation: numeric().notNull().default(Big(1).toPrecision()),
+		goal: numeric(),
+		thumbnailFileId: uuid().references(() => File.id, {
+			onDelete: 'set null',
+		}),
+		description: varchar({ length: 10000 }),
+		isCanceled: boolean().notNull().default(false),
+		createdAt: timestamp().notNull().defaultNow(),
+	},
+	(table) => [
+		check(
+			'goal_gte_quotation_check',
+			or(
+				isNull(table.goal),
+				isNull(table.quotation),
+				gte(table.goal, table.quotation),
+			) as SQL,
+		),
+	],
+);
 
-/* -- TRIGGERS
-CREATE TRIGGER update_project_thumbnail_file
-AFTER UPDATE OF thumbnail_file_id ON "project"
-FOR EACH ROW EXECUTE FUNCTION delete_old_file('thumbnail_file_id');
+/* TRIGGERS
+-- update_project_thumbnail_file
 */

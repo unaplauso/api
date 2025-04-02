@@ -12,9 +12,6 @@ import { and, eq } from 'drizzle-orm';
 export class ProjectService {
 	constructor(@InjectDB() private readonly db: Database) {}
 
-	// TODO: files
-	// deadline timestamp not working, string?
-	// with insert?
 	async createProject({
 		topicIds,
 		userId: creatorId,
@@ -40,7 +37,7 @@ export class ProjectService {
 		});
 	}
 
-	// TODO: con delete project files, categories, etc
+	// TODO: acordarse de incluir topics
 	async updateProject(dto: UserAction<TUpdateProject>) {
 		return 'test';
 	}

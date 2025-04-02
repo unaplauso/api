@@ -7,6 +7,7 @@ NO TIENE UNA FORMA MÁS AMIGABLE DE HACERLO AÚN :(
 
 -- EXTENSIONES
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- delete_old_file():
 -- Para borrar archivos viejos cuando se updatea su referencia
@@ -28,15 +29,15 @@ BEGIN
 END; 
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_user_profile_pic_file
+CREATE OR REPLACE TRIGGER update_user_profile_pic_file
 AFTER UPDATE OF profile_pic_file_id ON "user"
 FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_pic_file_id');
 
-CREATE TRIGGER update_user_profile_banner_file
+CREATE OR REPLACE TRIGGER update_user_profile_banner_file
 AFTER UPDATE OF profile_banner_file_id ON "user"
 FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_banner_file_id');
 
-CREATE TRIGGER update_project_thumbnail_file
+CREATE OR REPLACE TRIGGER update_project_thumbnail_file
 AFTER UPDATE OF thumbnail_file_id ON "project"
 FOR EACH ROW EXECUTE FUNCTION delete_old_file('thumbnail_file_id');
 
@@ -51,7 +52,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER file_deleted AFTER DELETE ON "file"
+CREATE OR REPLACE TRIGGER file_deleted AFTER DELETE ON "file"
 FOR EACH ROW EXECUTE FUNCTION notify_file_deleted();
 
 -- insert_user_detail():
@@ -64,8 +65,39 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER user_inserted AFTER INSERT ON "user"
+CREATE OR REPLACE TRIGGER user_inserted AFTER INSERT ON "user"
 FOR EACH ROW EXECUTE FUNCTION insert_user_detail();
+
+-- check_occurrence_limit():
+-- Evita que un valor tenga más de x ocurrencias de forma dinámica
+-- ej check_occurrence_limit('project_file', 'project_id', 5)
+--  + evita que project_file.project_id tenga el mismo valor más de 5 veces
+-- Se tendría que cambiar a statement-level y recrear los triggers
+CREATE OR REPLACE FUNCTION check_occurrence_limit()
+RETURNS trigger AS $$
+DECLARE
+    ref_value text;
+    max_count int := TG_ARGV[2]::int;
+    current_count int;
+BEGIN
+    SELECT row_to_json(NEW)->>TG_ARGV[1] INTO ref_value;
+
+    EXECUTE format(
+        'SELECT COUNT(*) FROM %I WHERE %I::text = $1',
+        TG_ARGV[0], TG_ARGV[1]
+    ) INTO current_count USING ref_value;
+
+    IF current_count >= max_count THEN
+        RAISE EXCEPTION '%', TG_ARGV[0] || '_limit_exception';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER check_project_file_occurrence_limit
+BEFORE INSERT ON project_file FOR EACH ROW
+EXECUTE FUNCTION check_occurrence_limit('project_file', 'project_id', 5);
 
 /* DATOS FALSOS PARA TESTEAR DE ACÁ PARA ABAJO */
 

@@ -51,7 +51,6 @@ export const UserDetail = pgTable(
 	],
 );
 
-/* -- TRIGGERS
-CREATE TRIGGER user_inserted AFTER INSERT ON "user"
-FOR EACH ROW EXECUTE FUNCTION insert_user_detail();
+/* TRIGGERS
+- user_inserted
 */

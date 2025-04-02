@@ -4,15 +4,18 @@ import {
 	S3Client,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
-import { Inject, Injectable, MisdirectedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { InjectConfig } from '@unaplauso/common/decorators';
 import { File, S3Bucket } from '@unaplauso/database';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { SyncFile } from '@unaplauso/files';
-import { IS_DEVELOPMENT } from '@unaplauso/validation';
+import {
+	InjectClient,
+	type InternalService,
+	Service,
+} from '@unaplauso/services';
 import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
-import { eq } from 'drizzle-orm';
 import { SyncService } from './sync.service';
 
 @Injectable()
@@ -23,6 +26,7 @@ export class FileService {
 		@InjectConfig() private readonly config: ConfigService,
 		@InjectDB() private readonly db: Database,
 		@Inject(SyncService) private readonly sync: SyncService,
+		@InjectClient() private readonly client: InternalService,
 	) {
 		this.s3 = new S3Client({
 			region: this.config.get('S3_AWS_REGION', 'sa-east-1'),
@@ -49,39 +53,62 @@ export class FileService {
 		}).done();
 	}
 
-	private async syncToDatabase(data: SyncFile, bucket?: S3Bucket) {
-		return (
-			await this.db
-				.insert(File)
-				.values({
-					type: data.type,
-					mimetype: data.file.mimetype,
-					bucket,
-				})
-				.returning({ id: File.id, bucket: File.bucket })
-		)[0];
-	}
-
-	private async deleteFile(Key: string) {
-		return this.db.delete(File).where(eq(File.id, Key));
+	private async syncToDatabase(
+		tx: Database,
+		data: SyncFile,
+		bucket?: S3Bucket,
+	) {
+		return tx
+			.insert(File)
+			.values(
+				'files' in data
+					? data.files.map((f) => ({
+							type: data.type,
+							mimetype: f.mimetype,
+							bucket,
+						}))
+					: [
+							{
+								type: data.type,
+								mimetype: data.file.mimetype,
+								bucket,
+							},
+						],
+			)
+			.returning({ id: File.id, bucket: File.bucket, mimetype: File.mimetype });
 	}
 
 	async syncFile(data: SyncFile) {
-		const op = await this.sync.getOptions(data);
-		const file = await this.syncToDatabase(data, op.Bucket);
-
-		try {
-			await this.sync.execCallback(file.id, data);
-
-			this.uploadFileToS3(data.file, { ...op, Key: file.id }).catch(
-				console.error,
+		return this.db.transaction(async (tx) => {
+			const op = await this.sync.getOptions(data);
+			const files = await this.syncToDatabase(
+				tx as unknown as Database,
+				data,
+				op.Bucket,
 			);
 
-			return file;
-		} catch (e: unknown) {
-			await this.deleteFile(file.id);
-			throw new MisdirectedException(IS_DEVELOPMENT ? e : undefined);
-		}
+			await this.sync.execCallback(
+				tx as unknown as Database,
+				files.map((f) => f.id),
+				data,
+			);
+
+			await Promise.all(
+				'files' in data
+					? files.map((f, i) =>
+							this.uploadFileToS3(data.files[i], { ...op, Key: f.id }),
+						)
+					: [this.uploadFileToS3(data.file, { ...op, Key: files[0].id })],
+			);
+
+			for (const f of files)
+				this.client.emit(Service.EVENT, 'file_uploaded', {
+					...data,
+					mimetype: f.mimetype,
+				});
+
+			return 'files' in data ? files : files[0];
+		});
 	}
 
 	async deleteFileFromS3(file: { bucket: S3Bucket; id: string }) {

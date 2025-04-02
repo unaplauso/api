@@ -30,8 +30,8 @@ export class EventService {
 		);
 	}
 
-	async fileUploaded(uuid: string, bucket: S3Bucket, mimetype: string) {
-		if (mimetype.startsWith('image/')) {
+	async fileUploaded(uuid: string, bucket: S3Bucket, mimetype?: string) {
+		if (mimetype?.startsWith('image/')) {
 			const { data } = await firstValueFrom<AxiosResponse<{ isNsfw: boolean }>>(
 				this.http.get(
 					`${this.MODERATION_API_URL}/image-review/${bucket}/${uuid}`,

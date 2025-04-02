@@ -38,15 +38,5 @@ export const File = pgTable('file', {
 });
 
 /* TRIGGERS
-CREATE OR REPLACE FUNCTION notify_file_deleted()
-RETURNS trigger AS $$
-BEGIN
-	PERFORM pg_notify('file_deleted', OLD.id::text);
-	RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER file_deleted
-AFTER DELETE ON "file"
-FOR EACH ROW EXECUTE FUNCTION notify_file_deleted();
+- file_deleted
 */

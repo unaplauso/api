@@ -10,47 +10,76 @@ import {
 } from '@unaplauso/database';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { SyncDeleteFile, SyncFile } from '@unaplauso/files';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { QueryResult } from 'pg';
 
 @Injectable()
 export class SyncService {
 	constructor(@InjectDB() private readonly db: Database) {}
 
-	private async profilePicCallback(fileId: string, userId: number) {
-		return this.db
+	private async profilePicCallback(
+		tx: Database,
+		fileId: string,
+		userId: number,
+	) {
+		return tx
 			.update(User)
 			.set({ profilePicFileId: fileId })
 			.where(eq(User.id, userId));
 	}
 
-	private async profileBannerCallback(fileId: string, userId: number) {
-		return this.db
+	private async profileBannerCallback(
+		tx: Database,
+		fileId: string,
+		userId: number,
+	) {
+		return tx
 			.update(User)
 			.set({ profileBannerFileId: fileId })
 			.where(eq(User.id, userId));
 	}
 
-	private async projectFileCallback(fileId: string, projectId: number) {
-		return this.db.insert(ProjectFile).values({ fileId, projectId });
+	private async projectFileCallback(
+		tx: Database,
+		fileIds: string[],
+		projectId: number,
+	) {
+		// FIXME: VALIDAR CREATORID
+		return tx
+			.insert(ProjectFile)
+			.values(fileIds.map((fileId) => ({ fileId, projectId })));
 	}
 
-	private async projectThumbnailCallback(fileId: string, projectId: number) {
-		return this.db
+	private async projectThumbnailCallback(
+		tx: Database,
+		fileId: string,
+		projectId: number,
+		userId: number,
+	) {
+		return tx
 			.update(Project)
 			.set({ thumbnailFileId: fileId })
-			.where(eq(Project.id, projectId));
+			.where(and(eq(Project.id, projectId), eq(Project.creatorId, userId)));
 	}
 
-	async execCallback(id: string, data: SyncFile): Promise<QueryResult> {
+	async execCallback(
+		tx: Database,
+		ids: string[],
+		data: SyncFile,
+	): Promise<QueryResult> {
 		if (data.type === FileType.PROFILE_PIC)
-			return this.profilePicCallback(id, data.userId);
+			return this.profilePicCallback(tx, ids[0], data.userId);
 		if (data.type === FileType.PROFILE_BANNER)
-			return this.profileBannerCallback(id, data.userId);
+			return this.profileBannerCallback(tx, ids[0], data.userId);
 		if (data.type === FileType.PROJECT_FILE)
-			return this.projectFileCallback(id, data.projectId);
+			return this.projectFileCallback(tx, ids, data.projectId);
 		if (data.type === FileType.PROJECT_THUMBNAIL)
-			return this.projectThumbnailCallback(id, data.projectId);
+			return this.projectThumbnailCallback(
+				tx,
+				ids[0],
+				data.projectId,
+				data.userId,
+			);
 		return data.type;
 	}
 
@@ -76,12 +105,18 @@ export class SyncService {
 				.set({ profileBannerFileId: null })
 				.where(eq(User.id, data.userId));
 		if (data.type === FileType.PROJECT_FILE)
-			return this.db.delete(File).where(eq(File.id, data.fileId));
+			// FIXME: VALIDAR CREATORID
+			return this.db.delete(File).where(inArray(File.id, data.fileIds));
 		if (data.type === FileType.PROJECT_THUMBNAIL)
 			return this.db
 				.update(Project)
 				.set({ thumbnailFileId: null })
-				.where(eq(Project.id, data.projectId));
+				.where(
+					and(
+						eq(Project.id, data.projectId),
+						eq(Project.creatorId, data.userId),
+					),
+				);
 		return data.type;
 	}
 }

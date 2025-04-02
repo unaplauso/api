@@ -7,8 +7,8 @@ import {
 	Patch,
 	Put,
 } from '@nestjs/common';
-import { NoContent } from '@unaplauso/common/decorators';
-import { FileType, type S3Bucket } from '@unaplauso/database';
+import { NoContent, UserId } from '@unaplauso/common/decorators';
+import { FileType } from '@unaplauso/database';
 import {
 	File,
 	FileExt,
@@ -28,10 +28,8 @@ import {
 } from '@unaplauso/validation/types';
 import { USERNAME_REGEX } from '@unaplauso/validation/utils';
 import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
-import { firstValueFrom } from 'rxjs';
 import * as v from 'valibot';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
-import { UserId } from '../decorators/user-id.decorator';
 
 @Controller('user')
 export class UserController {
@@ -65,24 +63,11 @@ export class UserController {
 		@File({ ext: FileExt.IMAGE })
 		file: MulterFile,
 	) {
-		const data = await firstValueFrom<{ id: string; bucket: S3Bucket }>(
-			await this.client.send<{ id: string; bucket: S3Bucket }, SyncFile>(
-				Service.FILE,
-				'sync_file',
-				{
-					file,
-					userId,
-					type: FileType.PROFILE_PIC,
-				},
-			),
-		);
-
-		this.client.emit(Service.EVENT, 'file_uploaded', {
-			...data,
-			mimetype: file.mimetype,
+		return this.client.send<true, SyncFile>(Service.FILE, 'sync_file', {
+			file,
+			userId,
+			type: FileType.PROFILE_PIC,
 		});
-
-		return data;
 	}
 
 	@JwtProtected()
@@ -93,24 +78,11 @@ export class UserController {
 		@File({ ext: FileExt.IMAGE })
 		file: MulterFile,
 	) {
-		const data = await firstValueFrom<{ id: string; bucket: S3Bucket }>(
-			await this.client.send<{ id: string; bucket: S3Bucket }, SyncFile>(
-				Service.FILE,
-				'sync_file',
-				{
-					file,
-					userId,
-					type: FileType.PROFILE_BANNER,
-				},
-			),
-		);
-
-		this.client.emit(Service.EVENT, 'file_uploaded', {
-			...data,
-			mimetype: file.mimetype,
+		return this.client.send<true, SyncFile>(Service.FILE, 'sync_file', {
+			file,
+			userId,
+			type: FileType.PROFILE_BANNER,
 		});
-
-		return data;
 	}
 
 	@JwtProtected()

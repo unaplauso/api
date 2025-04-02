@@ -8,8 +8,13 @@ export const ProjectFile = pgTable('project_file', {
 		.primaryKey()
 		.references(() => File.id, {
 			onDelete: 'cascade',
-		}),
+		})
+		.unique(),
 	projectId: integer()
 		.notNull()
 		.references(() => Project.id, { onDelete: 'cascade' }),
 });
+
+/* TRIGGERS
+- check_project_file_occurrence_limit
+*/

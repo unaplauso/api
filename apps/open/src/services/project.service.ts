@@ -42,6 +42,7 @@ export class ProjectService {
 			quotation,
 			donationsValue,
 			creatorId,
+			topicIds,
 			files,
 			interactions,
 			...selection

@@ -14,6 +14,7 @@ import { FacebookStrategy } from './strategies/facebook.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { XStrategy } from './strategies/x.strategy';
+import { MercadoPagoController } from './mercado-pago.controller';
 
 @Module({
 	imports: [
@@ -23,7 +24,7 @@ import { XStrategy } from './strategies/x.strategy';
 		LocalJwtModule(),
 		LocalThrottlerModule({ blockDuration: minutes(30) }),
 	],
-	controllers: [AuthController],
+	controllers: [AuthController, MercadoPagoController],
 	providers: [
 		AuthService,
 		GoogleStrategy,

@@ -9,8 +9,15 @@ export type SyncFile =
 	  }
 	| {
 			file: MulterFile;
-			type: FileType.PROJECT_FILE | FileType.PROJECT_THUMBNAIL;
+			type: FileType.PROJECT_THUMBNAIL;
 			projectId: number;
+			userId: number;
+	  }
+	| {
+			files: MulterFile[];
+			type: FileType.PROJECT_FILE;
+			projectId: number;
+			userId: number;
 	  }
 	| {
 			file: MulterFile;
@@ -30,11 +37,13 @@ export type SyncDeleteFile =
 	  }
 	| {
 			type: FileType.PROJECT_FILE;
-			fileId: string;
+			fileIds: string[];
+			userId: number;
 	  }
 	| {
 			type: FileType.PROJECT_THUMBNAIL;
 			projectId: number;
+			userId: number;
 	  }
 	| {
 			type: Exclude<

@@ -13,7 +13,6 @@ import {
 	FastifyAdapter,
 	type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import { AppModule } from './app.module';
 import { ClientErrorFilter } from './middlewares/client-error.filter';
@@ -37,7 +36,8 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 	app.useGlobalInterceptors(new NotFoundInterceptor());
 	app.useGlobalFilters(new ClientErrorFilter());
 
-	if (IS_DEVELOPMENT) {
+	/*
+		// FIXME: if (IS_DEVELOPMENT)
 		SwaggerModule.setup(
 			'api/docs',
 			app,
@@ -49,7 +49,8 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 					.build(),
 			),
 		);
-
+	*/
+	if (IS_DEVELOPMENT) {
 		if (module.hot) {
 			module.hot.accept();
 			module.hot.dispose(() => app.close());

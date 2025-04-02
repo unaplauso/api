@@ -6,9 +6,23 @@ import {
 	Get,
 	Patch,
 	Post,
+	Put,
 	Query,
 } from '@nestjs/common';
-import { InjectCache, NoContent, UseCache } from '@unaplauso/common/decorators';
+import {
+	InjectCache,
+	NoContent,
+	UseCache,
+	UserId,
+} from '@unaplauso/common/decorators';
+import { FileType } from '@unaplauso/database';
+import {
+	File,
+	FileExt,
+	ReceivesFile,
+	type SyncDeleteFile,
+	type SyncFile,
+} from '@unaplauso/files';
 import {
 	InjectClient,
 	type InternalService,
@@ -23,9 +37,10 @@ import {
 	type TUpdateProject,
 	UpdateProjectSchema,
 } from '@unaplauso/validation/types';
-import { firstValueFrom } from 'rxjs';
+import { isDefaultType } from '@unaplauso/validation/utils';
+import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
+import * as v from 'valibot';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
-import { UserId } from '../decorators/user-id.decorator';
 
 @Controller('project')
 export class ProjectController {
@@ -40,8 +55,71 @@ export class ProjectController {
 	@Post()
 	async createProject(@UserId() userId: number, @Body() dto: TCreateProject) {
 		return this.client.send(Service.AUDIT, 'create_project', {
-			userId,
 			...dto,
+			userId,
+		});
+	}
+
+	// FIXME: HACER RECIBO MÚLTIPLE + REVISAR BIEN SWAGGER
+	// LÍMITE DE SUBIDA CUSTOM, ACÁ ES DE 5 ARCHIVOS
+	@JwtProtected()
+	@ReceivesFile()
+	@Put(':id/files')
+	async putProjectFiles(
+		@UserId() userId: number,
+		@IdParam() projectId: number,
+		@File() files: MulterFile[],
+	) {
+		return this.client.send<true, SyncFile>(Service.FILE, 'sync_file', {
+			type: FileType.PROJECT_FILE,
+			files,
+			projectId,
+			userId,
+		});
+	}
+
+	@Validate('body', v.array(v.pipe(v.string(), v.uuid())))
+	@JwtProtected()
+	@NoContent()
+	@Delete('files')
+	async deleteProjectFiles(
+		@UserId() userId: number,
+		@Body() fileIds: string[],
+	) {
+		return this.client.send<true, SyncDeleteFile>(Service.FILE, 'delete_file', {
+			type: FileType.PROJECT_FILE,
+			fileIds,
+			userId,
+		});
+	}
+
+	@JwtProtected()
+	@ReceivesFile()
+	@Put(':id/thumbnail')
+	async putProjectThumbnail(
+		@UserId() userId: number,
+		@IdParam() projectId: number,
+		@File({ ext: FileExt.IMAGE }) file: MulterFile,
+	) {
+		return this.client.send<true, SyncFile>(Service.FILE, 'sync_file', {
+			type: FileType.PROJECT_THUMBNAIL,
+			file,
+			projectId,
+			userId,
+		});
+	}
+
+	@JwtProtected()
+	@NoContent()
+	@Delete(':id/thumbnail')
+	async deleteProjectThumbnail(
+		@UserId() userId: number,
+		@IdParam() projectId: number,
+	) {
+		return this.client.send<true, SyncDeleteFile>(Service.FILE, 'delete_file', {
+			type: FileType.PROJECT_THUMBNAIL,
+			projectId,
+			userId,
 		});
 	}
 
@@ -58,8 +136,8 @@ export class ProjectController {
 	@Patch()
 	async updateProject(@UserId() userId: number, @Body() dto: TUpdateProject) {
 		return this.client.send(Service.AUDIT, 'update_project', {
-			userId,
 			...dto,
+			userId,
 		});
 	}
 
@@ -77,22 +155,10 @@ export class ProjectController {
 	@UseCache()
 	@Get()
 	async listProject(@Query() dto: TListProject) {
-		if (
-			dto.status === undefined &&
-			!dto.creatorId &&
-			dto.page === 1 &&
-			dto.pageSize === 10 &&
-			dto.orderBy === 'interactions' &&
-			dto.order === 'desc'
-		) {
-			const cached = await this.cache.get('project_top_10');
+		if (isDefaultType(ListProjectSchema, dto)) {
+			const cached = await this.cache.get('top_project');
 			if (cached) return cached;
-
-			const value = await firstValueFrom(
-				await this.client.send(Service.OPEN, 'list_project', dto),
-			);
-
-			return this.cache.set('project_top_10', value);
+			this.client.emit(Service.EVENT, 'refresh_top_project');
 		}
 
 		return this.client.send(Service.OPEN, 'list_project', dto);

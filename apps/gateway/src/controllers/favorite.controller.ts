@@ -1,5 +1,5 @@
 import { Controller, Delete, Get, Post, Query } from '@nestjs/common';
-import { NoContent, UseCache } from '@unaplauso/common/decorators';
+import { NoContent, UseCache, UserId } from '@unaplauso/common/decorators';
 import {
 	InjectClient,
 	type InternalService,
@@ -12,7 +12,6 @@ import {
 } from '@unaplauso/validation/types';
 import * as v from 'valibot';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
-import { UserId } from '../decorators/user-id.decorator';
 
 @Controller('favorite')
 export class FavoriteController {

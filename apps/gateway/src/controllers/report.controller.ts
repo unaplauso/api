@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { NoContent } from '@unaplauso/common/decorators';
+import { NoContent, UserId } from '@unaplauso/common/decorators';
 import {
 	InjectClient,
 	type InternalService,
@@ -13,7 +13,6 @@ import {
 	type TCreateReportProject,
 } from '@unaplauso/validation/types';
 import { JwtProtected } from '../decorators/jwt-protected.decorator';
-import { UserId } from '../decorators/user-id.decorator';
 
 @Controller('report')
 export class ReportController {

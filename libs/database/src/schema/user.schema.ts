@@ -37,13 +37,8 @@ export const User = pgTable(
 );
 
 /* -- TRIGGERS
-CREATE TRIGGER update_user_profile_pic_file
-AFTER UPDATE OF profile_pic_file_id ON "user"
-FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_pic_file_id');
-
-CREATE TRIGGER update_user_profile_banner_file
-AFTER UPDATE OF profile_banner_file_id ON "user"
-FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_banner_file_id');
+- update_user_profile_pic_file
+- update_user_profile_banner_file
 */
 
 export type InsertUser = typeof User.$inferInsert;

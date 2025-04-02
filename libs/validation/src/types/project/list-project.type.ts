@@ -1,7 +1,6 @@
 import { ProjectStatus } from '@unaplauso/database';
-import { vQueryArray } from '@unaplauso/validation/utils/v-query-array';
 import * as v from 'valibot';
-import { vStringInt } from '../../utils';
+import { vQueryArray, vStringInt } from '../../utils';
 import { CreatePaginationSchema } from '../pagination.type';
 
 export const ListProjectSchema = v.strictObject({
@@ -20,3 +19,14 @@ export const ListProjectSchema = v.strictObject({
 });
 
 export type TListProject = v.InferOutput<typeof ListProjectSchema>;
+
+export async function isDefaultListProject(
+	obj: TListProject,
+): Promise<boolean> {
+	const defaults = v.getDefaults(ListProjectSchema);
+	const relevantObj = Object.fromEntries(
+		Object.entries(obj).filter(([_, value]) => value !== undefined),
+	);
+
+	return JSON.stringify(relevantObj) === JSON.stringify(defaults);
+}

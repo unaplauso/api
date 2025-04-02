@@ -67,7 +67,7 @@ export const ProjectTop = pgView('project_top').as((qb) => {
 				FavoriteProject,
 				eq(FavoriteProject.projectId, Project.id),
 			).as('favorites'),
-			creatorId: sql`${User.id}`.as('creator_id'),
+			creatorId: sql<number>`${User.id}`.as('creator_id'),
 			creator: jsonBuildObject({
 				id: User.id,
 				username: User.username,

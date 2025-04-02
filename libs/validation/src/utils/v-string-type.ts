@@ -8,7 +8,8 @@ export const vStringInt = v.pipe(
 
 export const vStringFloat = v.pipe(
 	v.union([v.string(), v.number()]),
-	v.check((x) => Boolean(Number.parseFloat(x.toString()))),
+	v.transform(Number.parseFloat),
+	v.number(),
 	v.transform(String),
 );
 
