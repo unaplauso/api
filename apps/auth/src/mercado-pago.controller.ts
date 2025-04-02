@@ -21,7 +21,10 @@ export class MercadoPagoController {
 	constructor(@InjectConfig() private readonly config: ConfigService) {
 		this.clientId = this.config.getOrThrow('MP_CLIENT_ID');
 		this.clientSecret = this.config.getOrThrow('MP_CLIENT_SECRET');
-		this.redirctUri = '/api/auth/mercado-pago/callback';
+		this.redirctUri = `${this.config.get(
+			'AUTH_HOST',
+			'http://localhost:5001/api/auth',
+		)}/mercado-pago/callback`;
 
 		this.mercadoPago = new MercadoPagoConfig({
 			accessToken: this.config.getOrThrow('MP_ACCESS_TOKEN'),

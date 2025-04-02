@@ -14,7 +14,10 @@ export class XStrategy extends PassportStrategy(Strategy, OauthStrategy.X) {
 			clientType: 'public',
 			clientID: config.getOrThrow('X_CLIENT_ID'),
 			clientSecret: config.getOrThrow('X_CLIENT_SECRET'),
-			callbackURL: 'http://localhost:5001/api/auth/x/callback',
+			callbackURL: `${config.get(
+				'AUTH_HOST',
+				'http://localhost:5001/api/auth',
+			)}/api/auth/x/callback`,
 			scope: ['email'],
 		});
 	}

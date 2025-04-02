@@ -16,7 +16,10 @@ export class DiscordStrategy extends PassportStrategy(
 		super({
 			clientID: config.getOrThrow('DISCORD_CLIENT_ID'),
 			clientSecret: config.getOrThrow('DISCORD_CLIENT_SECRET'),
-			callbackURL: '/api/auth/discord/callback',
+			callbackURL: `${config.get(
+				'AUTH_HOST',
+				'http://localhost:5001/api/auth',
+			)}/api/auth/discord/callback`,
 			scope: ['identify', 'email'],
 		});
 	}

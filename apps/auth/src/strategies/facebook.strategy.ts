@@ -16,7 +16,10 @@ export class FacebookStrategy extends PassportStrategy(
 		super({
 			clientID: config.getOrThrow('FACEBOOK_CLIENT_ID'),
 			clientSecret: config.getOrThrow('FACEBOOK_CLIENT_SECRET'),
-			callbackURL: '/api/auth/facebook/callback',
+			callbackURL: `${config.get(
+				'AUTH_HOST',
+				'http://localhost:5001/api/auth',
+			)}/api/auth/facebook/callback`,
 			profileFields: ['emails', 'name'],
 			scope: ['email'],
 		});
