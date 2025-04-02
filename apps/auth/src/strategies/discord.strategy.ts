@@ -19,7 +19,7 @@ export class DiscordStrategy extends PassportStrategy(
 			callbackURL: `${config.get(
 				'AUTH_HOST',
 				'http://localhost:5001/api/auth',
-			)}/api/auth/discord/callback`,
+			)}/discord/callback`,
 			scope: ['identify', 'email'],
 		});
 	}
