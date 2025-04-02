@@ -13,11 +13,11 @@ import {
 	FastifyAdapter,
 	type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import { AppModule } from './app.module';
 import { ClientErrorFilter } from './middlewares/client-error.filter';
 import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 (async () => {
 	const app = await NestFactory.create<NestFastifyApplication>(
