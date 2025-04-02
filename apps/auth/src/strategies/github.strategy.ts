@@ -19,7 +19,7 @@ export class GithubStrategy extends PassportStrategy(
 			callbackURL: `${config.get(
 				'AUTH_HOST',
 				'http://localhost:5001/api/auth',
-			)}/api/auth/github/callback`,
+			)}/github/callback`,
 			scope: ['user:email'],
 		});
 	}

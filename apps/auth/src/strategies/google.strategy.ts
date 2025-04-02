@@ -22,7 +22,7 @@ export class GoogleStrategy extends PassportStrategy(
 			callbackURL: `${config.get(
 				'AUTH_HOST',
 				'http://localhost:5001/api/auth',
-			)}/api/auth/google/callback`,
+			)}/google/callback`,
 			scope: ['email', 'profile'],
 		});
 	}

@@ -17,7 +17,7 @@ export class XStrategy extends PassportStrategy(Strategy, OauthStrategy.X) {
 			callbackURL: `${config.get(
 				'AUTH_HOST',
 				'http://localhost:5001/api/auth',
-			)}/api/auth/x/callback`,
+			)}/x/callback`,
 			scope: ['email'],
 		});
 	}

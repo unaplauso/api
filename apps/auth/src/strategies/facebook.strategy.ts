@@ -19,7 +19,7 @@ export class FacebookStrategy extends PassportStrategy(
 			callbackURL: `${config.get(
 				'AUTH_HOST',
 				'http://localhost:5001/api/auth',
-			)}/api/auth/facebook/callback`,
+			)}/facebook/callback`,
 			profileFields: ['emails', 'name'],
 			scope: ['email'],
 		});
