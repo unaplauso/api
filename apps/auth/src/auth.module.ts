@@ -9,12 +9,12 @@ import {
 import { DatabaseModule } from '@unaplauso/database/module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { MercadoPagoController } from './mercado-pago.controller';
 import { DiscordStrategy } from './strategies/discord.strategy';
 import { FacebookStrategy } from './strategies/facebook.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { XStrategy } from './strategies/x.strategy';
-import { MercadoPagoController } from './mercado-pago.controller';
 
 @Module({
 	imports: [

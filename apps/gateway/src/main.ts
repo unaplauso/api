@@ -17,6 +17,7 @@ import { IS_DEVELOPMENT } from '@unaplauso/validation';
 import { AppModule } from './app.module';
 import { ClientErrorFilter } from './middlewares/client-error.filter';
 import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 (async () => {
 	const app = await NestFactory.create<NestFastifyApplication>(
@@ -36,20 +37,19 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 	app.useGlobalInterceptors(new NotFoundInterceptor());
 	app.useGlobalFilters(new ClientErrorFilter());
 
-	/*
-		// FIXME: if (IS_DEVELOPMENT)
-		SwaggerModule.setup(
-			'api/docs',
+	// FIXME: if (IS_DEVELOPMENT)
+	SwaggerModule.setup(
+		'api/docs',
+		app,
+		SwaggerModule.createDocument(
 			app,
-			SwaggerModule.createDocument(
-				app,
-				new DocumentBuilder()
-					.addBearerAuth()
-					.addBasicAuth({ type: 'apiKey', in: 'header', name: 'x-api-key' })
-					.build(),
-			),
-		);
-	*/
+			new DocumentBuilder()
+				.addBearerAuth()
+				.addBasicAuth({ type: 'apiKey', in: 'header', name: 'x-api-key' })
+				.build(),
+		),
+	);
+
 	if (IS_DEVELOPMENT) {
 		if (module.hot) {
 			module.hot.accept();

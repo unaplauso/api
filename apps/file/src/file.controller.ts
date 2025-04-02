@@ -1,10 +1,10 @@
 import { Controller, Inject } from '@nestjs/common';
 import { Payload } from '@nestjs/microservices';
 import { NoContent } from '@unaplauso/common/decorators';
+import type { SyncDeleteFile, SyncFile } from '@unaplauso/files';
 import { Pattern } from './decorators/pattern.decorator';
 import { FileService } from './file.service';
 import { SyncService } from './sync.service';
-import type { SyncFile, SyncDeleteFile } from '@unaplauso/files';
 
 @Controller()
 export class FileController {
