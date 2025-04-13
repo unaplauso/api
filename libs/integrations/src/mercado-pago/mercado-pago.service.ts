@@ -12,7 +12,7 @@ import {
 	UserDetail,
 	UserIntegration,
 } from '@unaplauso/database';
-import { coalesce, nullif } from '@unaplauso/database/functions';
+import { coalesce } from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import Big from 'big.js';
 import { eq, sql } from 'drizzle-orm';
@@ -185,7 +185,7 @@ export class MercadoPagoService {
 					creatorId: UserIntegration.id,
 					tag: coalesce(
 						User.displayName,
-						nullif(sql<string>`@${User.username}`, '@'),
+						sql<string>`'@' || ${User.username}`,
 						User.email,
 					),
 					pic: coalesce(User.profilePicFileId, User.profileBannerFileId),
