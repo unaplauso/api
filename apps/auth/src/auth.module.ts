@@ -8,6 +8,7 @@ import {
 } from '@unaplauso/common/modules';
 import { DatabaseModule } from '@unaplauso/database/module';
 import { MercadoPagoService } from '@unaplauso/integrations/mercado-pago';
+import { InternalModule } from '@unaplauso/services';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { MercadoPagoController } from './mercado-pago.controller';
@@ -21,6 +22,7 @@ import { XStrategy } from './strategies/x.strategy';
 	imports: [
 		LocalConfigModule(),
 		LocalCacheModule({ ttl: seconds(60) }),
+		InternalModule,
 		DatabaseModule,
 		LocalJwtModule(),
 		LocalThrottlerModule({ blockDuration: minutes(30) }),
