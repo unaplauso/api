@@ -1,7 +1,6 @@
 import { Controller, Inject } from '@nestjs/common';
 import { Payload } from '@nestjs/microservices';
 import { NoContent } from '@unaplauso/common/decorators';
-import type { PaymentCreateRequest } from 'mercadopago/dist/clients/payment/create/types';
 import { Pattern } from './decorators/pattern.decorator';
 import { PaymentService } from './payment.service';
 
@@ -18,8 +17,8 @@ export class PaymentController {
 	}
 
 	@NoContent()
-	@Pattern('create_payment')
-	async createPayment(@Payload() { body }: { body: PaymentCreateRequest }) {
-		return this.payment.createPayment(body);
+	@Pattern('authorize_mercado_pago')
+	async authorizeMercadoPago(@Payload() data: { code: string; state: number }) {
+		return this.payment.authorizeMercadoPago(data);
 	}
 }

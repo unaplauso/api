@@ -1,24 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
-import { InjectConfig } from '@unaplauso/common/decorators';
-import MercadoPagoConfig, { Payment } from 'mercadopago';
-import type { PaymentCreateRequest } from 'mercadopago/dist/clients/payment/create/types';
+import { Inject, Injectable } from '@nestjs/common';
+import { MercadoPagoService } from '@unaplauso/integrations/mercado-pago';
 
 @Injectable()
 export class PaymentService {
-	private readonly mercadoPago: MercadoPagoConfig;
-
 	constructor(
-		@InjectConfig() private readonly config: ConfigService,
-		// @InjectDB() private readonly db: Database,
-	) {
-		this.mercadoPago = new MercadoPagoConfig({
-			accessToken: this.config.get('MP_ACCESS_TOKEN', 'N'),
-		});
-	}
+		@Inject(MercadoPagoService)
+		private readonly mercadoPago: MercadoPagoService,
+	) {}
 
-	async createPayment(body: PaymentCreateRequest) {
-		// Realizar + algun protocolo de cambiar porcentaje para cierto user/project
-		const payment = await new Payment(this.mercadoPago).create({ body });
+	async authorizeMercadoPago(data: { code: string; state: number }) {
+		return this.mercadoPago.connect(data.code, data.state);
 	}
 }

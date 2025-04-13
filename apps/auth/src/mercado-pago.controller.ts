@@ -6,13 +6,20 @@ import {
 	UserId,
 } from '@unaplauso/common/decorators';
 import { MercadoPagoService } from '@unaplauso/integrations/mercado-pago';
+import {
+	InjectClient,
+	type InternalService,
+	Service,
+} from '@unaplauso/services';
 import { Validate } from '@unaplauso/validation';
 import type { Response } from 'express';
+import { lastValueFrom } from 'rxjs';
 import * as v from 'valibot';
 
 @Controller('mercado-pago')
 export class MercadoPagoController {
 	constructor(
+		@InjectClient() private readonly client: InternalService,
 		@InjectConfig() private readonly config: ConfigService,
 		@Inject(MercadoPagoService)
 		private readonly mercadoPago: MercadoPagoService,
@@ -32,16 +39,17 @@ export class MercadoPagoController {
 		}),
 	)
 	@Get('callback')
-	async connect(
+	async authorizeMercadoPago(
 		@Res() res: Response,
 		@Query() data: { code: string; state: number },
 	) {
-		// FIXME: Salvar data + hablar con valen para path de config
-		console.log(data);
-		return res
-			.status(302)
-			.redirect(
-				`${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/???`,
-			);
+		await lastValueFrom(
+			await this.client.send(Service.PAYMENT, 'authorize_mercado_pago', data),
+		);
+
+		return res.status(302).redirect(
+			// FIXME: hablar con valen para path de config
+			`${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/???`,
+		);
 	}
 }

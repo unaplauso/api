@@ -8,7 +8,7 @@ import {
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { UserAction } from '@unaplauso/validation';
 import type { UpdateUser } from '@unaplauso/validation/types';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 
 @Injectable()
 export class UserService {
@@ -17,7 +17,11 @@ export class UserService {
 	async readUser(userId: number) {
 		return (
 			await this.db
-				.select()
+				.select({
+					...getTableColumns(User),
+					...getTableColumns(UserDetail),
+					...getTableColumns(UserIntegration),
+				})
 				.from(User)
 				.innerJoin(UserDetail, eq(UserDetail.id, User.id))
 				.innerJoin(UserIntegration, eq(UserIntegration.id, User.id))
