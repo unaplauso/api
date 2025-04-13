@@ -138,6 +138,7 @@ export class MercadoPagoService {
 		await this.saveRefreshToken(credentials.refresh_token, data.creatorId);
 
 		const quantity = Big(data.quantity).div(data.quotation).round(2).toNumber();
+
 		const preference = await new Preference(
 			new MercadoPagoConfig({
 				accessToken: credentials.access_token,
@@ -148,8 +149,9 @@ export class MercadoPagoService {
 				auto_return: 'approved',
 				binary_mode: true,
 				back_urls: {
-					success: `${this.config.get('GATEWAY_HOST', 'http://localhost:5000/api')}/donation/mercado-pago/done`,
-					failure: `${this.config.get('GATEWAY_HOST', 'http://localhost:5000/api')}/donation/mercado-pago/done`,
+					// FIXME: hablar con valen para path ok/error al pagar
+					success: `${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/ok`,
+					failure: `${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/no-ok`,
 				},
 				items: [
 					{

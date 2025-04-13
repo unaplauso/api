@@ -15,13 +15,12 @@ import { AuthModule } from './auth.module';
 	app.setGlobalPrefix('api/auth');
 
 	if (!IS_DEVELOPMENT) app.set('trust proxy', true);
-	else {
-		SwaggerModule.setup(
-			'api/auth/docs',
-			app,
-			SwaggerModule.createDocument(app, new DocumentBuilder().build()),
-		);
-	}
+	// BUG: else
+	SwaggerModule.setup(
+		'api/auth/docs',
+		app,
+		SwaggerModule.createDocument(app, new DocumentBuilder().build()),
+	);
 
 	app.use(
 		session({

@@ -6,7 +6,6 @@ import {
 	ParseFloatPipe,
 	Post,
 	Query,
-	Res,
 } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import {
@@ -28,7 +27,6 @@ import {
 	type ListTopDonation,
 	ListTopDonationSchema,
 } from '@unaplauso/validation/types';
-import type { FastifyReply } from 'fastify';
 
 @Controller('donation')
 export class DonationController {
@@ -111,19 +109,10 @@ export class DonationController {
 		});
 	}
 
-	// * CALLBACKS & WEBHOOKS
-
-	@Get('mercado-pago/done')
-	async createMercadoPagoDonation(
-		@Query() dto: unknown,
-		@Res() res: FastifyReply,
-	) {
-		// FIXME: Salvar donation + redirect al user con el status de pago, mensaje de pago y tal
-		console.log('OKE!', dto);
-		return res
-			.status(302)
-			.redirect(
-				`${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/???`,
-			);
+	@Post('hook/mercado-pago')
+	async hookMercadoPago(@Query() criteria: unknown, @Body() dto: unknown) {
+		// FIXME: Validar que sea de mp + Salvar donation
+		console.log('OKE!', { dto, criteria });
+		return true;
 	}
 }
