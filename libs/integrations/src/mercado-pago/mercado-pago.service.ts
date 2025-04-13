@@ -58,7 +58,7 @@ export class MercadoPagoService {
 	private async saveRefreshToken(mercadoPagoRefreshToken: string, id: number) {
 		return this.db
 			.update(UserIntegration)
-			.set({ id, mercadoPagoRefreshToken })
+			.set({ mercadoPagoRefreshToken })
 			.where(eq(UserIntegration.id, id));
 	}
 
@@ -90,7 +90,7 @@ export class MercadoPagoService {
 		return credentials.access_token;
 	}
 
-	async getUserData(userId: number) {
+	async getMercadoPagoData(userId: number) {
 		const token = await this.refreshToken(userId);
 		return new MpUser(new MercadoPagoConfig({ accessToken: token })).get();
 	}

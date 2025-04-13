@@ -11,4 +11,8 @@ export class PaymentService {
 	async authorizeMercadoPago(data: { code: string; state: number }) {
 		return this.mercadoPago.connect(data.code, data.state);
 	}
+
+	async readMercadoPago(userId: number) {
+		return this.mercadoPago.getMercadoPagoData(userId);
+	}
 }

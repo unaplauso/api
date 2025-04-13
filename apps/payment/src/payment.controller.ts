@@ -21,4 +21,9 @@ export class PaymentController {
 	async authorizeMercadoPago(@Payload() data: { code: string; state: number }) {
 		return this.payment.authorizeMercadoPago(data);
 	}
+
+	@Pattern('read_mercado_pago')
+	async readMercadoPago(@Payload() userId: number) {
+		return this.payment.readMercadoPago(userId);
+	}
 }

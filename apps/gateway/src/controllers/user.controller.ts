@@ -42,6 +42,12 @@ export class UserController {
 		return this.client.send(Service.AUDIT, 'read_user', userId);
 	}
 
+	@JwtProtected()
+	@Get('mercado-pago')
+	async readMercadoPago(@UserId() userId: number) {
+		return this.client.send(Service.PAYMENT, 'read_mercado_pago', userId);
+	}
+
 	@ValidateParam('username', v.pipe(v.string(), v.regex(USERNAME_REGEX)))
 	@Get('exists/:username')
 	async readUserExists(@Param('username') username: string) {
