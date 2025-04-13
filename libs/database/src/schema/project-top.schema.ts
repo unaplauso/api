@@ -1,37 +1,77 @@
-import { eq, gte, lte, sql } from 'drizzle-orm';
+import { eq, gte, lte, sql, sum } from 'drizzle-orm';
 import { pgView } from 'drizzle-orm/pg-core';
 import {
+	arrayAgg,
 	caseWhenNull,
 	coalesce,
+	jsonAgg,
 	jsonBuildObject,
 	sqlCase,
+	sqlFalse,
 	sqlJsonArray,
 	sqlNow,
 	sqlSmallintArray,
 	sqlStr0,
+	sqlTrue,
 	whenThen,
 } from '../functions';
 import { ProfilePicFile, ProjectThumbnailFile } from '../helpers/aliases';
-import {
-	BuildProjectDonationCte,
-	BuildProjectFileCte,
-	BuildProjectTopicCte,
-} from '../helpers/ctes';
 import { countWhereSq } from '../helpers/subqueries';
+import { Donation } from './donation.schema';
 import { FavoriteProject } from './favorite-project.schema';
+import { File } from './file.schema';
+import { ProjectDonation } from './project-donation.schema';
+import { ProjectFile } from './project-file.schema';
 import { ProjectInteraction } from './project-interaction.schema';
+import { ProjectTopic } from './project-topic.schema';
 import { Project, ProjectStatus } from './project.schema';
+import { Topic } from './topic.schema';
+import { UserIntegration } from './user-integration.schema';
 import { User } from './user.schema';
 
 export const ProjectTop = pgView('project_top').as((qb) => {
-	const [ProjectTopicCte, ProjectDonationCte, ProjectFileCte] = [
-		BuildProjectTopicCte(qb),
-		BuildProjectDonationCte(qb),
-		BuildProjectFileCte(qb),
-	];
+	const ProjectTopicCte = qb.$with('project_topic_cte').as((sqb) =>
+		sqb
+			.select({
+				projectId: ProjectTopic.projectId,
+				topics: jsonAgg(jsonBuildObject({ id: Topic.id, name: Topic.name })).as(
+					'topics',
+				),
+				topicIds: arrayAgg(Topic.id).as('topic_ids'),
+			})
+			.from(ProjectTopic)
+			.innerJoin(Topic, eq(Topic.id, ProjectTopic.topicId))
+			.groupBy(ProjectTopic.projectId),
+	);
+
+	const ProjectFileCte = qb.$with('project_file_cte').as((sqb) =>
+		sqb
+			.select({
+				projectId: ProjectFile.projectId,
+				files: jsonAgg(
+					jsonBuildObject({ id: File.id, isNsfw: File.isNsfw }),
+				).as('files'),
+				fileIds: arrayAgg(File.id).as('file_ids'),
+			})
+			.from(ProjectFile)
+			.innerJoin(File, eq(File.id, ProjectFile.fileId))
+			.groupBy(ProjectFile.projectId),
+	);
+
+	const ProjectDonationCte = qb.$with('project_donation_cte').as((sqb) =>
+		sqb
+			.select({
+				projectId: ProjectDonation.projectId,
+				amount: sum(Donation.amount).as('amount'),
+				value: sum(Donation.value).as('value'),
+			})
+			.from(ProjectDonation)
+			.innerJoin(Donation, eq(Donation.id, ProjectDonation.projectId))
+			.groupBy(ProjectDonation.projectId),
+	);
 
 	return qb
-		.with(ProjectTopicCte, ProjectDonationCte, ProjectFileCte)
+		.with(ProjectTopicCte, ProjectFileCte, ProjectDonationCte)
 		.select({
 			id: Project.id,
 			title: Project.title,
@@ -81,6 +121,10 @@ export const ProjectTop = pgView('project_top').as((qb) => {
 					}),
 				),
 			}).as('creator'),
+			hasMercadoPago: coalesce(
+				caseWhenNull(UserIntegration.mercadoPagoRefreshToken, sqlTrue),
+				sqlFalse,
+			).as('has_mercado_pago'),
 			topics: coalesce(ProjectTopicCte.topics, sqlJsonArray).as('topics'),
 			topicIds: coalesce(ProjectTopicCte.topicIds, sqlSmallintArray).as(
 				'topic_ids',
@@ -97,8 +141,9 @@ export const ProjectTop = pgView('project_top').as((qb) => {
 			eq(ProjectThumbnailFile.id, Project.thumbnailFileId),
 		)
 		.innerJoin(User, eq(User.id, Project.creatorId))
+		.innerJoin(UserIntegration, eq(UserIntegration.id, Project.creatorId))
 		.leftJoin(ProfilePicFile, eq(ProfilePicFile.id, User.profilePicFileId))
-		.leftJoin(ProjectDonationCte, eq(ProjectDonationCte.projectId, Project.id))
 		.leftJoin(ProjectTopicCte, eq(ProjectTopicCte.projectId, Project.id))
-		.leftJoin(ProjectFileCte, eq(ProjectFileCte.projectId, Project.id));
+		.leftJoin(ProjectFileCte, eq(ProjectFileCte.projectId, Project.id))
+		.leftJoin(ProjectDonationCte, eq(ProjectDonationCte.projectId, Project.id));
 });

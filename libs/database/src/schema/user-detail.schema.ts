@@ -6,7 +6,6 @@ import {
 	URL_REGEX,
 	X_USER_REGEX,
 } from '@unaplauso/validation/utils';
-import Big from 'big.js';
 import { check, integer, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { matchRegex } from '../functions';
 import { User } from './user.schema';
@@ -21,7 +20,7 @@ export const UserDetail = pgTable(
 		description: varchar({ length: 10000 }),
 		customThanks: varchar({ length: 1000 }),
 		location: varchar({ length: 64 }),
-		quotation: numeric().notNull().default(Big(1).toPrecision()),
+		quotation: numeric().notNull().default('1'),
 		personalUrl: varchar({ length: 255 }),
 		instagramUser: varchar({ length: 100 }),
 		facebookUser: varchar({ length: 100 }),
@@ -50,7 +49,3 @@ export const UserDetail = pgTable(
 		),
 	],
 );
-
-/* TRIGGERS
-- user_inserted
-*/

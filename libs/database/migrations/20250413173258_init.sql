@@ -1,4 +1,6 @@
-CREATE EXTENSION pg_trgm;
+-- EXTENSIONES
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 CREATE TYPE "public"."file_type" AS ENUM('profile_pic', 'profile_banner', 'project_file', 'project_thumbnail');
 CREATE TYPE "public"."s3_bucket" AS ENUM('unaplauso-public');
@@ -56,7 +58,8 @@ CREATE TABLE "project_donation" (
 
 CREATE TABLE "project_file" (
 	"file_id" uuid PRIMARY KEY NOT NULL,
-	"project_id" integer NOT NULL
+	"project_id" integer NOT NULL,
+	CONSTRAINT "project_file_fileId_unique" UNIQUE("file_id")
 );
 
 CREATE TABLE "project_interaction" (
@@ -75,13 +78,15 @@ CREATE TABLE "project" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"title" varchar(64) NOT NULL,
 	"creator_id" integer NOT NULL,
-	"deadline" timestamp,
+	"deadline" timestamp(0),
 	"quotation" numeric DEFAULT '1' NOT NULL,
+	"fee" numeric DEFAULT '0.05' NOT NULL,
 	"goal" numeric,
 	"thumbnail_file_id" uuid,
 	"description" varchar(10000),
 	"is_canceled" boolean DEFAULT false NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "goal_gte_quotation_check" CHECK (("project"."goal" is null or "project"."quotation" is null or "project"."goal" >= "project"."quotation"))
 );
 
 CREATE TABLE "report_creator" (
@@ -129,6 +134,12 @@ CREATE TABLE "user_detail" (
 	CONSTRAINT "github_user_check" CHECK ("user_detail"."github_user" IS NULL OR "user_detail"."github_user" ~ '^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$')
 );
 
+CREATE TABLE "user_integration" (
+	"id" integer PRIMARY KEY NOT NULL,
+	"fee" numeric DEFAULT '0.05' NOT NULL,
+	"mercado_pago_refresh_token" varchar(512)
+);
+
 CREATE TABLE "user_topic" (
 	"user_id" integer NOT NULL,
 	"topic_id" integer NOT NULL,
@@ -143,7 +154,7 @@ CREATE TABLE "user" (
 	"profile_pic_file_id" uuid,
 	"profile_banner_file_id" uuid,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "username_format_check" CHECK ("user"."username" IS NULL OR "user"."username" ~ '^[a-zA-Z0-9_-]{2,32}$')
+	CONSTRAINT "username_format_check" CHECK ("user"."username" IS NULL OR "user"."username" ~ '^(?=.*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9_-]{1,31}$')
 );
 
 ALTER TABLE "creator_donation" ADD CONSTRAINT "creator_donation_donation_id_donation_id_fk" FOREIGN KEY ("donation_id") REFERENCES "public"."donation"("id") ON DELETE cascade ON UPDATE no action;
@@ -168,6 +179,7 @@ ALTER TABLE "report_creator" ADD CONSTRAINT "report_creator_creator_id_user_id_f
 ALTER TABLE "report_project" ADD CONSTRAINT "report_project_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "report_project" ADD CONSTRAINT "report_project_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "user_detail" ADD CONSTRAINT "user_detail_id_user_id_fk" FOREIGN KEY ("id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "user_integration" ADD CONSTRAINT "user_integration_id_user_id_fk" FOREIGN KEY ("id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "user_topic" ADD CONSTRAINT "user_topic_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "user_topic" ADD CONSTRAINT "user_topic_topic_id_topic_id_fk" FOREIGN KEY ("topic_id") REFERENCES "public"."topic"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "user" ADD CONSTRAINT "user_profile_pic_file_id_file_id_fk" FOREIGN KEY ("profile_pic_file_id") REFERENCES "public"."file"("id") ON DELETE set null ON UPDATE no action;
@@ -179,11 +191,21 @@ CREATE INDEX "project_interaction_created_at_idx" ON "project_interaction" USING
 CREATE INDEX "topic_aliases_trgm" ON "topic" USING gin ("aliases" gin_trgm_ops);
 CREATE INDEX "topic_name_trgm" ON "topic" USING gin ("name" gin_trgm_ops);
 CREATE UNIQUE INDEX "user_username_unique_lower" ON "user" USING btree (lower("username"));
-CREATE INDEX "user_username_trgm" ON "user" USING gist ("username" gist_trgm_ops);
 CREATE UNIQUE INDEX "user_email_unique_lower" ON "user" USING btree (lower("email"));
-CREATE VIEW "public"."project_top" AS (with "project_topic_cte" as (select "project_topic"."project_id", json_agg(json_build_object('id', "topic"."id", 'name', "topic"."name")) as "topics", array_agg("topic"."id") as "topic_ids" from "project_topic" inner join "topic" on "topic"."id" = "project_topic"."topic_id" group by "project_topic"."project_id"), "project_donation_cte" as (select "project_donation"."project_id", sum("donation"."amount") as "amount", sum("donation"."value") as "value" from "project_donation" inner join "donation" on "donation"."id" = "project_donation"."project_id" group by "project_donation"."project_id"), "project_file_cte" as (select "project_file"."project_id", json_agg(json_build_object('id', "file"."id", 'isNsfw', "file"."is_nsfw")) as "files" from "project_file" inner join "file" on "file"."id" = "project_file"."file_id" group by "project_file"."project_id") select "project"."id", "project"."title", "project"."description", "project"."created_at", "project"."deadline", case when "project"."thumbnail_file_id" is not null then json_build_object('id', "project_thumbnail_file"."id", 'bucket', "project_thumbnail_file"."bucket", 'isNsfw', "project_thumbnail_file"."is_nsfw") else null end as "thumbnail", case when "project"."is_canceled" = true then 'canceled' when "amount" >= "project"."goal" then 'completed' when "project"."deadline" <= NOW() then 'failed' else 'open' end as "status", "project"."goal", "project"."quotation", coalesce("amount", 0) as "donations_amount", coalesce("value", 0) as "donations_value", coalesce((select count(*) from "favorite_project" where "favorite_project"."project_id" = "project"."id"), 0) as "favorites", "user"."id" as "creator_id", json_build_object('id', "user"."id", 'username', "user"."username", 'displayName', "user"."display_name", 'profilePic', case when "user"."profile_pic_file_id" is not null then json_build_object('id', "profile_pic_file"."id", 'bucket', "profile_pic_file"."bucket", 'isNsfw', "profile_pic_file"."is_nsfw") else null end) as "creator", coalesce("topics", '[]'::json) as "topics", coalesce("topic_ids", ARRAY[]::smallint[]) as "topic_ids", coalesce("files", '[]'::json) as "files", coalesce((select count(*) from "project_interaction" where "project_interaction"."project_id" = "project"."id"), 0) as "interactions" from "project" left join "file" "project_thumbnail_file" on "project_thumbnail_file"."id" = "project"."thumbnail_file_id" inner join "user" on "user"."id" = "project"."creator_id" left join "file" "profile_pic_file" on "profile_pic_file"."id" = "user"."profile_pic_file_id" left join "project_donation_cte" on "project_donation_cte"."project_id" = "project"."id" left join "project_topic_cte" on "project_topic_cte"."project_id" = "project"."id" left join "project_file_cte" on "project_file_cte"."project_id" = "project"."id");
-CREATE MATERIALIZED VIEW "public"."creator_top" AS (select "id" from "user");
+CREATE VIEW "public"."creator_top" AS (with "user_topic_cte" as (select "user_topic"."user_id", json_agg(json_build_object('id', "topic"."id", 'name', "topic"."name")) as "topics", array_agg("topic"."id") as "topic_ids" from "user_topic" inner join "topic" on "topic"."id" = "user_topic"."topic_id" group by "user_topic"."user_id"), "creator_donation_cte" as (select "creator_donation"."creator_id", sum("donation"."amount") as "amount", sum("donation"."value") as "value" from "creator_donation" inner join "donation" on "donation"."id" = "creator_donation"."creator_id" group by "creator_donation"."creator_id") select "user"."id", "user"."username", "user"."display_name" as "display_name", "user"."created_at", case when "user"."profile_pic_file_id" is not null then json_build_object('id', "profile_pic_file"."id", 'bucket', "profile_pic_file"."bucket", 'isNsfw', "profile_pic_file"."is_nsfw") else null end as "profile_pic", case when "user"."profile_banner_file_id" is not null then json_build_object('id', "profile_banner_file"."id", 'bucket', "profile_banner_file"."bucket", 'isNsfw', "profile_banner_file"."is_nsfw") else null end as "profile_banner", "user_detail"."description" as "description", "user_detail"."custom_thanks" as "custom_thanks", "user_detail"."location" as "location", "user_detail"."quotation" as "quotation", "user_detail"."personal_url" as "personal_url", "user_detail"."instagram_user" as "instagram_user", "user_detail"."facebook_user" as "facebook_user", "user_detail"."x_user" as "x_user", "user_detail"."tiktok_user" as "tiktok_user", "user_detail"."github_user" as "github_user", coalesce("amount", 0) as "donations_amount", coalesce("value", 0) as "donations_value", coalesce(case when "user_integration"."mercado_pago_refresh_token" is not null then true else null end, false) as "has_mercado_pago", coalesce((select count(*) from "favorite_creator" where "favorite_creator"."creator_id" = "user"."id"), 0) as "favorites", coalesce("topics", '[]'::json) as "topics", coalesce("topic_ids", ARRAY[]::smallint[]) as "topic_ids", coalesce((select count(*) from "creator_interaction" where "creator_interaction"."creator_id" = "user"."id"), 0) as "interactions" from "user" inner join "user_detail" on "user_detail"."id" = "user"."id" inner join "user_integration" on "user_integration"."id" = "user"."id" left join "file" "profile_pic_file" on "profile_pic_file"."id" = "user"."profile_pic_file_id" left join "file" "profile_banner_file" on "profile_banner_file"."id" = "user"."profile_banner_file_id" left join "user_topic_cte" on "user_topic_cte"."user_id" = "user"."id" left join "creator_donation_cte" on "creator_donation_cte"."creator_id" = "user"."id");
+CREATE VIEW "public"."donator_top" AS (with "creator_donation_cte" as ((select "donation"."user_id", "creator_donation"."creator_id" as "creator_id", null as "project_id", sum("donation"."amount") as "amount", sum("donation"."value") as "value" from "creator_donation" inner join "donation" on "donation"."id" = "creator_donation"."donation_id" group by "donation"."user_id", "creator_donation"."creator_id") union all (select "donation"."user_id", null as "creator_id", "project_donation"."project_id" as "project_id", sum("donation"."amount") as "amount", sum("donation"."value") as "value" from "project_donation" inner join "donation" on "donation"."id" = "project_donation"."donation_id" group by "donation"."user_id", "project_donation"."project_id")), "user_topic_cte" as (select "user_topic"."user_id", json_agg(json_build_object('id', "topic"."id", 'name', "topic"."name")) as "topics", array_agg("topic"."id") as "topic_ids" from "user_topic" inner join "topic" on "topic"."id" = "user_topic"."topic_id" group by "user_topic"."user_id") select "user"."id", "creator_id" as "creator_id", "project_id" as "project_id", "amount", "value", "user"."username", "user"."display_name" as "display_name", "user"."created_at", case when "user"."profile_pic_file_id" is not null then json_build_object('id', "profile_pic_file"."id", 'bucket', "profile_pic_file"."bucket", 'isNsfw', "profile_pic_file"."is_nsfw") else null end as "profile_pic", case when "user"."profile_banner_file_id" is not null then json_build_object('id', "profile_banner_file"."id", 'bucket', "profile_banner_file"."bucket", 'isNsfw', "profile_banner_file"."is_nsfw") else null end as "profile_banner", "user_detail"."location" as "location", "user_detail"."personal_url" as "personal_url", "user_detail"."instagram_user" as "instagram_user", "user_detail"."facebook_user" as "facebook_user", "user_detail"."x_user" as "x_user", "user_detail"."tiktok_user" as "tiktok_user", "user_detail"."github_user" as "github_user", coalesce("topics", '[]'::json) as "topics", coalesce("topic_ids", ARRAY[]::smallint[]) as "topic_ids" from "user" inner join "user_detail" on "user_detail"."id" = "user"."id" left join "file" "profile_pic_file" on "profile_pic_file"."id" = "user"."profile_pic_file_id" left join "file" "profile_banner_file" on "profile_banner_file"."id" = "user"."profile_banner_file_id" inner join "creator_donation_cte" on "creator_donation_cte"."user_id" = "user"."id" left join "user_topic_cte" on "user_topic_cte"."user_id" = "user"."id");
+CREATE VIEW "public"."project_top" AS (with "project_topic_cte" as (select "project_topic"."project_id", json_agg(json_build_object('id', "topic"."id", 'name', "topic"."name")) as "topics", array_agg("topic"."id") as "topic_ids" from "project_topic" inner join "topic" on "topic"."id" = "project_topic"."topic_id" group by "project_topic"."project_id"), "project_file_cte" as (select "project_file"."project_id", json_agg(json_build_object('id', "file"."id", 'isNsfw', "file"."is_nsfw")) as "files", array_agg("file"."id") as "file_ids" from "project_file" inner join "file" on "file"."id" = "project_file"."file_id" group by "project_file"."project_id"), "project_donation_cte" as (select "project_donation"."project_id", sum("donation"."amount") as "amount", sum("donation"."value") as "value" from "project_donation" inner join "donation" on "donation"."id" = "project_donation"."project_id" group by "project_donation"."project_id") select "project"."id", "project"."title", "project"."description", "project"."created_at", "project"."deadline", case when "project"."thumbnail_file_id" is not null then json_build_object('id', "project_thumbnail_file"."id", 'bucket', "project_thumbnail_file"."bucket", 'isNsfw', "project_thumbnail_file"."is_nsfw") else null end as "thumbnail", case when "project"."is_canceled" = true then 'canceled' when "amount" >= "project"."goal" then 'completed' when "project"."deadline" <= NOW() then 'failed' else 'open' end as "status", "project"."goal", "project"."quotation", coalesce("amount", 0) as "donations_amount", coalesce("value", 0) as "donations_value", coalesce((select count(*) from "favorite_project" where "favorite_project"."project_id" = "project"."id"), 0) as "favorites", "user"."id" as "creator_id", json_build_object('id', "user"."id", 'username', "user"."username", 'displayName', "user"."display_name", 'profilePic', case when "user"."profile_pic_file_id" is not null then json_build_object('id', "profile_pic_file"."id", 'bucket', "profile_pic_file"."bucket", 'isNsfw', "profile_pic_file"."is_nsfw") else null end) as "creator", coalesce(case when "user_integration"."mercado_pago_refresh_token" is not null then true else null end, false) as "has_mercado_pago", coalesce("topics", '[]'::json) as "topics", coalesce("topic_ids", ARRAY[]::smallint[]) as "topic_ids", coalesce("files", '[]'::json) as "files", coalesce((select count(*) from "project_interaction" where "project_interaction"."project_id" = "project"."id"), 0) as "interactions" from "project" left join "file" "project_thumbnail_file" on "project_thumbnail_file"."id" = "project"."thumbnail_file_id" inner join "user" on "user"."id" = "project"."creator_id" inner join "user_integration" on "user_integration"."id" = "project"."creator_id" left join "file" "profile_pic_file" on "profile_pic_file"."id" = "user"."profile_pic_file_id" left join "project_topic_cte" on "project_topic_cte"."project_id" = "project"."id" left join "project_file_cte" on "project_file_cte"."project_id" = "project"."id" left join "project_donation_cte" on "project_donation_cte"."project_id" = "project"."id");
+CREATE MATERIALIZED VIEW "public"."creator_top_mv" AS (select "id", "username", "display_name", "created_at", "profile_pic", "profile_banner", "donations_amount", "donations_value", "favorites", "topics", "topic_ids", "interactions" from "creator_top" where "creator_top"."username" is not null);
 
+
+-- creator_top_mv | Indexes
+CREATE UNIQUE INDEX creator_top_mv_id_idx ON creator_top_mv (id);
+CREATE INDEX creator_top_mv_topic_ids_idx ON creator_top_mv USING GIN (topic_ids);
+CREATE INDEX creator_top_mv_donations_value_idx ON creator_top_mv (donations_value DESC);
+CREATE INDEX creator_top_mv_interactions_idx ON creator_top_mv (interactions DESC);
+CREATE INDEX creator_top_user_search_trgm_idx ON public.creator_top_mv
+  USING gin (lower(username || '|' || coalesce(display_name, '')) gin_trgm_ops);
+REFRESH MATERIALIZED VIEW CONCURRENTLY creator_top_mv;
 
 -- delete_old_file():
 -- Para borrar archivos viejos cuando se updatea su referencia
@@ -205,15 +227,15 @@ BEGIN
 END; 
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_user_profile_pic_file
+CREATE OR REPLACE TRIGGER update_user_profile_pic_file
 AFTER UPDATE OF profile_pic_file_id ON "user"
 FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_pic_file_id');
 
-CREATE TRIGGER update_user_profile_banner_file
+CREATE OR REPLACE TRIGGER update_user_profile_banner_file
 AFTER UPDATE OF profile_banner_file_id ON "user"
 FOR EACH ROW EXECUTE FUNCTION delete_old_file('profile_banner_file_id');
 
-CREATE TRIGGER update_project_thumbnail_file
+CREATE OR REPLACE TRIGGER update_project_thumbnail_file
 AFTER UPDATE OF thumbnail_file_id ON "project"
 FOR EACH ROW EXECUTE FUNCTION delete_old_file('thumbnail_file_id');
 
@@ -228,21 +250,61 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER file_deleted AFTER DELETE ON "file"
+CREATE OR REPLACE TRIGGER file_deleted AFTER DELETE ON "file"
 FOR EACH ROW EXECUTE FUNCTION notify_file_deleted();
 
--- insert_user_detail():
--- Para auto-crear los details al crear un user
-CREATE OR REPLACE FUNCTION insert_user_detail()
+-- new_user_inserted():
+-- Para auto-crear relaciones one-to-one al crear un user
+CREATE OR REPLACE FUNCTION new_user_inserted()
 RETURNS trigger AS $$
 BEGIN
   INSERT INTO user_detail ("id") VALUES (NEW.id);
+  INSERT INTO user_integration ("id") VALUES (NEW.id);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER user_inserted AFTER INSERT ON "user"
-FOR EACH ROW EXECUTE FUNCTION insert_user_detail();
+CREATE OR REPLACE TRIGGER user_inserted AFTER INSERT ON "user"
+FOR EACH ROW EXECUTE FUNCTION new_user_inserted();
+
+-- check_occurrence_limit():
+-- Evita que un valor tenga más de x ocurrencias de forma dinámica
+-- ej check_occurrence_limit('project_file', 'project_id', 5)
+--  + evita que project_file.project_id tenga el mismo valor más de 5 veces
+-- Se tendría que cambiar a statement-level y recrear los triggers
+CREATE OR REPLACE FUNCTION check_occurrence_limit()
+RETURNS trigger AS $$
+DECLARE
+    ref_value text;
+    max_count int := TG_ARGV[2]::int;
+    current_count int;
+BEGIN
+    SELECT row_to_json(NEW)->>TG_ARGV[1] INTO ref_value;
+
+    EXECUTE format(
+        'SELECT COUNT(%I) FROM %I WHERE %I::text = $1',
+        TG_ARGV[1], TG_ARGV[0], TG_ARGV[1]
+    ) INTO current_count USING ref_value;
+
+    IF current_count >= max_count THEN
+        RAISE EXCEPTION '%', TG_ARGV[0] || '_limit_exception';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER check_project_file_occurrence_limit
+BEFORE INSERT ON project_file FOR EACH ROW
+EXECUTE FUNCTION check_occurrence_limit('project_file', 'project_id', 5);
+
+CREATE OR REPLACE TRIGGER check_project_topic_occurrence_limit
+BEFORE INSERT ON project_topic FOR EACH ROW
+EXECUTE FUNCTION check_occurrence_limit('project_topic', 'project_id', 10);
+
+CREATE OR REPLACE TRIGGER check_user_topic_occurrence_limit
+BEFORE INSERT ON user_topic FOR EACH ROW
+EXECUTE FUNCTION check_occurrence_limit('user_topic', 'user_id', 10);
 
 /* DATOS FALSOS PARA TESTEAR DE ACÁ PARA ABAJO */
 

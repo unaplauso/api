@@ -20,11 +20,11 @@ export const CreateProjectSchema = v.pipe(
 				quotation: v.optional(vStringFloat),
 				goal: v.optional(vStringFloat),
 			}).entries,
-			topicIds: v.optional(v.array(v.number())),
+			topicIds: v.optional(v.array(v.number()), []),
 		}),
 		['createdAt', 'creatorId', 'id', 'isCanceled', 'thumbnailFileId'],
 	),
 	v.check((x) => !x.goal || !x.quotation || Big(x.goal).gte(x.quotation)),
 );
 
-export type TCreateProject = v.InferOutput<typeof CreateProjectSchema>;
+export type CreateProject = v.InferOutput<typeof CreateProjectSchema>;

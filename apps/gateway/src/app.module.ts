@@ -8,6 +8,7 @@ import {
 	LocalThrottlerModule,
 } from '@unaplauso/common/modules';
 import { DatabaseModule } from '@unaplauso/database/module';
+import { MercadoPagoService } from '@unaplauso/integrations/mercado-pago';
 import { InternalModule } from '@unaplauso/services';
 import { CreatorController } from './controllers/creator.controller';
 import { DonationController } from './controllers/donation.controller';
@@ -27,7 +28,7 @@ import { UserController } from './controllers/user.controller';
 		LocalJwtModule(),
 		LocalThrottlerModule(),
 	],
-	providers: [GlobalThrottlerProvider],
+	providers: [GlobalThrottlerProvider, MercadoPagoService],
 	controllers: [
 		CreatorController,
 		DonationController,

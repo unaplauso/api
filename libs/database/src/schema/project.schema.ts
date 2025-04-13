@@ -1,4 +1,3 @@
-import Big from 'big.js';
 import { type SQL, gte, isNull, or } from 'drizzle-orm';
 import {
 	boolean,
@@ -30,7 +29,8 @@ export const Project = pgTable(
 			.notNull()
 			.references(() => User.id, { onDelete: 'cascade' }),
 		deadline: timestamp({ mode: 'string', precision: 0 }),
-		quotation: numeric().notNull().default(Big(1).toPrecision()),
+		quotation: numeric().notNull().default('1'),
+		fee: numeric().notNull().default('0.05'),
 		goal: numeric(),
 		thumbnailFileId: uuid().references(() => File.id, {
 			onDelete: 'set null',
@@ -52,5 +52,5 @@ export const Project = pgTable(
 );
 
 /* TRIGGERS
--- update_project_thumbnail_file
+- update_project_thumbnail_file
 */

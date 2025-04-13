@@ -1,13 +1,8 @@
-import {
-	type ExecutionContext,
-	PreconditionFailedException,
-	createParamDecorator,
-} from '@nestjs/common';
+import { type ExecutionContext, createParamDecorator } from '@nestjs/common';
 
 export const UserId = createParamDecorator(
-	(allowNull: boolean, ctx: ExecutionContext) => {
+	(_: unknown, ctx: ExecutionContext) => {
 		const { user } = ctx.switchToHttp().getRequest();
-		if (!user?.id && !allowNull) throw new PreconditionFailedException();
-		return user.id;
+		return user?.id ?? null;
 	},
 );

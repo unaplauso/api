@@ -1,5 +1,5 @@
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import {
 	File,
 	FileType,
@@ -44,7 +44,6 @@ export class SyncService {
 		fileIds: string[],
 		projectId: number,
 	) {
-		// FIXME: VALIDAR CREATORID
 		return tx
 			.insert(ProjectFile)
 			.values(fileIds.map((fileId) => ({ fileId, projectId })));
@@ -54,12 +53,11 @@ export class SyncService {
 		tx: Database,
 		fileId: string,
 		projectId: number,
-		userId: number,
 	) {
 		return tx
 			.update(Project)
 			.set({ thumbnailFileId: fileId })
-			.where(and(eq(Project.id, projectId), eq(Project.creatorId, userId)));
+			.where(and(eq(Project.id, projectId)));
 	}
 
 	async execCallback(
@@ -74,23 +72,43 @@ export class SyncService {
 		if (data.type === FileType.PROJECT_FILE)
 			return this.projectFileCallback(tx, ids, data.projectId);
 		if (data.type === FileType.PROJECT_THUMBNAIL)
-			return this.projectThumbnailCallback(
-				tx,
-				ids[0],
-				data.projectId,
-				data.userId,
-			);
+			return this.projectThumbnailCallback(tx, ids[0], data.projectId);
 		return data.type;
 	}
 
-	async getOptions({
-		type: t,
-	}: SyncFile): Promise<Partial<PutObjectCommandInput & { Bucket: S3Bucket }>> {
-		if (t === FileType.PROFILE_PIC) return {};
-		if (t === FileType.PROFILE_BANNER) return {};
-		if (t === FileType.PROJECT_FILE) return {};
-		if (t === FileType.PROJECT_THUMBNAIL) return {};
-		return t;
+	async getOptions(
+		tx: Database,
+		data: SyncFile,
+	): Promise<Partial<PutObjectCommandInput & { Bucket: S3Bucket }>> {
+		if (
+			data.type === FileType.PROFILE_PIC ||
+			data.type === FileType.PROFILE_BANNER
+		)
+			return {};
+
+		if (
+			data.type === FileType.PROJECT_FILE ||
+			data.type === FileType.PROJECT_THUMBNAIL
+		) {
+			if (
+				!(
+					await tx
+						.select({ id: Project.id })
+						.from(Project)
+						.where(
+							and(
+								eq(Project.id, data.projectId),
+								eq(Project.creatorId, data.userId),
+							),
+						)
+				).at(0)?.id
+			)
+				throw new ForbiddenException();
+
+			return {};
+		}
+
+		return data.type;
 	}
 
 	async execDelete(data: SyncDeleteFile): Promise<QueryResult> {
@@ -104,9 +122,31 @@ export class SyncService {
 				.update(User)
 				.set({ profileBannerFileId: null })
 				.where(eq(User.id, data.userId));
-		if (data.type === FileType.PROJECT_FILE)
-			// FIXME: VALIDAR CREATORID
-			return this.db.delete(File).where(inArray(File.id, data.fileIds));
+		if (data.type === FileType.PROJECT_FILE) {
+			return this.db.delete(File).where(
+				inArray(
+					File.id,
+					this.db
+						.select({ id: File.id })
+						.from(File)
+						.innerJoin(
+							ProjectFile,
+							and(
+								eq(ProjectFile.fileId, File.id),
+								eq(ProjectFile.projectId, data.projectId),
+							),
+						)
+						.innerJoin(
+							Project,
+							and(
+								eq(Project.id, data.projectId),
+								eq(Project.creatorId, data.userId),
+							),
+						)
+						.where(inArray(File.id, data.fileIds)),
+				),
+			);
+		}
 		if (data.type === FileType.PROJECT_THUMBNAIL)
 			return this.db
 				.update(Project)

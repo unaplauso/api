@@ -9,10 +9,18 @@ export function Validate(
 	paramType: Paramtype,
 	genericSchema: GenericSchema,
 	paramName?: string,
+	fileKeys = ['file', 'files'], // para fixar JSON Schema
 ) {
 	const schema = toJsonSchema(genericSchema, {
 		errorMode: 'ignore',
 	}) as SchemaObject;
+
+	for (const fileKey of fileKeys)
+		if (schema.properties?.[fileKey])
+			schema.properties[fileKey] =
+				(schema.properties[fileKey] as { type: string }).type === 'array'
+					? { type: 'array', items: { type: 'string', format: 'binary' } }
+					: { type: 'string', format: 'binary' };
 
 	return applyDecorators(
 		UsePipes(new ValibotPipe(genericSchema, paramType, paramName)),

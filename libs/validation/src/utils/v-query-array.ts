@@ -8,4 +8,5 @@ export const vQueryArray = <
 	v.pipe(
 		v.union([v.array(item), item]),
 		v.transform((x) => (Array.isArray(x) ? x : [x])),
+		v.array(item),
 	);

@@ -37,6 +37,6 @@ export const CreatePaginationSchema = <T extends string | never>(
 
 export const PaginationSchema = v.omit(CreatePaginationSchema(), ['orderBy']);
 
-export type TPagination<T = never> = v.InferOutput<typeof PaginationSchema> & {
+export type Pagination<T = never> = v.InferOutput<typeof PaginationSchema> & {
 	orderBy: T;
 };

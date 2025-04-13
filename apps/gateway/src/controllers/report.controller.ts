@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { NoContent, UserId } from '@unaplauso/common/decorators';
+import { JwtProtected, NoContent, UserId } from '@unaplauso/common/decorators';
 import {
 	InjectClient,
 	type InternalService,
@@ -7,12 +7,11 @@ import {
 } from '@unaplauso/services';
 import { IdParam, Validate } from '@unaplauso/validation';
 import {
+	type CreateReportCreator,
 	CreateReportCreatorSchema,
+	type CreateReportProject,
 	CreateReportProjectSchema,
-	type TCreateReportCreator,
-	type TCreateReportProject,
 } from '@unaplauso/validation/types';
-import { JwtProtected } from '../decorators/jwt-protected.decorator';
 
 @Controller('report')
 export class ReportController {
@@ -25,7 +24,7 @@ export class ReportController {
 	async createReportCreator(
 		@UserId() userId: number,
 		@IdParam() creatorId: number,
-		@Body() dto: TCreateReportCreator,
+		@Body() dto: CreateReportCreator,
 	) {
 		return this.client.send(Service.AUDIT, 'create_report_creator', {
 			...dto,
@@ -41,7 +40,7 @@ export class ReportController {
 	async createReportProject(
 		@UserId() userId: number,
 		@IdParam() projectId: number,
-		@Body() dto: TCreateReportProject,
+		@Body() dto: CreateReportProject,
 	) {
 		return this.client.send(Service.AUDIT, 'create_report_project', {
 			...dto,

@@ -3,15 +3,11 @@
  * Copyright (C) 2025 Un Aplauso
  */
 
-// biome-ignore lint/suspicious/noExplicitAny: Webpack module
-declare const module: any;
-
 import type { INestMicroservice, Type } from '@nestjs/common';
 import type { NestApplicationContextOptions } from '@nestjs/common/interfaces/nest-application-context-options.interface';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
-import { IS_DEVELOPMENT } from '@unaplauso/validation';
-import { DatabaseErrorFilter } from './middlewares/database-error.filter';
+import { ServiceErrorFilter } from './middlewares/service-error.filter';
 import { ValidResponseInterceptor } from './middlewares/valid-response.interceptor';
 
 export async function bootstrapService(
@@ -30,15 +26,8 @@ export async function bootstrapService(
 		...extraOptions,
 	});
 
-	if (IS_DEVELOPMENT) {
-		if (module.hot) {
-			module.hot.accept();
-			module.hot.dispose(() => app.close());
-		}
-	}
-
 	app.useGlobalInterceptors(new ValidResponseInterceptor(new Reflector()));
-	app.useGlobalFilters(new DatabaseErrorFilter());
+	app.useGlobalFilters(new ServiceErrorFilter());
 	if (callback) await callback(app);
 	await app.listen();
 }

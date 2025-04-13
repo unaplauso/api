@@ -1,17 +1,18 @@
 import { Controller, Delete, Get, Post, Query } from '@nestjs/common';
-import { NoContent, UseCache, UserId } from '@unaplauso/common/decorators';
+import {
+	JwtProtected,
+	NoContent,
+	UseCache,
+	UserId,
+} from '@unaplauso/common/decorators';
 import {
 	InjectClient,
 	type InternalService,
 	Service,
 } from '@unaplauso/services';
 import { IdParam, Validate } from '@unaplauso/validation';
-import {
-	PaginationSchema,
-	type TPagination,
-} from '@unaplauso/validation/types';
+import { type Pagination, PaginationSchema } from '@unaplauso/validation/types';
 import * as v from 'valibot';
-import { JwtProtected } from '../decorators/jwt-protected.decorator';
 
 @Controller('favorite')
 export class FavoriteController {
@@ -48,7 +49,7 @@ export class FavoriteController {
 	@Get(':id/creator')
 	async listCreatorFavoriteCreator(
 		@IdParam() creatorId: number,
-		@Query() pagination: Omit<TPagination, 'order' | 'search'>,
+		@Query() pagination: Omit<Pagination, 'order' | 'search'>,
 	) {
 		return this.client.send(Service.AUDIT, 'list_favorite_creator', {
 			...pagination,
@@ -61,7 +62,7 @@ export class FavoriteController {
 	@Get('creator')
 	async listFavoriteCreator(
 		@UserId() userId: number,
-		@Query() pagination: Omit<TPagination, 'order' | 'search'>,
+		@Query() pagination: Omit<Pagination, 'order' | 'search'>,
 	) {
 		return this.client.send(Service.AUDIT, 'list_favorite_creator', {
 			...pagination,
@@ -100,7 +101,7 @@ export class FavoriteController {
 	@Get(':id/project')
 	async listCreatorFavoriteProject(
 		@IdParam() creatorId: number,
-		@Query() pagination: TPagination,
+		@Query() pagination: Pagination,
 	) {
 		return this.client.send(Service.AUDIT, 'list_favorite_project', {
 			...pagination,
@@ -113,7 +114,7 @@ export class FavoriteController {
 	@Get('project')
 	async listFavoriteProject(
 		@UserId() userId: number,
-		@Query() pagination: TPagination,
+		@Query() pagination: Pagination,
 	) {
 		return this.client.send(Service.AUDIT, 'list_favorite_project', {
 			...pagination,

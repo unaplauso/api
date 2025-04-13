@@ -9,6 +9,15 @@ NO TIENE UNA FORMA MÁS AMIGABLE DE HACERLO AÚN :(
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- CREATE EXTENSION IF NOT EXISTS pg_cron;
 
+-- creator_top_mv | Indexes
+CREATE UNIQUE INDEX creator_top_mv_id_idx ON creator_top_mv (id);
+CREATE INDEX creator_top_mv_topic_ids_idx ON creator_top_mv USING GIN (topic_ids);
+CREATE INDEX creator_top_mv_donations_value_idx ON creator_top_mv (donations_value DESC);
+CREATE INDEX creator_top_mv_interactions_idx ON creator_top_mv (interactions DESC);
+CREATE INDEX creator_top_user_search_trgm_idx ON public.creator_top_mv
+  USING gin (lower(username || '|' || coalesce(display_name, '')) gin_trgm_ops);
+REFRESH MATERIALIZED VIEW CONCURRENTLY creator_top_mv;
+
 -- delete_old_file():
 -- Para borrar archivos viejos cuando se updatea su referencia
 -- ej: Al updatear user.profile_pic_file_id, necesitamos que se borre el anterior
@@ -55,18 +64,19 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE TRIGGER file_deleted AFTER DELETE ON "file"
 FOR EACH ROW EXECUTE FUNCTION notify_file_deleted();
 
--- insert_user_detail():
--- Para auto-crear los details al crear un user
-CREATE OR REPLACE FUNCTION insert_user_detail()
+-- new_user_inserted():
+-- Para auto-crear relaciones one-to-one al crear un user
+CREATE OR REPLACE FUNCTION new_user_inserted()
 RETURNS trigger AS $$
 BEGIN
   INSERT INTO user_detail ("id") VALUES (NEW.id);
+  INSERT INTO user_integration ("id") VALUES (NEW.id);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE TRIGGER user_inserted AFTER INSERT ON "user"
-FOR EACH ROW EXECUTE FUNCTION insert_user_detail();
+FOR EACH ROW EXECUTE FUNCTION new_user_inserted();
 
 -- check_occurrence_limit():
 -- Evita que un valor tenga más de x ocurrencias de forma dinámica
@@ -83,8 +93,8 @@ BEGIN
     SELECT row_to_json(NEW)->>TG_ARGV[1] INTO ref_value;
 
     EXECUTE format(
-        'SELECT COUNT(*) FROM %I WHERE %I::text = $1',
-        TG_ARGV[0], TG_ARGV[1]
+        'SELECT COUNT(%I) FROM %I WHERE %I::text = $1',
+        TG_ARGV[1], TG_ARGV[0], TG_ARGV[1]
     ) INTO current_count USING ref_value;
 
     IF current_count >= max_count THEN
@@ -98,6 +108,14 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE TRIGGER check_project_file_occurrence_limit
 BEFORE INSERT ON project_file FOR EACH ROW
 EXECUTE FUNCTION check_occurrence_limit('project_file', 'project_id', 5);
+
+CREATE OR REPLACE TRIGGER check_project_topic_occurrence_limit
+BEFORE INSERT ON project_topic FOR EACH ROW
+EXECUTE FUNCTION check_occurrence_limit('project_topic', 'project_id', 10);
+
+CREATE OR REPLACE TRIGGER check_user_topic_occurrence_limit
+BEFORE INSERT ON user_topic FOR EACH ROW
+EXECUTE FUNCTION check_occurrence_limit('user_topic', 'user_id', 10);
 
 /* DATOS FALSOS PARA TESTEAR DE ACÁ PARA ABAJO */
 

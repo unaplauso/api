@@ -38,7 +38,7 @@ export class FileService {
 	}
 
 	private async uploadFileToS3(
-		file: MulterFile,
+		{ buffer, ...file }: MulterFile,
 		metadata: { Key: string } & Partial<PutObjectCommandInput>,
 	) {
 		return new Upload({
@@ -46,8 +46,12 @@ export class FileService {
 			params: {
 				Bucket: S3Bucket.PUBLIC,
 				ContentType: file.mimetype,
+				Metadata: Object.fromEntries(
+					Object.entries(file).map(([key, value]) => [key, String(value)]),
+				),
 				ContentEncoding: file.encoding,
-				Body: Buffer.from(file.buffer),
+				ContentDisposition: `attachment; filename="${file.originalname}"`,
+				Body: Buffer.from(buffer),
 				...metadata,
 			},
 		}).done();
@@ -80,7 +84,7 @@ export class FileService {
 
 	async syncFile(data: SyncFile) {
 		return this.db.transaction(async (tx) => {
-			const op = await this.sync.getOptions(data);
+			const op = await this.sync.getOptions(tx as unknown as Database, data);
 			const files = await this.syncToDatabase(
 				tx as unknown as Database,
 				data,

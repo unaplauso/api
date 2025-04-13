@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ProjectTop } from '@unaplauso/database';
 import { sqlArray } from '@unaplauso/database/functions/sql-array';
 import { type Database, InjectDB } from '@unaplauso/database/module';
-import type { TListProject } from '@unaplauso/validation/types';
+import type { ListProject } from '@unaplauso/validation/types';
 import {
 	and,
 	arrayOverlaps,
@@ -34,7 +34,7 @@ export class ProjectService {
 		).at(0);
 	}
 
-	async listProject(dto: TListProject) {
+	async listProject(dto: ListProject) {
 		const {
 			description,
 			createdAt,
@@ -42,6 +42,7 @@ export class ProjectService {
 			quotation,
 			donationsValue,
 			creatorId,
+			hasMercadoPago,
 			topicIds,
 			files,
 			interactions,
@@ -68,8 +69,8 @@ export class ProjectService {
 					dto.orderBy === 'createdAt'
 						? ProjectTop.createdAt
 						: dto.orderBy === 'donations'
-							? ProjectTop.interactions
-							: ProjectTop.donationsValue,
+							? ProjectTop.donationsValue
+							: ProjectTop.interactions,
 				),
 			)
 			.limit(dto.pageSize)

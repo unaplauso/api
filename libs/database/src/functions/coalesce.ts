@@ -17,3 +17,11 @@ export const sqlNow = sql<Date>`NOW()`;
 export const sqlStr0 = sql<string>`0`;
 
 export const sql0 = sql<number>`0`;
+
+export const sqlNull = <T>(alias: string) => sql<T | null>`null`.as(alias);
+
+export const sqlEmptyStr = sql<string>`''`;
+
+export const sqlFalse = sql<boolean>`false`;
+
+export const sqlTrue = sql<boolean>`true`;

@@ -7,7 +7,9 @@ import {
 	File,
 	ProjectInteraction,
 	type S3Bucket,
+	User,
 } from '@unaplauso/database';
+import { lowerEq } from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { AxiosResponse } from 'axios';
 import { eq } from 'drizzle-orm';
@@ -55,7 +57,18 @@ export class EventService {
 		return this.db.insert(ProjectInteraction).values({ projectId });
 	}
 
-	async creatorRead(creatorId: number) {
-		return this.db.insert(CreatorInteraction).values({ creatorId });
+	async creatorRead(idOrUsername: string | number) {
+		if (typeof idOrUsername === 'number')
+			return this.db
+				.insert(CreatorInteraction)
+				.values({ creatorId: idOrUsername });
+
+		return this.db.insert(CreatorInteraction).values({
+			creatorId: this.db
+				.select({ id: User.id })
+				.from(User)
+				.where(lowerEq(User.username, idOrUsername))
+				.getSQL(),
+		});
 	}
 }

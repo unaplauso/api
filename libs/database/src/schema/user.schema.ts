@@ -7,7 +7,7 @@ import {
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
-import { lowerIndex, matchRegex, trgmIndex } from '../functions';
+import { lowerIndex, matchRegex } from '../functions';
 import { File } from './file.schema';
 
 export const User = pgTable(
@@ -31,14 +31,14 @@ export const User = pgTable(
 			matchRegex(table.username, USERNAME_REGEX, true),
 		),
 		lowerIndex(table.username),
-		trgmIndex(table.username, 'gist'),
 		lowerIndex(table.email),
 	],
 );
 
-/* -- TRIGGERS
+/* TRIGGERS
 - update_user_profile_pic_file
 - update_user_profile_banner_file
+- user_inserted
 */
 
 export type InsertUser = typeof User.$inferInsert;

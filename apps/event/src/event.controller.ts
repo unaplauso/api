@@ -35,8 +35,8 @@ export class EventController {
 
 	@NoContent()
 	@Pattern('creator_read')
-	async creatorRead(@Payload() id: number) {
-		return this.event.creatorRead(id);
+	async creatorRead(@Payload() idOrUsername: string | number) {
+		return this.event.creatorRead(idOrUsername);
 	}
 
 	@NoContent()
@@ -47,7 +47,7 @@ export class EventController {
 
 	@NoContent()
 	@Pattern('refresh_top_creator')
-	async refreshTopCreator() {
-		return this.cron.refreshTopCreator();
+	async refreshTopCreator(@Payload() refresh?: boolean) {
+		return this.cron.refreshTopCreator(refresh ?? true);
 	}
 }

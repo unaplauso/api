@@ -15,5 +15,6 @@ export * from './schema/report-creator.schema';
 export * from './schema/report-project.schema';
 export * from './schema/topic.schema';
 export * from './schema/user-detail.schema';
+export * from './schema/user-integration.schema';
 export * from './schema/user-topic.schema';
 export * from './schema/user.schema';

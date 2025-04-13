@@ -6,15 +6,15 @@ import type {
 	UserToProjectAction,
 } from '@unaplauso/validation';
 import type {
-	TCreateReportCreator,
-	TCreateReportProject,
+	CreateReportCreator,
+	CreateReportProject,
 } from '@unaplauso/validation/types';
 
 @Injectable()
 export class ReportService {
 	constructor(@InjectDB() private readonly db: Database) {}
 
-	async createReportCreator(dto: UserToCreatorAction<TCreateReportCreator>) {
+	async createReportCreator(dto: UserToCreatorAction<CreateReportCreator>) {
 		return this.db
 			.insert(ReportCreator)
 			.values(dto)
@@ -24,7 +24,7 @@ export class ReportService {
 			});
 	}
 
-	async createReportProject(dto: UserToProjectAction<TCreateReportProject>) {
+	async createReportProject(dto: UserToProjectAction<CreateReportProject>) {
 		return this.db
 			.insert(ReportProject)
 			.values(dto)

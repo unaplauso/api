@@ -1,4 +1,4 @@
-export const USERNAME_REGEX = /^[a-zA-Z0-9_-]{2,32}$/;
+export const USERNAME_REGEX = /^(?=.*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9_-]{1,31}$/;
 
 export const URL_REGEX =
 	/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;

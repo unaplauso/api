@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Topic } from '@unaplauso/database';
 import { wordSimilarity } from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
-import type { TPagination } from '@unaplauso/validation/types';
+import type { Pagination } from '@unaplauso/validation/types';
 import { asc, desc, gte } from 'drizzle-orm';
 
 @Injectable()
 export class TopicService {
 	constructor(@InjectDB() private readonly db: Database) {}
 
-	async listTopic(dto: Omit<TPagination, 'order'>) {
+	async listTopic(dto: Omit<Pagination, 'order'>) {
 		return this.db
 			.select({ id: Topic.id, name: Topic.name })
 			.from(Topic)

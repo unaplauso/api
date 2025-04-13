@@ -3,9 +3,6 @@
  * Copyright (C) 2025 Un Aplauso
  */
 
-// biome-ignore lint/suspicious/noExplicitAny: Webpack module
-declare const module: any;
-
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -24,11 +21,6 @@ import { AuthModule } from './auth.module';
 			app,
 			SwaggerModule.createDocument(app, new DocumentBuilder().build()),
 		);
-
-		if (module.hot) {
-			module.hot.accept();
-			module.hot.dispose(() => app.close());
-		}
 	}
 
 	app.use(

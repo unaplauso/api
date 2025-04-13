@@ -1,37 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {
-	CreatorDonation,
-	Donation,
+	CreatorTop,
 	FavoriteCreator,
 	FavoriteProject,
 	ProjectTop,
-	Topic,
-	User,
-	UserTopic,
 } from '@unaplauso/database';
-import {
-	ProfileBannerFile,
-	ProfilePicFile,
-} from '@unaplauso/database/helpers/aliases';
-
-import {
-	caseWhenNull,
-	coalesce,
-	jsonAgg,
-	jsonBuildObject,
-	sqlJsonArray,
-} from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
-import type { TPagination } from '@unaplauso/validation/types';
-import {
-	and,
-	desc,
-	eq,
-	getViewSelectedFields,
-	isNotNull,
-	sql,
-	sum,
-} from 'drizzle-orm';
+import type { Pagination } from '@unaplauso/validation/types';
+import { and, desc, eq, getViewSelectedFields } from 'drizzle-orm';
 
 @Injectable()
 export class FavoriteService {
@@ -55,69 +31,37 @@ export class FavoriteService {
 			);
 	}
 
-	listFavoriteCreatorQuery = this.db
-		.select({
-			id: User.id,
-			favoritedAt: FavoriteCreator.createdAt,
-			displayName: User.displayName,
-			username: User.username,
-			profilePic: caseWhenNull(
-				User.profilePicFileId,
-				jsonBuildObject({
-					id: ProfilePicFile.id,
-					bucket: ProfilePicFile.bucket,
-					isNsfw: ProfilePicFile.isNsfw,
-				}),
-			),
-			profileBanner: caseWhenNull(
-				User.profileBannerFileId,
-				jsonBuildObject({
-					id: ProfileBannerFile.id,
-					bucket: ProfileBannerFile.bucket,
-					isNsfw: ProfileBannerFile.isNsfw,
-				}),
-			),
-			topics: coalesce(
-				jsonAgg(
-					jsonBuildObject({ id: Topic.id, name: Topic.name }),
-					isNotNull(Topic.id),
-				),
-				sqlJsonArray,
-			),
-			donations: coalesce(sum(Donation.amount), sql`0`),
-		})
-		.from(FavoriteCreator)
-		.innerJoin(User, eq(User.id, FavoriteCreator.creatorId))
-		.leftJoin(ProfilePicFile, eq(ProfilePicFile.id, User.profilePicFileId))
-		.leftJoin(
-			ProfileBannerFile,
-			eq(ProfileBannerFile.id, User.profileBannerFileId),
-		)
-		.leftJoin(UserTopic, eq(UserTopic.userId, User.id))
-		.leftJoin(Topic, eq(Topic.id, UserTopic.topicId))
-		.leftJoin(CreatorDonation, eq(CreatorDonation.creatorId, User.id))
-		.leftJoin(Donation, eq(Donation.id, CreatorDonation.donationId))
-		.where(eq(FavoriteCreator.userId, sql.placeholder('userId')))
-		.groupBy(
-			User.id,
-			FavoriteCreator.createdAt,
-			ProfilePicFile.id,
-			ProfileBannerFile.id,
-		)
-		.orderBy(desc(FavoriteCreator.createdAt))
-		.limit(sql.placeholder('limit'))
-		.offset(sql.placeholder('offset'))
-		.prepare('list_favorite_creator_query');
-
 	async listFavoriteCreator(
 		userId: number,
-		dto: Omit<TPagination, 'order' | 'search'>,
+		dto: Omit<Pagination, 'order' | 'search'>,
 	) {
-		return this.listFavoriteCreatorQuery.execute({
-			userId,
-			limit: dto.pageSize,
-			offset: (dto.page - 1) * dto.pageSize,
-		});
+		const {
+			createdAt,
+			description,
+			customThanks,
+			location,
+			quotation,
+			personalUrl,
+			instagramUser,
+			facebookUser,
+			xUser,
+			tiktokUser,
+			githubUser,
+			donationsValue,
+			hasMercadoPago,
+			topicIds,
+			interactions,
+			...selection
+		} = getViewSelectedFields(CreatorTop);
+
+		return this.db
+			.select({ favoritedAt: FavoriteCreator.createdAt, ...selection })
+			.from(FavoriteCreator)
+			.innerJoin(CreatorTop, eq(CreatorTop.id, FavoriteCreator.creatorId))
+			.where(eq(FavoriteCreator.userId, userId))
+			.limit(dto.pageSize)
+			.offset((dto.page - 1) * dto.pageSize)
+			.orderBy(desc(FavoriteCreator.createdAt));
 	}
 
 	async createFavoriteProject(userId: number, projectId: number) {
@@ -140,7 +84,7 @@ export class FavoriteService {
 
 	async listFavoriteProject(
 		userId: number,
-		dto: Omit<TPagination, 'order' | 'search'>,
+		dto: Omit<Pagination, 'order' | 'search'>,
 	) {
 		const {
 			description,
@@ -149,6 +93,7 @@ export class FavoriteService {
 			quotation,
 			donationsValue,
 			creatorId,
+			hasMercadoPago,
 			topicIds,
 			files,
 			interactions,

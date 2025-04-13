@@ -7,7 +7,12 @@ import {
 	Patch,
 	Put,
 } from '@nestjs/common';
-import { NoContent, UserId } from '@unaplauso/common/decorators';
+import {
+	JwtProtected,
+	LowThrottle,
+	NoContent,
+	UserId,
+} from '@unaplauso/common/decorators';
 import { FileType } from '@unaplauso/database';
 import {
 	File,
@@ -22,14 +27,10 @@ import {
 	Service,
 } from '@unaplauso/services';
 import { Validate, ValidateParam } from '@unaplauso/validation';
-import {
-	type TUpdateUser,
-	UpdateUserSchema,
-} from '@unaplauso/validation/types';
+import { type UpdateUser, UpdateUserSchema } from '@unaplauso/validation/types';
 import { USERNAME_REGEX } from '@unaplauso/validation/utils';
 import type { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 import * as v from 'valibot';
-import { JwtProtected } from '../decorators/jwt-protected.decorator';
 
 @Controller('user')
 export class UserController {
@@ -48,10 +49,11 @@ export class UserController {
 	}
 
 	@JwtProtected()
+	@LowThrottle()
 	@NoContent()
 	@Validate('body', UpdateUserSchema)
 	@Patch()
-	updateUser(@UserId() userId: number, @Body() dto: TUpdateUser) {
+	updateUser(@UserId() userId: number, @Body() dto: UpdateUser) {
 		return this.client.send(Service.AUDIT, 'update_user', { ...dto, userId });
 	}
 

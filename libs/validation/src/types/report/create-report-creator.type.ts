@@ -7,6 +7,6 @@ export const CreateReportCreatorSchema = v.pipe(
 	v.check((x) => Boolean(x.reason ?? x.message)),
 );
 
-export type TCreateReportCreator = v.InferOutput<
+export type CreateReportCreator = v.InferOutput<
 	typeof CreateReportCreatorSchema
 >;

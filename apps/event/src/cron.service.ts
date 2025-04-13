@@ -5,7 +5,7 @@ import { days } from '@nestjs/throttler';
 import { InjectCache } from '@unaplauso/common/decorators';
 import {
 	CreatorInteraction,
-	CreatorTopMat,
+	CreatorTopMv,
 	ProjectInteraction,
 	ProjectStatus,
 	ProjectTop,
@@ -22,10 +22,20 @@ export class CronService {
 	) {}
 
 	@Cron(CronExpression.EVERY_DAY_AT_9PM)
-	async refreshTopCreator() {
-		await this.db.refreshMaterializedView(CreatorTopMat);
-		const top = await this.db.select().from(CreatorTopMat).limit(10);
-		return this.cache.set('creator_top_10', top, days(1));
+	async refreshTopCreator(refresh = true) {
+		if (refresh)
+			await this.db.refreshMaterializedView(CreatorTopMv).concurrently();
+
+		const { createdAt, donationsValue, topicIds, interactions, ...selection } =
+			getViewSelectedFields(CreatorTopMv);
+
+		const top = await this.db
+			.select(selection)
+			.from(CreatorTopMv)
+			.orderBy(desc(CreatorTopMv.donationsValue))
+			.limit(10);
+
+		return this.cache.set('top_creator', top, days(1));
 	}
 
 	@Cron(CronExpression.EVERY_10_MINUTES)

@@ -7,12 +7,12 @@ import type {
 	UserToProjectAction,
 } from '@unaplauso/validation';
 import type {
-	TCreateProject,
-	TCreateReportCreator,
-	TCreateReportProject,
-	TPagination,
-	TUpdateProject,
-	TUpdateUser,
+	CreateProject,
+	CreateReportCreator,
+	CreateReportProject,
+	Pagination,
+	UpdateProject,
+	UpdateUser,
 } from '@unaplauso/validation/types';
 import { Pattern } from './decorators/pattern.decorator';
 import { FavoriteService } from './services/favorite.service';
@@ -37,14 +37,14 @@ export class AuditController {
 
 	@NoContent()
 	@Pattern('create_project')
-	async createProject(@Payload() dto: UserAction<TCreateProject>) {
+	async createProject(@Payload() dto: UserAction<CreateProject>) {
 		return this.project.createProject(dto);
 	}
 
 	@NoContent()
 	@Pattern('create_report_creator')
 	async createReportCreator(
-		@Payload() dto: UserToCreatorAction<TCreateReportCreator>,
+		@Payload() dto: UserToCreatorAction<CreateReportCreator>,
 	) {
 		return this.report.createReportCreator(dto);
 	}
@@ -52,7 +52,7 @@ export class AuditController {
 	@NoContent()
 	@Pattern('create_report_project')
 	async createReportProject(
-		@Payload() dto: UserToProjectAction<TCreateReportProject>,
+		@Payload() dto: UserToProjectAction<CreateReportProject>,
 	) {
 		return this.report.createReportProject(dto);
 	}
@@ -76,13 +76,13 @@ export class AuditController {
 
 	@NoContent()
 	@Pattern('update_user')
-	async updateUser(@Payload() dto: UserAction<TUpdateUser>) {
+	async updateUser(@Payload() dto: UserAction<UpdateUser>) {
 		return this.user.updateUser(dto);
 	}
 
 	@NoContent()
 	@Pattern('update_project')
-	async updateProject(@Payload() dto: UserAction<TUpdateProject>) {
+	async updateProject(@Payload() dto: UserToProjectAction<UpdateProject>) {
 		return this.project.updateProject(dto);
 	}
 
@@ -109,7 +109,7 @@ export class AuditController {
 		@Payload() {
 			userId,
 			...dto
-		}: UserAction<Omit<TPagination, 'order' | 'search'>>,
+		}: UserAction<Omit<Pagination, 'order' | 'search'>>,
 	) {
 		return this.favorite.listFavoriteCreator(userId, dto);
 	}
@@ -119,7 +119,7 @@ export class AuditController {
 		@Payload() {
 			userId,
 			...dto
-		}: UserAction<Omit<TPagination, 'order' | 'search'>>,
+		}: UserAction<Omit<Pagination, 'order' | 'search'>>,
 	) {
 		return this.favorite.listFavoriteProject(userId, dto);
 	}

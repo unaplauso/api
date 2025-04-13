@@ -1,4 +1,3 @@
-import Big from 'big.js';
 import { type SQL, sql } from 'drizzle-orm';
 import {
 	bigserial,
@@ -16,7 +15,7 @@ export const Donation = pgTable('donation', {
 	userId: integer().references(() => User.id, { onDelete: 'set null' }),
 	message: varchar({ length: 500 }),
 	createdAt: timestamp().notNull().defaultNow(),
-	quotation: numeric().notNull().default(Big(1).toPrecision()),
+	quotation: numeric().notNull().default('1'),
 	amount: numeric().notNull(),
 	value: numeric()
 		.notNull()

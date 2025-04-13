@@ -3,9 +3,6 @@
  * Copyright (C) 2025 Un Aplauso
  */
 
-// biome-ignore lint/suspicious/noExplicitAny: Webpack module
-declare const module: any;
-
 import fastifyHelmet from '@fastify/helmet';
 import fastifyMultipart from '@fastify/multipart';
 import { NestFactory } from '@nestjs/core';
@@ -29,15 +26,13 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 	);
 
 	app.setGlobalPrefix('api');
-	// biome-ignore lint/suspicious/noExplicitAny: @types version mismatch
-	await app.register(fastifyHelmet as any);
-	// biome-ignore lint/suspicious/noExplicitAny: @types version mismatch
-	await app.register(fastifyMultipart as any);
+	await app.register(fastifyHelmet);
+	await app.register(fastifyMultipart);
 
 	app.useGlobalInterceptors(new NotFoundInterceptor());
 	app.useGlobalFilters(new ClientErrorFilter());
 
-	// FIXME: if (IS_DEVELOPMENT)
+	// BUG: if (IS_DEVELOPMENT)
 	SwaggerModule.setup(
 		'api/docs',
 		app,
@@ -49,13 +44,6 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 				.build(),
 		),
 	);
-
-	if (IS_DEVELOPMENT) {
-		if (module.hot) {
-			module.hot.accept();
-			module.hot.dispose(() => app.close());
-		}
-	}
 
 	await app.listen(process.env.GATEWAY_PORT ?? 5000, '0.0.0.0');
 })();

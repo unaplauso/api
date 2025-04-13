@@ -36,8 +36,10 @@ export const UpdateUserSchema = v.omit(
 				v.pipe(v.string(), v.trim(), v.regex(GITHUB_USER_REGEX)),
 			),
 		}).entries,
+		addTopicIds: v.optional(v.pipe(v.array(v.number()), v.maxLength(10)), []),
+		removeTopicIds: v.optional(v.array(v.number()), []),
 	}),
 	['createdAt', 'id', 'email', 'profileBannerFileId', 'profilePicFileId'],
 );
 
-export type TUpdateUser = v.InferOutput<typeof UpdateUserSchema>;
+export type UpdateUser = v.InferOutput<typeof UpdateUserSchema>;

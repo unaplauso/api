@@ -6,6 +6,7 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -14,11 +15,15 @@ export class JwtGuard implements CanActivate {
 	constructor(
 		@Inject(JwtService) private readonly jwt: JwtService,
 		@Inject(ConfigService) private readonly config: ConfigService,
+		@Inject(Reflector) private readonly reflector: Reflector,
 	) {
 		this.JWT_SECRET = this.config.getOrThrow('JWT_SECRET');
 	}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const strict =
+			this.reflector.get<boolean>('strict', context.getHandler()) ?? true;
+
 		const request = context.switchToHttp().getRequest();
 		const [method, token] = request.headers.authorization?.split(' ') ?? [];
 		if (method !== 'Bearer' || !token) throw new UnauthorizedException();
@@ -28,6 +33,7 @@ export class JwtGuard implements CanActivate {
 				secret: this.JWT_SECRET,
 			});
 		} catch {
+			if (!strict) return true;
 			throw new UnauthorizedException();
 		}
 

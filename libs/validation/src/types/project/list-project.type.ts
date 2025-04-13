@@ -13,20 +13,9 @@ export const ListProjectSchema = v.strictObject({
 	).entries,
 	...v.object({
 		creatorId: v.optional(vStringInt),
-		topicIds: v.optional(vQueryArray(vStringInt)),
+		topicIds: v.optional(vQueryArray(vStringInt), []),
 		status: v.optional(v.enum(ProjectStatus)),
 	}).entries,
 });
 
-export type TListProject = v.InferOutput<typeof ListProjectSchema>;
-
-export async function isDefaultListProject(
-	obj: TListProject,
-): Promise<boolean> {
-	const defaults = v.getDefaults(ListProjectSchema);
-	const relevantObj = Object.fromEntries(
-		Object.entries(obj).filter(([_, value]) => value !== undefined),
-	);
-
-	return JSON.stringify(relevantObj) === JSON.stringify(defaults);
-}
+export type ListProject = v.InferOutput<typeof ListProjectSchema>;

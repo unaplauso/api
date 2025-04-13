@@ -38,6 +38,7 @@ export type SyncDeleteFile =
 	| {
 			type: FileType.PROJECT_FILE;
 			fileIds: string[];
+			projectId: number;
 			userId: number;
 	  }
 	| {
