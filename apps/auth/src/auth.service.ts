@@ -20,7 +20,7 @@ export class AuthService {
 		@InjectDB() private readonly db: Database,
 		@Inject(JwtService) private readonly jwt: JwtService,
 	) {
-		this.FRONT_REDIRECT_URL = `${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/onboarding/?user_data=`;
+		this.FRONT_REDIRECT_URL = `${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/onboarding/?data=`;
 		this.JWT_REFRESH_SECRET = this.config.get('JWT_REFRESH_SECRET', 'secret');
 	}
 
