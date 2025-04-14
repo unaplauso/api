@@ -13,17 +13,17 @@ import { AuthModule } from './auth.module';
 (async () => {
 	const app = await NestFactory.create<NestExpressApplication>(AuthModule);
 	app.setGlobalPrefix('api/auth');
+	app.set('trust proxy', true);
 
-	if (!IS_DEVELOPMENT) app.set('trust proxy', true);
-	// BUG: else
-	SwaggerModule.setup(
-		'api/auth/docs',
-		app,
-		SwaggerModule.createDocument(
+	if (IS_DEVELOPMENT)
+		SwaggerModule.setup(
+			'api/auth/docs',
 			app,
-			new DocumentBuilder().addBearerAuth().addOAuth2().build(),
-		),
-	);
+			SwaggerModule.createDocument(
+				app,
+				new DocumentBuilder().addBearerAuth().addOAuth2().build(),
+			),
+		);
 
 	app.use(
 		session({

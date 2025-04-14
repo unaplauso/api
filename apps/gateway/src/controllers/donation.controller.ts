@@ -112,9 +112,22 @@ export class DonationController {
 	}
 
 	@Post('hook/mercado-pago')
-	async hookMercadoPago(@Query() criteria: unknown, @Body() dto: unknown) {
+	async hookMercadoPago(@Body() dto: unknown) {
 		// FIXME: Validar que sea de mp + Salvar donation
-		console.log('OKE!', { dto, criteria });
+		/* 
+		{
+      "action": "payment.created",
+      "api_version": "v1",
+      "data": {
+        "id": "108387766738"
+      },
+      "date_created": "2025-04-14T15:51:39Z",
+      "id": 120606648984,
+      "live_mode": true,
+      "type": "payment",
+      "user_id": "692240846"
+    }
+		*/
 		return true;
 	}
 }

@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import * as schema from '..';
+import { IS_DEVELOPMENT } from '@unaplauso/validation';
 
 export const DATABASE_CONNECTION = 'database_connection';
 
@@ -24,7 +25,7 @@ export const DATABASE_CONNECTION = 'database_connection';
 					}),
 					{
 						casing: 'snake_case',
-						logger: true, // FIXME: IS_DEVELOPMENT,
+						logger: IS_DEVELOPMENT,
 						schema,
 					},
 				);

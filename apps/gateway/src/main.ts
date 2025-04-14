@@ -20,8 +20,8 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 	const app = await NestFactory.create<NestFastifyApplication>(
 		AppModule,
 		new FastifyAdapter({
-			trustProxy: !IS_DEVELOPMENT,
-			logger: true, // FIXME: IS_DEVELOPMENT,
+			trustProxy: true,
+			logger: IS_DEVELOPMENT,
 		}),
 	);
 
@@ -32,18 +32,18 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 	app.useGlobalInterceptors(new NotFoundInterceptor());
 	app.useGlobalFilters(new ClientErrorFilter());
 
-	// BUG: if (IS_DEVELOPMENT)
-	SwaggerModule.setup(
-		'api/docs',
-		app,
-		SwaggerModule.createDocument(
+	if (IS_DEVELOPMENT)
+		SwaggerModule.setup(
+			'api/docs',
 			app,
-			new DocumentBuilder()
-				.addBearerAuth()
-				.addBasicAuth({ type: 'apiKey', in: 'header', name: 'x-api-key' })
-				.build(),
-		),
-	);
+			SwaggerModule.createDocument(
+				app,
+				new DocumentBuilder()
+					.addBearerAuth()
+					.addBasicAuth({ type: 'apiKey', in: 'header', name: 'x-api-key' })
+					.build(),
+			),
+		);
 
 	await app.listen(process.env.GATEWAY_PORT ?? 5000, '0.0.0.0');
 })();
