@@ -42,6 +42,7 @@ export class DonationController {
 	async createCreatorMercadoPago(
 		@UserId() userId: number | null,
 		@IdParam() id: number,
+		// FIXME: currency code / id
 		@Body(ParseFloatPipe) quantity: number,
 	) {
 		return this.mercadoPago.getCreatorInitPoint(id, quantity, userId);
@@ -52,6 +53,7 @@ export class DonationController {
 	async createProjectMercadoPago(
 		@UserId() userId: number | null,
 		@IdParam() id: number,
+		// FIXME: currency code / id
 		@Body(ParseFloatPipe) quantity: number,
 	) {
 		return this.mercadoPago.getProjectInitPoint(id, quantity, userId);

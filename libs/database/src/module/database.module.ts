@@ -24,7 +24,7 @@ export const DATABASE_CONNECTION = 'database_connection';
 					}),
 					{
 						casing: 'snake_case',
-						logger: true,
+						logger: true, // FIXME: IS_DEVELOPMENT,
 						schema,
 					},
 				);

@@ -21,7 +21,7 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 		AppModule,
 		new FastifyAdapter({
 			trustProxy: !IS_DEVELOPMENT,
-			logger: IS_DEVELOPMENT,
+			logger: true, // FIXME: IS_DEVELOPMENT,
 		}),
 	);
 

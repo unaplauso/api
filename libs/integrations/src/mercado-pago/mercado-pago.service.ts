@@ -160,6 +160,8 @@ export class MercadoPagoService {
 						id: data.projectId ? `p-${data.projectId}` : `u-${data.creatorId}`,
 						unit_price: Number.parseFloat(data.quotation),
 						quantity,
+						// FIXME: currency code / id
+						currency_id: '',
 						picture_url: data.pic
 							? `${this.config.getOrThrow('S3_PUBLIC_URL')}/${data.pic}`
 							: undefined,
