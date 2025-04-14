@@ -55,6 +55,8 @@ export class MercadoPagoService {
 		});
 	}
 
+	// FIXME: Salvar refresh, access y tiempo de expiración
+	// Ajustar el service para no estar refrescando todo el tiempo
 	private async saveRefreshToken(mercadoPagoRefreshToken: string, id: number) {
 		return this.db
 			.update(UserIntegration)

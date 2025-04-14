@@ -19,7 +19,10 @@ import { AuthModule } from './auth.module';
 	SwaggerModule.setup(
 		'api/auth/docs',
 		app,
-		SwaggerModule.createDocument(app, new DocumentBuilder().build()),
+		SwaggerModule.createDocument(
+			app,
+			new DocumentBuilder().addBearerAuth().addOAuth2().build(),
+		),
 	);
 
 	app.use(

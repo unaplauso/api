@@ -49,7 +49,7 @@ export class MercadoPagoController {
 
 		return res.status(302).redirect(
 			// FIXME: hablar con valen para path de config
-			`${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/???`,
+			`${this.config.get('FRONT_REDIRECT_URL', 'http://localhost:3000')}/mp-ok`,
 		);
 	}
 }
