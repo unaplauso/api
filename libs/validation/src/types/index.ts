@@ -1,4 +1,5 @@
 export * from './creator/list-creator.type';
+export * from './donation/create-donation.type';
 export * from './donation/list-donation.type';
 export * from './donation/list-top-donation.type';
 export * from './pagination.type';

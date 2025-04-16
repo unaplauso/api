@@ -1,20 +1,10 @@
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
+import { JwtProtected, UseCache, UserId } from '@unaplauso/common/decorators';
 import {
-	Body,
-	Controller,
-	Get,
-	Inject,
-	ParseFloatPipe,
-	Post,
-	Query,
-} from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
-import {
-	InjectConfig,
-	JwtProtected,
-	UseCache,
-	UserId,
-} from '@unaplauso/common/decorators';
-import { MercadoPagoService } from '@unaplauso/integrations/mercado-pago';
+	type MpHook,
+	MpHookSchema,
+} from '@unaplauso/integrations/mercado-pago';
 import {
 	InjectClient,
 	type InternalService,
@@ -22,42 +12,46 @@ import {
 } from '@unaplauso/services';
 import { IdParam, Validate } from '@unaplauso/validation';
 import {
+	type CreateDonation,
+	CreateDonationSchema,
 	type ListDonation,
 	ListDonationSchema,
 	type ListTopDonation,
 	ListTopDonationSchema,
 } from '@unaplauso/validation/types';
-import * as v from 'valibot';
 
 @Controller('donation')
 export class DonationController {
-	constructor(
-		@InjectClient() private readonly client: InternalService,
-		@InjectConfig() private readonly config: ConfigService,
-		@Inject(MercadoPagoService)
-		private readonly mercadoPago: MercadoPagoService,
-	) {}
+	constructor(@InjectClient() private readonly client: InternalService) {}
 
+	@Validate('body', CreateDonationSchema)
 	@JwtProtected({ strict: false })
 	@Post('creator/:id/mercado-pago')
 	async createCreatorMercadoPago(
 		@UserId() userId: number | null,
-		@IdParam() id: number,
-		@Body(ParseFloatPipe) quantity: number,
+		@IdParam() creatorId: number,
+		@Body() dto: CreateDonation,
 	) {
-		// FIXME: SACAR DEL GATEWAY
-		return this.mercadoPago.getCreatorInitPoint(id, quantity, userId);
+		return this.client.send(Service.PAYMENT, 'create_creator_mercado_pago', {
+			...dto,
+			creatorId,
+			userId,
+		});
 	}
 
+	@Validate('body', CreateDonationSchema)
 	@JwtProtected({ strict: false })
 	@Post('project/:id/mercado-pago')
 	async createProjectMercadoPago(
 		@UserId() userId: number | null,
-		@IdParam() id: number,
-		@Body(ParseFloatPipe) quantity: number,
+		@IdParam() projectId: number,
+		@Body() dto: CreateDonation,
 	) {
-		// FIXME: SACAR DEL GATEWAY
-		return this.mercadoPago.getProjectInitPoint(id, quantity, userId);
+		return this.client.send(Service.PAYMENT, 'create_project_mercado_pago', {
+			...dto,
+			projectId,
+			userId,
+		});
 	}
 
 	@Validate('query', ListDonationSchema)
@@ -112,34 +106,10 @@ export class DonationController {
 		});
 	}
 
-	@Validate(
-		'body',
-		v.looseObject({
-			id: v.number(),
-			date_created: v.pipe(
-				v.string(),
-				v.isoTimestamp(),
-				v.transform((x) => new Date(x)),
-			),
-		}),
-	)
+	@SkipThrottle()
+	@Validate('body', MpHookSchema)
 	@Post('hook/mercado-pago')
-	async hookMercadoPago(@Body() dto: { id: number; date_created: Date }) {
-		// FIXME: Validar que sea de mp + Salvar donation
-		/* 
-		{
-      "action": "payment.created",
-      "api_version": "v1",
-      "data": {
-        "id": "108387766738"
-      },
-      "date_created": "2025-04-14T15:51:39Z",
-      "id": 120606648984,
-      "live_mode": true,
-      "type": "payment",
-      "user_id": "692240846"
-    }
-		*/
-		return this.mercadoPago.hook(dto);
+	async hookMercadoPago(@Body() dto: MpHook) {
+		return this.client.send(Service.PAYMENT, 'hook_mercado_pago', dto);
 	}
 }

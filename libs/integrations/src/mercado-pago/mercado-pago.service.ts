@@ -3,18 +3,28 @@ import {
 	Injectable,
 	NotFoundException,
 	PreconditionFailedException,
+	UnprocessableEntityException,
 } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { minutes } from '@nestjs/throttler';
 import { InjectCache, InjectConfig } from '@unaplauso/common/decorators';
 import {
+	CreatorDonation,
+	Donation,
 	Project,
+	ProjectDonation,
 	User,
 	UserDetail,
 	UserIntegration,
 } from '@unaplauso/database';
 import { coalesce } from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
+import type {
+	UserToCreatorAction,
+	UserToProjectAction,
+} from '@unaplauso/validation';
+import type { CreateDonation } from '@unaplauso/validation/types';
+import { vStringFloat } from '@unaplauso/validation/utils';
 import Big from 'big.js';
 import { eq, sql } from 'drizzle-orm';
 import MercadoPagoConfig, {
@@ -24,6 +34,8 @@ import MercadoPagoConfig, {
 	Preference,
 } from 'mercadopago';
 import type { OAuthResponse } from 'mercadopago/dist/clients/oAuth/commonTypes';
+import * as v from 'valibot';
+import type { MpHook } from './mp-hook.type';
 
 @Injectable()
 export class MercadoPagoService {
@@ -106,7 +118,7 @@ export class MercadoPagoService {
 		return this.saveCredentials(credentials, creatorId);
 	}
 
-	async getMercadoPagoData(userId: number) {
+	async readMercadoPago(userId: number) {
 		const token = await this.getToken(userId);
 		return new MpUser(new MercadoPagoConfig({ accessToken: token })).get();
 	}
@@ -133,6 +145,7 @@ export class MercadoPagoService {
 		fee: string;
 		refreshToken: string | null;
 		quantity: number;
+		message?: string | null;
 		userId?: number | null;
 	}) {
 		const accessToken = await this.getToken(data.creatorId, data.refreshToken);
@@ -174,11 +187,7 @@ export class MercadoPagoService {
 		return preference.init_point;
 	}
 
-	async getCreatorInitPoint(
-		creatorId: number,
-		quantity: number,
-		userId?: number | null,
-	) {
+	async getCreatorInitPoint(dto: UserToCreatorAction<CreateDonation>) {
 		const data = (
 			await this.db
 				.select({
@@ -196,17 +205,19 @@ export class MercadoPagoService {
 				.from(UserIntegration)
 				.innerJoin(User, eq(User.id, UserIntegration.id))
 				.innerJoin(UserDetail, eq(UserDetail.id, UserIntegration.id))
-				.where(eq(UserIntegration.id, creatorId))
+				.where(eq(UserIntegration.id, dto.creatorId))
 		).at(0);
 		if (!data?.refreshToken) throw new NotFoundException();
-		return this.getInitPoint({ ...data, quantity, userId });
+
+		return this.getInitPoint({
+			...data,
+			userId: dto.userId,
+			quantity: Number.parseFloat(dto.quantity),
+			message: dto.message,
+		});
 	}
 
-	async getProjectInitPoint(
-		projectId: number,
-		quantity: number,
-		userId?: number | null,
-	) {
+	async getProjectInitPoint(dto: UserToProjectAction<CreateDonation>) {
 		const data = (
 			await this.db
 				.select({
@@ -220,14 +231,69 @@ export class MercadoPagoService {
 				})
 				.from(Project)
 				.innerJoin(UserIntegration, eq(UserIntegration.id, Project.creatorId))
-				.where(eq(Project.id, projectId))
+				.where(eq(Project.id, dto.projectId))
 		).at(0);
 		if (!data?.refreshToken) throw new NotFoundException();
-		return this.getInitPoint({ ...data, quantity, userId });
+
+		return this.getInitPoint({
+			...data,
+			userId: dto.userId,
+			quantity: Number.parseFloat(dto.quantity),
+			message: dto.message,
+		});
 	}
 
-	async hook(dto: { id: number; date_created: Date }) {
-		console.log(dto);
-		return new Payment(this.mercadoPago).get({ id: dto.id });
+	metadataSchema = v.pipe(
+		v.looseObject({
+			quotation: vStringFloat,
+			user_id: v.number(),
+			creator_id: v.number(),
+			project_id: v.optional(v.number()),
+			quantity: vStringFloat,
+			message: v.optional(v.pipe(v.string(), v.maxLength(500))),
+		}),
+		v.check((x) => Boolean(x.project_id ?? x.creator_id)),
+	);
+
+	async hook(dto: MpHook) {
+		const res = await new Payment(this.mercadoPago).get({ id: dto.data.id });
+		const metadata = await v.parseAsync(this.metadataSchema, res.metadata);
+
+		return this.db.transaction(async (tx) => {
+			if (
+				(
+					await tx
+						.select({ id: Donation.id })
+						.from(Donation)
+						.where(eq(sql`${Donation.transactionData} ->> 'id'`, dto.data.id))
+						.limit(1)
+				).length
+			)
+				throw new UnprocessableEntityException();
+
+			const donationId = (
+				await tx
+					.insert(Donation)
+					.values({
+						userId: metadata.user_id,
+						message: metadata.message,
+						createdAt: new Date(
+							res.date_approved ?? res.date_created ?? new Date(),
+						),
+						quotation: metadata.quotation,
+						amount: metadata.quantity,
+						transactionData: { id: dto.data.id },
+					})
+					.returning({ id: Donation.id })
+			)[0].id;
+
+			return metadata.project_id
+				? this.db
+						.insert(ProjectDonation)
+						.values({ projectId: metadata.project_id, donationId })
+				: this.db
+						.insert(CreatorDonation)
+						.values({ creatorId: metadata.creator_id, donationId });
+		});
 	}
 }

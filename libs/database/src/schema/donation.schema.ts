@@ -2,7 +2,7 @@ import { type SQL, sql } from 'drizzle-orm';
 import {
 	bigserial,
 	integer,
-	json,
+	jsonb,
 	numeric,
 	pgTable,
 	timestamp,
@@ -22,5 +22,5 @@ export const Donation = pgTable('donation', {
 		.generatedAlwaysAs(
 			(): SQL => sql`${Donation.amount} * ${Donation.quotation}`,
 		),
-	transactionData: json(),
+	transactionData: jsonb(),
 });
