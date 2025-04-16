@@ -59,7 +59,7 @@ export const CreatorTop = pgView('creator_top').as((qb) => {
 				value: sum(Donation.value).as('value'),
 			})
 			.from(CreatorDonation)
-			.innerJoin(Donation, eq(Donation.id, CreatorDonation.creatorId))
+			.innerJoin(Donation, eq(Donation.id, CreatorDonation.donationId))
 			.groupBy(CreatorDonation.creatorId),
 	);
 
