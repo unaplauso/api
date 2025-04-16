@@ -50,6 +50,7 @@ export class PaymentController {
 		return this.mercadoPago.getProjectInitPoint(dto);
 	}
 
+	@NoContent()
 	@Pattern('hook_mercado_pago')
 	async hookMercadoPago(@Payload() dto: MpHook) {
 		return this.mercadoPago.hook(dto);

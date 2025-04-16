@@ -1,6 +1,11 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { JwtProtected, UseCache, UserId } from '@unaplauso/common/decorators';
+import {
+	JwtProtected,
+	NoContent,
+	UseCache,
+	UserId,
+} from '@unaplauso/common/decorators';
 import {
 	type MpHook,
 	MpHookSchema,
@@ -106,6 +111,7 @@ export class DonationController {
 		});
 	}
 
+	@NoContent()
 	@SkipThrottle()
 	@Validate('body', MpHookSchema)
 	@Post('hook/mercado-pago')

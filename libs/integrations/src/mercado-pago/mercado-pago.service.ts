@@ -259,18 +259,18 @@ export class MercadoPagoService {
 		const res = await new Payment(this.mercadoPago).get({ id: dto.data.id });
 		const metadata = await v.parseAsync(this.metadataSchema, res.metadata);
 
-		return this.db.transaction(async (tx) => {
-			if (
-				(
-					await tx
-						.select({ id: Donation.id })
-						.from(Donation)
-						.where(eq(sql`${Donation.transactionData} ->> 'id'`, dto.data.id))
-						.limit(1)
-				).length
-			)
-				throw new UnprocessableEntityException();
+		if (
+			(
+				await this.db
+					.select({ id: Donation.id })
+					.from(Donation)
+					.where(eq(sql`${Donation.transactionData} ->> 'id'`, dto.data.id))
+					.limit(1)
+			).length
+		)
+			throw new UnprocessableEntityException();
 
+		return this.db.transaction(async (tx) => {
 			const donationId = (
 				await tx
 					.insert(Donation)
