@@ -246,7 +246,7 @@ export class MercadoPagoService {
 	metadataSchema = v.pipe(
 		v.looseObject({
 			quotation: vStringFloat,
-			user_id: v.number(),
+			user_id: v.optional(v.number()),
 			creator_id: v.number(),
 			project_id: v.optional(v.number()),
 			quantity: vStringFloat,
@@ -288,10 +288,10 @@ export class MercadoPagoService {
 			)[0].id;
 
 			return metadata.project_id
-				? this.db
+				? tx
 						.insert(ProjectDonation)
 						.values({ projectId: metadata.project_id, donationId })
-				: this.db
+				: tx
 						.insert(CreatorDonation)
 						.values({ creatorId: metadata.creator_id, donationId });
 		});

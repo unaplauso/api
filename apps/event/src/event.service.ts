@@ -12,7 +12,7 @@ import {
 import { lowerEq } from '@unaplauso/database/functions';
 import { type Database, InjectDB } from '@unaplauso/database/module';
 import type { AxiosResponse } from 'axios';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
@@ -64,11 +64,11 @@ export class EventService {
 				.values({ creatorId: idOrUsername });
 
 		return this.db.insert(CreatorInteraction).values({
-			creatorId: this.db
+			creatorId: sql`(${this.db
 				.select({ id: User.id })
 				.from(User)
 				.where(lowerEq(User.username, idOrUsername))
-				.getSQL(),
+				.getSQL()})`,
 		});
 	}
 }
