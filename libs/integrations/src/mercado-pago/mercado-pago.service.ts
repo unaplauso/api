@@ -1,11 +1,12 @@
+import type { Cache } from '@nestjs/cache-manager';
 import {
-	ForbiddenException,
 	Injectable,
 	NotFoundException,
 	PreconditionFailedException,
 } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
-import { InjectConfig } from '@unaplauso/common/decorators';
+import { minutes } from '@nestjs/throttler';
+import { InjectCache, InjectConfig } from '@unaplauso/common/decorators';
 import {
 	Project,
 	User,
@@ -19,8 +20,10 @@ import { eq, sql } from 'drizzle-orm';
 import MercadoPagoConfig, {
 	User as MpUser,
 	OAuth,
+	Payment,
 	Preference,
 } from 'mercadopago';
+import type { OAuthResponse } from 'mercadopago/dist/clients/oAuth/commonTypes';
 
 @Injectable()
 export class MercadoPagoService {
@@ -32,6 +35,7 @@ export class MercadoPagoService {
 	constructor(
 		@InjectDB() private readonly db: Database,
 		@InjectConfig() private readonly config: ConfigService,
+		@InjectCache() private readonly cache: Cache,
 	) {
 		this.clientId = this.config.getOrThrow('MP_CLIENT_ID');
 		this.clientSecret = this.config.getOrThrow('MP_CLIENT_SECRET');
@@ -55,19 +59,30 @@ export class MercadoPagoService {
 		});
 	}
 
-	// FIXME: Salvar refresh, access y tiempo de expiración
-	// Ajustar el service para no estar refrescando todo el tiempo
-	// ACCESS TOKEN MP EN CACHÉ?!
-	private async saveRefreshToken(mercadoPagoRefreshToken: string, id: number) {
-		return this.db
-			.update(UserIntegration)
-			.set({ mercadoPagoRefreshToken })
-			.where(eq(UserIntegration.id, id));
+	private async saveCredentials(credentials: OAuthResponse, id: number) {
+		if (!credentials.access_token) throw new PreconditionFailedException();
+
+		this.cache.set(
+			`mp-token-${id}`,
+			credentials.access_token,
+			credentials.expires_in ?? minutes(15),
+		);
+
+		if (credentials.refresh_token)
+			this.db
+				.update(UserIntegration)
+				.set({ mercadoPagoRefreshToken: credentials.refresh_token })
+				.where(eq(UserIntegration.id, id));
+
+		return credentials.access_token;
 	}
 
-	private async refreshToken(creatorId: number, refreshToken?: string) {
-		const token =
-			refreshToken ??
+	private async getToken(creatorId: number, cachedToken?: string | null) {
+		const accessToken = await this.cache.get<string>(`mp-token-${creatorId}`);
+		if (accessToken) return accessToken;
+
+		const refreshToken =
+			cachedToken ??
 			(
 				await this.db
 					.select({ token: UserIntegration.mercadoPagoRefreshToken })
@@ -75,11 +90,11 @@ export class MercadoPagoService {
 					.where(eq(UserIntegration.id, creatorId))
 			).at(0)?.token;
 
-		if (!token) throw new NotFoundException();
+		if (!refreshToken) throw new NotFoundException();
 
 		const credentials = await new OAuth(this.mercadoPago).refresh({
 			body: {
-				refresh_token: token,
+				refresh_token: refreshToken,
 				client_id: this.clientId,
 				client_secret: this.clientSecret,
 			},
@@ -88,13 +103,11 @@ export class MercadoPagoService {
 		if (!credentials?.access_token || !credentials.refresh_token)
 			throw new PreconditionFailedException();
 
-		await this.saveRefreshToken(credentials.refresh_token, creatorId);
-
-		return credentials.access_token;
+		return this.saveCredentials(credentials, creatorId);
 	}
 
 	async getMercadoPagoData(userId: number) {
-		const token = await this.refreshToken(userId);
+		const token = await this.getToken(userId);
 		return new MpUser(new MercadoPagoConfig({ accessToken: token })).get();
 	}
 
@@ -108,11 +121,7 @@ export class MercadoPagoService {
 			},
 		});
 
-		if (!credentials?.refresh_token || !credentials.access_token)
-			throw new ForbiddenException();
-
-		await this.saveRefreshToken(credentials.refresh_token, userId);
-		return credentials.access_token;
+		return this.saveCredentials(credentials, userId);
 	}
 
 	private async getInitPoint(data: {
@@ -126,26 +135,12 @@ export class MercadoPagoService {
 		quantity: number;
 		userId?: number | null;
 	}) {
-		if (!data?.refreshToken) throw new NotFoundException();
-		const credentials = await new OAuth(this.mercadoPago).refresh({
-			body: {
-				refresh_token: data.refreshToken,
-				client_id: this.clientId,
-				client_secret: this.clientSecret,
-			},
-		});
-
-		if (!credentials?.access_token || !credentials.refresh_token)
-			throw new PreconditionFailedException();
-
-		await this.saveRefreshToken(credentials.refresh_token, data.creatorId);
+		const accessToken = await this.getToken(data.creatorId, data.refreshToken);
 
 		const quantity = Big(data.quantity).div(data.quotation).round(2).toNumber();
 
 		const preference = await new Preference(
-			new MercadoPagoConfig({
-				accessToken: credentials.access_token,
-			}),
+			new MercadoPagoConfig({ accessToken }),
 		).create({
 			body: {
 				metadata: { ...data, refreshToken: undefined },
@@ -161,8 +156,6 @@ export class MercadoPagoService {
 						id: data.projectId ? `p-${data.projectId}` : `u-${data.creatorId}`,
 						unit_price: Number.parseFloat(data.quotation),
 						quantity,
-						// FIXME: currency code / id
-						currency_id: '',
 						picture_url: data.pic
 							? `${this.config.getOrThrow('S3_PUBLIC_URL')}/${data.pic}`
 							: undefined,
@@ -231,5 +224,10 @@ export class MercadoPagoService {
 		).at(0);
 		if (!data?.refreshToken) throw new NotFoundException();
 		return this.getInitPoint({ ...data, quantity, userId });
+	}
+
+	async hook(dto: { id: number; date_created: Date }) {
+		console.log(dto);
+		return new Payment(this.mercadoPago).get({ id: dto.id });
 	}
 }

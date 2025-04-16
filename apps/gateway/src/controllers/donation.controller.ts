@@ -27,6 +27,7 @@ import {
 	type ListTopDonation,
 	ListTopDonationSchema,
 } from '@unaplauso/validation/types';
+import * as v from 'valibot';
 
 @Controller('donation')
 export class DonationController {
@@ -42,9 +43,9 @@ export class DonationController {
 	async createCreatorMercadoPago(
 		@UserId() userId: number | null,
 		@IdParam() id: number,
-		// FIXME: currency code / id
 		@Body(ParseFloatPipe) quantity: number,
 	) {
+		// FIXME: SACAR DEL GATEWAY
 		return this.mercadoPago.getCreatorInitPoint(id, quantity, userId);
 	}
 
@@ -53,9 +54,9 @@ export class DonationController {
 	async createProjectMercadoPago(
 		@UserId() userId: number | null,
 		@IdParam() id: number,
-		// FIXME: currency code / id
 		@Body(ParseFloatPipe) quantity: number,
 	) {
+		// FIXME: SACAR DEL GATEWAY
 		return this.mercadoPago.getProjectInitPoint(id, quantity, userId);
 	}
 
@@ -111,8 +112,19 @@ export class DonationController {
 		});
 	}
 
+	@Validate(
+		'body',
+		v.looseObject({
+			id: v.number(),
+			date_created: v.pipe(
+				v.string(),
+				v.isoTimestamp(),
+				v.transform((x) => new Date(x)),
+			),
+		}),
+	)
 	@Post('hook/mercado-pago')
-	async hookMercadoPago(@Body() dto: unknown) {
+	async hookMercadoPago(@Body() dto: { id: number; date_created: Date }) {
 		// FIXME: Validar que sea de mp + Salvar donation
 		/* 
 		{
@@ -128,6 +140,6 @@ export class DonationController {
       "user_id": "692240846"
     }
 		*/
-		return true;
+		return this.mercadoPago.hook(dto);
 	}
 }
