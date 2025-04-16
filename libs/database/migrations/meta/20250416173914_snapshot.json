@@ -1,1528 +1,1396 @@
 {
-  "id": "06c72ac3-527d-4fce-a629-792991103f81",
-  "prevId": "ec24c338-ff0b-453a-80d7-0ea4b8af7be5",
-  "version": "7",
-  "dialect": "postgresql",
-  "tables": {
-    "public.creator_donation": {
-      "name": "creator_donation",
-      "schema": "",
-      "columns": {
-        "donation_id": {
-          "name": "donation_id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "creator_donation_donation_id_donation_id_fk": {
-          "name": "creator_donation_donation_id_donation_id_fk",
-          "tableFrom": "creator_donation",
-          "tableTo": "donation",
-          "columnsFrom": [
-            "donation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "creator_donation_creator_id_user_id_fk": {
-          "name": "creator_donation_creator_id_user_id_fk",
-          "tableFrom": "creator_donation",
-          "tableTo": "user",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.creator_interaction": {
-      "name": "creator_interaction",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "bigserial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "creator_interaction_project_id_idx": {
-          "name": "creator_interaction_project_id_idx",
-          "columns": [
-            {
-              "expression": "creator_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "creator_interaction_created_at_idx": {
-          "name": "creator_interaction_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "creator_interaction_creator_id_user_id_fk": {
-          "name": "creator_interaction_creator_id_user_id_fk",
-          "tableFrom": "creator_interaction",
-          "tableTo": "user",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.donation": {
-      "name": "donation",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "bigserial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "message": {
-          "name": "message",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "quotation": {
-          "name": "quotation",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'1'"
-        },
-        "amount": {
-          "name": "amount",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "generated": {
-            "as": "\"donation\".\"amount\" * \"donation\".\"quotation\"",
-            "type": "stored"
-          }
-        },
-        "transaction_data": {
-          "name": "transaction_data",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "donation_user_id_user_id_fk": {
-          "name": "donation_user_id_user_id_fk",
-          "tableFrom": "donation",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.favorite_creator": {
-      "name": "favorite_creator",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "favorite_creator_user_id_user_id_fk": {
-          "name": "favorite_creator_user_id_user_id_fk",
-          "tableFrom": "favorite_creator",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "favorite_creator_creator_id_user_id_fk": {
-          "name": "favorite_creator_creator_id_user_id_fk",
-          "tableFrom": "favorite_creator",
-          "tableTo": "user",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "favorite_creator_user_id_creator_id_pk": {
-          "name": "favorite_creator_user_id_creator_id_pk",
-          "columns": [
-            "user_id",
-            "creator_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.favorite_project": {
-      "name": "favorite_project",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "favorite_project_user_id_user_id_fk": {
-          "name": "favorite_project_user_id_user_id_fk",
-          "tableFrom": "favorite_project",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "favorite_project_project_id_project_id_fk": {
-          "name": "favorite_project_project_id_project_id_fk",
-          "tableFrom": "favorite_project",
-          "tableTo": "project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "favorite_project_user_id_project_id_pk": {
-          "name": "favorite_project_user_id_project_id_pk",
-          "columns": [
-            "user_id",
-            "project_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.file": {
-      "name": "file",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "bucket": {
-          "name": "bucket",
-          "type": "s3_bucket",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'unaplauso-public'"
-        },
-        "type": {
-          "name": "type",
-          "type": "file_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "mimetype": {
-          "name": "mimetype",
-          "type": "varchar(96)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "is_nsfw": {
-          "name": "is_nsfw",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.project_donation": {
-      "name": "project_donation",
-      "schema": "",
-      "columns": {
-        "donation_id": {
-          "name": "donation_id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "project_donation_donation_id_donation_id_fk": {
-          "name": "project_donation_donation_id_donation_id_fk",
-          "tableFrom": "project_donation",
-          "tableTo": "donation",
-          "columnsFrom": [
-            "donation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "project_donation_project_id_project_id_fk": {
-          "name": "project_donation_project_id_project_id_fk",
-          "tableFrom": "project_donation",
-          "tableTo": "project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.project_file": {
-      "name": "project_file",
-      "schema": "",
-      "columns": {
-        "file_id": {
-          "name": "file_id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "project_file_file_id_file_id_fk": {
-          "name": "project_file_file_id_file_id_fk",
-          "tableFrom": "project_file",
-          "tableTo": "file",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "project_file_project_id_project_id_fk": {
-          "name": "project_file_project_id_project_id_fk",
-          "tableFrom": "project_file",
-          "tableTo": "project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "project_file_fileId_unique": {
-          "name": "project_file_fileId_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "file_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.project_interaction": {
-      "name": "project_interaction",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "bigserial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "project_interaction_project_id_idx": {
-          "name": "project_interaction_project_id_idx",
-          "columns": [
-            {
-              "expression": "project_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "project_interaction_created_at_idx": {
-          "name": "project_interaction_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "project_interaction_project_id_project_id_fk": {
-          "name": "project_interaction_project_id_project_id_fk",
-          "tableFrom": "project_interaction",
-          "tableTo": "project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.project_topic": {
-      "name": "project_topic",
-      "schema": "",
-      "columns": {
-        "project_id": {
-          "name": "project_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "topic_id": {
-          "name": "topic_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "project_topic_project_id_project_id_fk": {
-          "name": "project_topic_project_id_project_id_fk",
-          "tableFrom": "project_topic",
-          "tableTo": "project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "project_topic_topic_id_topic_id_fk": {
-          "name": "project_topic_topic_id_topic_id_fk",
-          "tableFrom": "project_topic",
-          "tableTo": "topic",
-          "columnsFrom": [
-            "topic_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "project_topic_project_id_topic_id_pk": {
-          "name": "project_topic_project_id_topic_id_pk",
-          "columns": [
-            "project_id",
-            "topic_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.project": {
-      "name": "project",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "deadline": {
-          "name": "deadline",
-          "type": "timestamp(0)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quotation": {
-          "name": "quotation",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'1'"
-        },
-        "fee": {
-          "name": "fee",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'0.05'"
-        },
-        "goal": {
-          "name": "goal",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "thumbnail_file_id": {
-          "name": "thumbnail_file_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar(10000)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_canceled": {
-          "name": "is_canceled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "project_creator_id_user_id_fk": {
-          "name": "project_creator_id_user_id_fk",
-          "tableFrom": "project",
-          "tableTo": "user",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "project_thumbnail_file_id_file_id_fk": {
-          "name": "project_thumbnail_file_id_file_id_fk",
-          "tableFrom": "project",
-          "tableTo": "file",
-          "columnsFrom": [
-            "thumbnail_file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "goal_gte_quotation_check": {
-          "name": "goal_gte_quotation_check",
-          "value": "(\"project\".\"goal\" is null or \"project\".\"quotation\" is null or \"project\".\"goal\" >= \"project\".\"quotation\")"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.report_creator": {
-      "name": "report_creator",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reason": {
-          "name": "reason",
-          "type": "report_creator_reason",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "message": {
-          "name": "message",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "report_creator_user_id_user_id_fk": {
-          "name": "report_creator_user_id_user_id_fk",
-          "tableFrom": "report_creator",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "report_creator_creator_id_user_id_fk": {
-          "name": "report_creator_creator_id_user_id_fk",
-          "tableFrom": "report_creator",
-          "tableTo": "user",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "report_creator_user_id_creator_id_pk": {
-          "name": "report_creator_user_id_creator_id_pk",
-          "columns": [
-            "user_id",
-            "creator_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "reason_or_message_check": {
-          "name": "reason_or_message_check",
-          "value": "(\"report_creator\".\"reason\" is not null or \"report_creator\".\"message\" is not null)"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.report_project": {
-      "name": "report_project",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reason": {
-          "name": "reason",
-          "type": "report_project_reason",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "message": {
-          "name": "message",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "report_project_user_id_user_id_fk": {
-          "name": "report_project_user_id_user_id_fk",
-          "tableFrom": "report_project",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "report_project_project_id_project_id_fk": {
-          "name": "report_project_project_id_project_id_fk",
-          "tableFrom": "report_project",
-          "tableTo": "project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "report_project_user_id_project_id_pk": {
-          "name": "report_project_user_id_project_id_pk",
-          "columns": [
-            "user_id",
-            "project_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "reason_or_message_check": {
-          "name": "reason_or_message_check",
-          "value": "(\"report_project\".\"reason\" is not null or \"report_project\".\"message\" is not null)"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.topic": {
-      "name": "topic",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "smallserial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "aliases": {
-          "name": "aliases",
-          "type": "varchar(320)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "topic_aliases_trgm": {
-          "name": "topic_aliases_trgm",
-          "columns": [
-            {
-              "expression": "\"aliases\" gin_trgm_ops",
-              "asc": true,
-              "isExpression": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "gin",
-          "with": {}
-        },
-        "topic_name_trgm": {
-          "name": "topic_name_trgm",
-          "columns": [
-            {
-              "expression": "\"name\" gin_trgm_ops",
-              "asc": true,
-              "isExpression": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "gin",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "topic_name_unique": {
-          "name": "topic_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.user_detail": {
-      "name": "user_detail",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar(10000)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "custom_thanks": {
-          "name": "custom_thanks",
-          "type": "varchar(1000)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "location": {
-          "name": "location",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quotation": {
-          "name": "quotation",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'1'"
-        },
-        "personal_url": {
-          "name": "personal_url",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "instagram_user": {
-          "name": "instagram_user",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "facebook_user": {
-          "name": "facebook_user",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "x_user": {
-          "name": "x_user",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tiktok_user": {
-          "name": "tiktok_user",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "github_user": {
-          "name": "github_user",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "user_detail_id_user_id_fk": {
-          "name": "user_detail_id_user_id_fk",
-          "tableFrom": "user_detail",
-          "tableTo": "user",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "personal_url_check": {
-          "name": "personal_url_check",
-          "value": "\"user_detail\".\"personal_url\" IS NULL OR \"user_detail\".\"personal_url\" ~ '[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)'"
-        },
-        "instagram_user_check": {
-          "name": "instagram_user_check",
-          "value": "\"user_detail\".\"instagram_user\" IS NULL OR \"user_detail\".\"instagram_user\" ~ '^@?[a-zA-Z0-9._]{1,30}$'"
-        },
-        "facebook_user_check": {
-          "name": "facebook_user_check",
-          "value": "\"user_detail\".\"facebook_user\" IS NULL OR \"user_detail\".\"facebook_user\" ~ '^[a-zA-Z0-9.]{5,50}$'"
-        },
-        "x_user_check": {
-          "name": "x_user_check",
-          "value": "\"user_detail\".\"x_user\" IS NULL OR \"user_detail\".\"x_user\" ~ '^@?[a-zA-Z0-9_]{1,15}$'"
-        },
-        "tiktok_user_check": {
-          "name": "tiktok_user_check",
-          "value": "\"user_detail\".\"tiktok_user\" IS NULL OR \"user_detail\".\"tiktok_user\" ~ '^@?[a-zA-Z0-9_.]{1,24}$'"
-        },
-        "github_user_check": {
-          "name": "github_user_check",
-          "value": "\"user_detail\".\"github_user\" IS NULL OR \"user_detail\".\"github_user\" ~ '^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$'"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.user_integration": {
-      "name": "user_integration",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "fee": {
-          "name": "fee",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'0.05'"
-        },
-        "mercado_pago_refresh_token": {
-          "name": "mercado_pago_refresh_token",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "user_integration_id_user_id_fk": {
-          "name": "user_integration_id_user_id_fk",
-          "tableFrom": "user_integration",
-          "tableTo": "user",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.user_topic": {
-      "name": "user_topic",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "topic_id": {
-          "name": "topic_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "user_topic_user_id_user_id_fk": {
-          "name": "user_topic_user_id_user_id_fk",
-          "tableFrom": "user_topic",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "user_topic_topic_id_topic_id_fk": {
-          "name": "user_topic_topic_id_topic_id_fk",
-          "tableFrom": "user_topic",
-          "tableTo": "topic",
-          "columnsFrom": [
-            "topic_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "user_topic_user_id_topic_id_pk": {
-          "name": "user_topic_user_id_topic_id_pk",
-          "columns": [
-            "user_id",
-            "topic_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.user": {
-      "name": "user",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "username": {
-          "name": "username",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "display_name": {
-          "name": "display_name",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "email": {
-          "name": "email",
-          "type": "varchar(320)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "profile_pic_file_id": {
-          "name": "profile_pic_file_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "profile_banner_file_id": {
-          "name": "profile_banner_file_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "user_username_unique_lower": {
-          "name": "user_username_unique_lower",
-          "columns": [
-            {
-              "expression": "lower(\"username\")",
-              "asc": true,
-              "isExpression": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "user_email_unique_lower": {
-          "name": "user_email_unique_lower",
-          "columns": [
-            {
-              "expression": "lower(\"email\")",
-              "asc": true,
-              "isExpression": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "user_profile_pic_file_id_file_id_fk": {
-          "name": "user_profile_pic_file_id_file_id_fk",
-          "tableFrom": "user",
-          "tableTo": "file",
-          "columnsFrom": [
-            "profile_pic_file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "user_profile_banner_file_id_file_id_fk": {
-          "name": "user_profile_banner_file_id_file_id_fk",
-          "tableFrom": "user",
-          "tableTo": "file",
-          "columnsFrom": [
-            "profile_banner_file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "username_format_check": {
-          "name": "username_format_check",
-          "value": "\"user\".\"username\" IS NULL OR \"user\".\"username\" ~ '^(?=.*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9_-]{1,31}$'"
-        }
-      },
-      "isRLSEnabled": false
-    }
-  },
-  "enums": {
-    "public.file_type": {
-      "name": "file_type",
-      "schema": "public",
-      "values": [
-        "profile_pic",
-        "profile_banner",
-        "project_file",
-        "project_thumbnail"
-      ]
-    },
-    "public.s3_bucket": {
-      "name": "s3_bucket",
-      "schema": "public",
-      "values": [
-        "unaplauso-public"
-      ]
-    },
-    "public.report_creator_reason": {
-      "name": "report_creator_reason",
-      "schema": "public",
-      "values": [
-        "spam",
-        "fraud",
-        "tos_disrespect",
-        "stolen_content",
-        "misleading_information",
-        "intellectual_property_violation",
-        "illegal_activity",
-        "harassment",
-        "discrimination",
-        "inappropriate_content",
-        "abusive_behavior"
-      ]
-    },
-    "public.report_project_reason": {
-      "name": "report_project_reason",
-      "schema": "public",
-      "values": [
-        "spam",
-        "fraud",
-        "tos_disrespect",
-        "stolen_content",
-        "misleading_information",
-        "intellectual_property_violation",
-        "illegal_activity",
-        "harassment",
-        "discrimination",
-        "inappropriate_content",
-        "abusive_behavior"
-      ]
-    }
-  },
-  "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
-  "views": {
-    "public.creator_top": {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "username": {
-          "name": "username",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "with \"user_topic_cte\" as (select \"user_topic\".\"user_id\", json_agg(json_build_object('id', \"topic\".\"id\", 'name', \"topic\".\"name\")) as \"topics\", array_agg(\"topic\".\"id\") as \"topic_ids\" from \"user_topic\" inner join \"topic\" on \"topic\".\"id\" = \"user_topic\".\"topic_id\" group by \"user_topic\".\"user_id\"), \"creator_donation_cte\" as (select \"creator_donation\".\"creator_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"creator_donation\" inner join \"donation\" on \"donation\".\"id\" = \"creator_donation\".\"creator_id\" group by \"creator_donation\".\"creator_id\"), \"creator_last_day_donation_cte\" as (select \"creator_donation\".\"creator_id\", sum(\"donation\".\"amount\") as \"last_day_amount\", sum(\"donation\".\"value\") as \"last_day_value\" from \"creator_donation\" inner join \"donation\" on \"donation\".\"id\" = \"creator_donation\".\"donation_id\" where \"donation\".\"created_at\" >= NOW() - interval '1 day' group by \"creator_donation\".\"creator_id\") select \"user\".\"id\", \"user\".\"username\", \"user\".\"display_name\" as \"display_name\", \"user\".\"created_at\" as \"created_at\", case when \"user\".\"profile_pic_file_id\" is not null then json_build_object('id', \"profile_pic_file\".\"id\", 'bucket', \"profile_pic_file\".\"bucket\", 'isNsfw', \"profile_pic_file\".\"is_nsfw\") else null end as \"profile_pic\", case when \"user\".\"profile_banner_file_id\" is not null then json_build_object('id', \"profile_banner_file\".\"id\", 'bucket', \"profile_banner_file\".\"bucket\", 'isNsfw', \"profile_banner_file\".\"is_nsfw\") else null end as \"profile_banner\", \"user_detail\".\"description\" as \"description\", \"user_detail\".\"custom_thanks\" as \"custom_thanks\", \"user_detail\".\"location\" as \"location\", \"user_detail\".\"quotation\" as \"quotation\", \"user_detail\".\"personal_url\" as \"personal_url\", \"user_detail\".\"instagram_user\" as \"instagram_user\", \"user_detail\".\"facebook_user\" as \"facebook_user\", \"user_detail\".\"x_user\" as \"x_user\", \"user_detail\".\"tiktok_user\" as \"tiktok_user\", \"user_detail\".\"github_user\" as \"github_user\", coalesce(\"amount\", 0) as \"donations_amount\", coalesce(\"value\", 0) as \"donations_value\", coalesce(\"last_day_amount\", 0) as \"last_day_donations_amount\", coalesce(\"last_day_value\", 0) as \"last_day_donations_value\", coalesce(case when \"user_integration\".\"mercado_pago_refresh_token\" is not null then true else null end, false) as \"has_mercado_pago\", coalesce((select count(*) from \"favorite_creator\" where \"favorite_creator\".\"creator_id\" = \"user\".\"id\"), 0) as \"favorites\", coalesce(\"topics\", '[]'::json) as \"topics\", coalesce(\"topic_ids\", ARRAY[]::smallint[]) as \"topic_ids\", coalesce((select count(*) from \"creator_interaction\" where \"creator_interaction\".\"creator_id\" = \"user\".\"id\"), 0) as \"interactions\" from \"user\" inner join \"user_detail\" on \"user_detail\".\"id\" = \"user\".\"id\" inner join \"user_integration\" on \"user_integration\".\"id\" = \"user\".\"id\" left join \"file\" \"profile_pic_file\" on \"profile_pic_file\".\"id\" = \"user\".\"profile_pic_file_id\" left join \"file\" \"profile_banner_file\" on \"profile_banner_file\".\"id\" = \"user\".\"profile_banner_file_id\" left join \"user_topic_cte\" on \"user_topic_cte\".\"user_id\" = \"user\".\"id\" left join \"creator_donation_cte\" on \"creator_donation_cte\".\"creator_id\" = \"user\".\"id\" left join \"creator_last_day_donation_cte\" on \"creator_last_day_donation_cte\".\"creator_id\" = \"user\".\"id\"",
-      "name": "creator_top",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": false
-    },
-    "public.donator_top": {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "username": {
-          "name": "username",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "definition": "with \"creator_donation_cte\" as ((select \"donation\".\"user_id\", \"creator_donation\".\"creator_id\" as \"creator_id\", null as \"project_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"creator_donation\" inner join \"donation\" on \"donation\".\"id\" = \"creator_donation\".\"donation_id\" group by \"donation\".\"user_id\", \"creator_donation\".\"creator_id\") union all (select \"donation\".\"user_id\", null as \"creator_id\", \"project_donation\".\"project_id\" as \"project_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"project_donation\" inner join \"donation\" on \"donation\".\"id\" = \"project_donation\".\"donation_id\" group by \"donation\".\"user_id\", \"project_donation\".\"project_id\")), \"user_topic_cte\" as (select \"user_topic\".\"user_id\", json_agg(json_build_object('id', \"topic\".\"id\", 'name', \"topic\".\"name\")) as \"topics\", array_agg(\"topic\".\"id\") as \"topic_ids\" from \"user_topic\" inner join \"topic\" on \"topic\".\"id\" = \"user_topic\".\"topic_id\" group by \"user_topic\".\"user_id\") select \"user\".\"id\", \"creator_id\" as \"creator_id\", \"project_id\" as \"project_id\", \"amount\", \"value\", \"user\".\"username\", \"user\".\"display_name\" as \"display_name\", \"user\".\"created_at\", case when \"user\".\"profile_pic_file_id\" is not null then json_build_object('id', \"profile_pic_file\".\"id\", 'bucket', \"profile_pic_file\".\"bucket\", 'isNsfw', \"profile_pic_file\".\"is_nsfw\") else null end as \"profile_pic\", case when \"user\".\"profile_banner_file_id\" is not null then json_build_object('id', \"profile_banner_file\".\"id\", 'bucket', \"profile_banner_file\".\"bucket\", 'isNsfw', \"profile_banner_file\".\"is_nsfw\") else null end as \"profile_banner\", \"user_detail\".\"location\" as \"location\", \"user_detail\".\"personal_url\" as \"personal_url\", \"user_detail\".\"instagram_user\" as \"instagram_user\", \"user_detail\".\"facebook_user\" as \"facebook_user\", \"user_detail\".\"x_user\" as \"x_user\", \"user_detail\".\"tiktok_user\" as \"tiktok_user\", \"user_detail\".\"github_user\" as \"github_user\", coalesce(\"topics\", '[]'::json) as \"topics\", coalesce(\"topic_ids\", ARRAY[]::smallint[]) as \"topic_ids\" from \"user\" inner join \"user_detail\" on \"user_detail\".\"id\" = \"user\".\"id\" left join \"file\" \"profile_pic_file\" on \"profile_pic_file\".\"id\" = \"user\".\"profile_pic_file_id\" left join \"file\" \"profile_banner_file\" on \"profile_banner_file\".\"id\" = \"user\".\"profile_banner_file_id\" inner join \"creator_donation_cte\" on \"creator_donation_cte\".\"user_id\" = \"user\".\"id\" left join \"user_topic_cte\" on \"user_topic_cte\".\"user_id\" = \"user\".\"id\"",
-      "name": "donator_top",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": false
-    },
-    "public.project_top": {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar(10000)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "deadline": {
-          "name": "deadline",
-          "type": "timestamp(0)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "goal": {
-          "name": "goal",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "quotation": {
-          "name": "quotation",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'1'"
-        }
-      },
-      "definition": "with \"project_topic_cte\" as (select \"project_topic\".\"project_id\", json_agg(json_build_object('id', \"topic\".\"id\", 'name', \"topic\".\"name\")) as \"topics\", array_agg(\"topic\".\"id\") as \"topic_ids\" from \"project_topic\" inner join \"topic\" on \"topic\".\"id\" = \"project_topic\".\"topic_id\" group by \"project_topic\".\"project_id\"), \"project_file_cte\" as (select \"project_file\".\"project_id\", json_agg(json_build_object('id', \"file\".\"id\", 'isNsfw', \"file\".\"is_nsfw\")) as \"files\", array_agg(\"file\".\"id\") as \"file_ids\" from \"project_file\" inner join \"file\" on \"file\".\"id\" = \"project_file\".\"file_id\" group by \"project_file\".\"project_id\"), \"project_donation_cte\" as (select \"project_donation\".\"project_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"project_donation\" inner join \"donation\" on \"donation\".\"id\" = \"project_donation\".\"project_id\" group by \"project_donation\".\"project_id\") select \"project\".\"id\", \"project\".\"title\", \"project\".\"description\", \"project\".\"created_at\", \"project\".\"deadline\", case when \"project\".\"thumbnail_file_id\" is not null then json_build_object('id', \"project_thumbnail_file\".\"id\", 'bucket', \"project_thumbnail_file\".\"bucket\", 'isNsfw', \"project_thumbnail_file\".\"is_nsfw\") else null end as \"thumbnail\", case when \"project\".\"is_canceled\" = true then 'canceled' when \"amount\" >= \"project\".\"goal\" then 'completed' when \"project\".\"deadline\" <= NOW() then 'failed' else 'open' end as \"status\", \"project\".\"goal\", \"project\".\"quotation\", coalesce(\"amount\", 0) as \"donations_amount\", coalesce(\"value\", 0) as \"donations_value\", coalesce((select count(*) from \"favorite_project\" where \"favorite_project\".\"project_id\" = \"project\".\"id\"), 0) as \"favorites\", \"user\".\"id\" as \"creator_id\", json_build_object('id', \"user\".\"id\", 'username', \"user\".\"username\", 'displayName', \"user\".\"display_name\", 'profilePic', case when \"user\".\"profile_pic_file_id\" is not null then json_build_object('id', \"profile_pic_file\".\"id\", 'bucket', \"profile_pic_file\".\"bucket\", 'isNsfw', \"profile_pic_file\".\"is_nsfw\") else null end) as \"creator\", coalesce(case when \"user_integration\".\"mercado_pago_refresh_token\" is not null then true else null end, false) as \"has_mercado_pago\", coalesce(\"topics\", '[]'::json) as \"topics\", coalesce(\"topic_ids\", ARRAY[]::smallint[]) as \"topic_ids\", coalesce(\"files\", '[]'::json) as \"files\", coalesce((select count(*) from \"project_interaction\" where \"project_interaction\".\"project_id\" = \"project\".\"id\"), 0) as \"interactions\" from \"project\" left join \"file\" \"project_thumbnail_file\" on \"project_thumbnail_file\".\"id\" = \"project\".\"thumbnail_file_id\" inner join \"user\" on \"user\".\"id\" = \"project\".\"creator_id\" inner join \"user_integration\" on \"user_integration\".\"id\" = \"project\".\"creator_id\" left join \"file\" \"profile_pic_file\" on \"profile_pic_file\".\"id\" = \"user\".\"profile_pic_file_id\" left join \"project_topic_cte\" on \"project_topic_cte\".\"project_id\" = \"project\".\"id\" left join \"project_file_cte\" on \"project_file_cte\".\"project_id\" = \"project\".\"id\" left join \"project_donation_cte\" on \"project_donation_cte\".\"project_id\" = \"project\".\"id\"",
-      "name": "project_top",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": false
-    },
-    "public.creator_top_mv": {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "username": {
-          "name": "username",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "select \"id\", \"username\", \"display_name\", \"created_at\", \"profile_pic\", \"profile_banner\", \"donations_amount\", \"donations_value\", \"last_day_donations_amount\", \"last_day_donations_value\", \"favorites\", \"topics\", \"topic_ids\", \"interactions\" from \"creator_top\" where \"creator_top\".\"username\" is not null",
-      "name": "creator_top_mv",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": true
-    }
-  },
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+	"id": "06c72ac3-527d-4fce-a629-792991103f81",
+	"prevId": "ec24c338-ff0b-453a-80d7-0ea4b8af7be5",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.creator_donation": {
+			"name": "creator_donation",
+			"schema": "",
+			"columns": {
+				"donation_id": {
+					"name": "donation_id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"creator_id": {
+					"name": "creator_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"creator_donation_donation_id_donation_id_fk": {
+					"name": "creator_donation_donation_id_donation_id_fk",
+					"tableFrom": "creator_donation",
+					"tableTo": "donation",
+					"columnsFrom": ["donation_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"creator_donation_creator_id_user_id_fk": {
+					"name": "creator_donation_creator_id_user_id_fk",
+					"tableFrom": "creator_donation",
+					"tableTo": "user",
+					"columnsFrom": ["creator_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.creator_interaction": {
+			"name": "creator_interaction",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "bigserial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"creator_id": {
+					"name": "creator_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"creator_interaction_project_id_idx": {
+					"name": "creator_interaction_project_id_idx",
+					"columns": [
+						{
+							"expression": "creator_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"creator_interaction_created_at_idx": {
+					"name": "creator_interaction_created_at_idx",
+					"columns": [
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"creator_interaction_creator_id_user_id_fk": {
+					"name": "creator_interaction_creator_id_user_id_fk",
+					"tableFrom": "creator_interaction",
+					"tableTo": "user",
+					"columnsFrom": ["creator_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.donation": {
+			"name": "donation",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "bigserial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"message": {
+					"name": "message",
+					"type": "varchar(500)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"quotation": {
+					"name": "quotation",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'1'"
+				},
+				"amount": {
+					"name": "amount",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"value": {
+					"name": "value",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true,
+					"generated": {
+						"as": "\"donation\".\"amount\" * \"donation\".\"quotation\"",
+						"type": "stored"
+					}
+				},
+				"transaction_data": {
+					"name": "transaction_data",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"donation_user_id_user_id_fk": {
+					"name": "donation_user_id_user_id_fk",
+					"tableFrom": "donation",
+					"tableTo": "user",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.favorite_creator": {
+			"name": "favorite_creator",
+			"schema": "",
+			"columns": {
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"creator_id": {
+					"name": "creator_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"favorite_creator_user_id_user_id_fk": {
+					"name": "favorite_creator_user_id_user_id_fk",
+					"tableFrom": "favorite_creator",
+					"tableTo": "user",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"favorite_creator_creator_id_user_id_fk": {
+					"name": "favorite_creator_creator_id_user_id_fk",
+					"tableFrom": "favorite_creator",
+					"tableTo": "user",
+					"columnsFrom": ["creator_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"favorite_creator_user_id_creator_id_pk": {
+					"name": "favorite_creator_user_id_creator_id_pk",
+					"columns": ["user_id", "creator_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.favorite_project": {
+			"name": "favorite_project",
+			"schema": "",
+			"columns": {
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"favorite_project_user_id_user_id_fk": {
+					"name": "favorite_project_user_id_user_id_fk",
+					"tableFrom": "favorite_project",
+					"tableTo": "user",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"favorite_project_project_id_project_id_fk": {
+					"name": "favorite_project_project_id_project_id_fk",
+					"tableFrom": "favorite_project",
+					"tableTo": "project",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"favorite_project_user_id_project_id_pk": {
+					"name": "favorite_project_user_id_project_id_pk",
+					"columns": ["user_id", "project_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.file": {
+			"name": "file",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"bucket": {
+					"name": "bucket",
+					"type": "s3_bucket",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'unaplauso-public'"
+				},
+				"type": {
+					"name": "type",
+					"type": "file_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"mimetype": {
+					"name": "mimetype",
+					"type": "varchar(96)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"is_nsfw": {
+					"name": "is_nsfw",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.project_donation": {
+			"name": "project_donation",
+			"schema": "",
+			"columns": {
+				"donation_id": {
+					"name": "donation_id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"project_donation_donation_id_donation_id_fk": {
+					"name": "project_donation_donation_id_donation_id_fk",
+					"tableFrom": "project_donation",
+					"tableTo": "donation",
+					"columnsFrom": ["donation_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"project_donation_project_id_project_id_fk": {
+					"name": "project_donation_project_id_project_id_fk",
+					"tableFrom": "project_donation",
+					"tableTo": "project",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.project_file": {
+			"name": "project_file",
+			"schema": "",
+			"columns": {
+				"file_id": {
+					"name": "file_id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"project_file_file_id_file_id_fk": {
+					"name": "project_file_file_id_file_id_fk",
+					"tableFrom": "project_file",
+					"tableTo": "file",
+					"columnsFrom": ["file_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"project_file_project_id_project_id_fk": {
+					"name": "project_file_project_id_project_id_fk",
+					"tableFrom": "project_file",
+					"tableTo": "project",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"project_file_fileId_unique": {
+					"name": "project_file_fileId_unique",
+					"nullsNotDistinct": false,
+					"columns": ["file_id"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.project_interaction": {
+			"name": "project_interaction",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "bigserial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"project_interaction_project_id_idx": {
+					"name": "project_interaction_project_id_idx",
+					"columns": [
+						{
+							"expression": "project_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"project_interaction_created_at_idx": {
+					"name": "project_interaction_created_at_idx",
+					"columns": [
+						{
+							"expression": "created_at",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"project_interaction_project_id_project_id_fk": {
+					"name": "project_interaction_project_id_project_id_fk",
+					"tableFrom": "project_interaction",
+					"tableTo": "project",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.project_topic": {
+			"name": "project_topic",
+			"schema": "",
+			"columns": {
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"topic_id": {
+					"name": "topic_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"project_topic_project_id_project_id_fk": {
+					"name": "project_topic_project_id_project_id_fk",
+					"tableFrom": "project_topic",
+					"tableTo": "project",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"project_topic_topic_id_topic_id_fk": {
+					"name": "project_topic_topic_id_topic_id_fk",
+					"tableFrom": "project_topic",
+					"tableTo": "topic",
+					"columnsFrom": ["topic_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"project_topic_project_id_topic_id_pk": {
+					"name": "project_topic_project_id_topic_id_pk",
+					"columns": ["project_id", "topic_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.project": {
+			"name": "project",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "varchar(64)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"creator_id": {
+					"name": "creator_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"deadline": {
+					"name": "deadline",
+					"type": "timestamp(0)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"quotation": {
+					"name": "quotation",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'1'"
+				},
+				"fee": {
+					"name": "fee",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'0.05'"
+				},
+				"goal": {
+					"name": "goal",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"thumbnail_file_id": {
+					"name": "thumbnail_file_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"description": {
+					"name": "description",
+					"type": "varchar(10000)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"is_canceled": {
+					"name": "is_canceled",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"project_creator_id_user_id_fk": {
+					"name": "project_creator_id_user_id_fk",
+					"tableFrom": "project",
+					"tableTo": "user",
+					"columnsFrom": ["creator_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"project_thumbnail_file_id_file_id_fk": {
+					"name": "project_thumbnail_file_id_file_id_fk",
+					"tableFrom": "project",
+					"tableTo": "file",
+					"columnsFrom": ["thumbnail_file_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"goal_gte_quotation_check": {
+					"name": "goal_gte_quotation_check",
+					"value": "(\"project\".\"goal\" is null or \"project\".\"quotation\" is null or \"project\".\"goal\" >= \"project\".\"quotation\")"
+				}
+			},
+			"isRLSEnabled": false
+		},
+		"public.report_creator": {
+			"name": "report_creator",
+			"schema": "",
+			"columns": {
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"creator_id": {
+					"name": "creator_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"reason": {
+					"name": "reason",
+					"type": "report_creator_reason",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"message": {
+					"name": "message",
+					"type": "varchar(500)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"report_creator_user_id_user_id_fk": {
+					"name": "report_creator_user_id_user_id_fk",
+					"tableFrom": "report_creator",
+					"tableTo": "user",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"report_creator_creator_id_user_id_fk": {
+					"name": "report_creator_creator_id_user_id_fk",
+					"tableFrom": "report_creator",
+					"tableTo": "user",
+					"columnsFrom": ["creator_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"report_creator_user_id_creator_id_pk": {
+					"name": "report_creator_user_id_creator_id_pk",
+					"columns": ["user_id", "creator_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"reason_or_message_check": {
+					"name": "reason_or_message_check",
+					"value": "(\"report_creator\".\"reason\" is not null or \"report_creator\".\"message\" is not null)"
+				}
+			},
+			"isRLSEnabled": false
+		},
+		"public.report_project": {
+			"name": "report_project",
+			"schema": "",
+			"columns": {
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"project_id": {
+					"name": "project_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"reason": {
+					"name": "reason",
+					"type": "report_project_reason",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"message": {
+					"name": "message",
+					"type": "varchar(500)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"report_project_user_id_user_id_fk": {
+					"name": "report_project_user_id_user_id_fk",
+					"tableFrom": "report_project",
+					"tableTo": "user",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"report_project_project_id_project_id_fk": {
+					"name": "report_project_project_id_project_id_fk",
+					"tableFrom": "report_project",
+					"tableTo": "project",
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"report_project_user_id_project_id_pk": {
+					"name": "report_project_user_id_project_id_pk",
+					"columns": ["user_id", "project_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"reason_or_message_check": {
+					"name": "reason_or_message_check",
+					"value": "(\"report_project\".\"reason\" is not null or \"report_project\".\"message\" is not null)"
+				}
+			},
+			"isRLSEnabled": false
+		},
+		"public.topic": {
+			"name": "topic",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "smallserial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"aliases": {
+					"name": "aliases",
+					"type": "varchar(320)",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {
+				"topic_aliases_trgm": {
+					"name": "topic_aliases_trgm",
+					"columns": [
+						{
+							"expression": "\"aliases\" gin_trgm_ops",
+							"asc": true,
+							"isExpression": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
+					"with": {}
+				},
+				"topic_name_trgm": {
+					"name": "topic_name_trgm",
+					"columns": [
+						{
+							"expression": "\"name\" gin_trgm_ops",
+							"asc": true,
+							"isExpression": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "gin",
+					"with": {}
+				}
+			},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"topic_name_unique": {
+					"name": "topic_name_unique",
+					"nullsNotDistinct": false,
+					"columns": ["name"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.user_detail": {
+			"name": "user_detail",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "varchar(10000)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"custom_thanks": {
+					"name": "custom_thanks",
+					"type": "varchar(1000)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"location": {
+					"name": "location",
+					"type": "varchar(64)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"quotation": {
+					"name": "quotation",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'1'"
+				},
+				"personal_url": {
+					"name": "personal_url",
+					"type": "varchar(255)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"instagram_user": {
+					"name": "instagram_user",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"facebook_user": {
+					"name": "facebook_user",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"x_user": {
+					"name": "x_user",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"tiktok_user": {
+					"name": "tiktok_user",
+					"type": "varchar(50)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"github_user": {
+					"name": "github_user",
+					"type": "varchar(100)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"user_detail_id_user_id_fk": {
+					"name": "user_detail_id_user_id_fk",
+					"tableFrom": "user_detail",
+					"tableTo": "user",
+					"columnsFrom": ["id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"personal_url_check": {
+					"name": "personal_url_check",
+					"value": "\"user_detail\".\"personal_url\" IS NULL OR \"user_detail\".\"personal_url\" ~ '[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)'"
+				},
+				"instagram_user_check": {
+					"name": "instagram_user_check",
+					"value": "\"user_detail\".\"instagram_user\" IS NULL OR \"user_detail\".\"instagram_user\" ~ '^@?[a-zA-Z0-9._]{1,30}$'"
+				},
+				"facebook_user_check": {
+					"name": "facebook_user_check",
+					"value": "\"user_detail\".\"facebook_user\" IS NULL OR \"user_detail\".\"facebook_user\" ~ '^[a-zA-Z0-9.]{5,50}$'"
+				},
+				"x_user_check": {
+					"name": "x_user_check",
+					"value": "\"user_detail\".\"x_user\" IS NULL OR \"user_detail\".\"x_user\" ~ '^@?[a-zA-Z0-9_]{1,15}$'"
+				},
+				"tiktok_user_check": {
+					"name": "tiktok_user_check",
+					"value": "\"user_detail\".\"tiktok_user\" IS NULL OR \"user_detail\".\"tiktok_user\" ~ '^@?[a-zA-Z0-9_.]{1,24}$'"
+				},
+				"github_user_check": {
+					"name": "github_user_check",
+					"value": "\"user_detail\".\"github_user\" IS NULL OR \"user_detail\".\"github_user\" ~ '^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$'"
+				}
+			},
+			"isRLSEnabled": false
+		},
+		"public.user_integration": {
+			"name": "user_integration",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"fee": {
+					"name": "fee",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'0.05'"
+				},
+				"mercado_pago_refresh_token": {
+					"name": "mercado_pago_refresh_token",
+					"type": "varchar(512)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"user_integration_id_user_id_fk": {
+					"name": "user_integration_id_user_id_fk",
+					"tableFrom": "user_integration",
+					"tableTo": "user",
+					"columnsFrom": ["id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.user_topic": {
+			"name": "user_topic",
+			"schema": "",
+			"columns": {
+				"user_id": {
+					"name": "user_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"topic_id": {
+					"name": "topic_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"user_topic_user_id_user_id_fk": {
+					"name": "user_topic_user_id_user_id_fk",
+					"tableFrom": "user_topic",
+					"tableTo": "user",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				},
+				"user_topic_topic_id_topic_id_fk": {
+					"name": "user_topic_topic_id_topic_id_fk",
+					"tableFrom": "user_topic",
+					"tableTo": "topic",
+					"columnsFrom": ["topic_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {
+				"user_topic_user_id_topic_id_pk": {
+					"name": "user_topic_user_id_topic_id_pk",
+					"columns": ["user_id", "topic_id"]
+				}
+			},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.user": {
+			"name": "user",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"username": {
+					"name": "username",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"display_name": {
+					"name": "display_name",
+					"type": "varchar(64)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"email": {
+					"name": "email",
+					"type": "varchar(320)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"profile_pic_file_id": {
+					"name": "profile_pic_file_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"profile_banner_file_id": {
+					"name": "profile_banner_file_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"user_username_unique_lower": {
+					"name": "user_username_unique_lower",
+					"columns": [
+						{
+							"expression": "lower(\"username\")",
+							"asc": true,
+							"isExpression": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": true,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"user_email_unique_lower": {
+					"name": "user_email_unique_lower",
+					"columns": [
+						{
+							"expression": "lower(\"email\")",
+							"asc": true,
+							"isExpression": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": true,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"user_profile_pic_file_id_file_id_fk": {
+					"name": "user_profile_pic_file_id_file_id_fk",
+					"tableFrom": "user",
+					"tableTo": "file",
+					"columnsFrom": ["profile_pic_file_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				},
+				"user_profile_banner_file_id_file_id_fk": {
+					"name": "user_profile_banner_file_id_file_id_fk",
+					"tableFrom": "user",
+					"tableTo": "file",
+					"columnsFrom": ["profile_banner_file_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {
+				"username_format_check": {
+					"name": "username_format_check",
+					"value": "\"user\".\"username\" IS NULL OR \"user\".\"username\" ~ '^(?=.*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9_-]{1,31}$'"
+				}
+			},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {
+		"public.file_type": {
+			"name": "file_type",
+			"schema": "public",
+			"values": [
+				"profile_pic",
+				"profile_banner",
+				"project_file",
+				"project_thumbnail"
+			]
+		},
+		"public.s3_bucket": {
+			"name": "s3_bucket",
+			"schema": "public",
+			"values": ["unaplauso-public"]
+		},
+		"public.report_creator_reason": {
+			"name": "report_creator_reason",
+			"schema": "public",
+			"values": [
+				"spam",
+				"fraud",
+				"tos_disrespect",
+				"stolen_content",
+				"misleading_information",
+				"intellectual_property_violation",
+				"illegal_activity",
+				"harassment",
+				"discrimination",
+				"inappropriate_content",
+				"abusive_behavior"
+			]
+		},
+		"public.report_project_reason": {
+			"name": "report_project_reason",
+			"schema": "public",
+			"values": [
+				"spam",
+				"fraud",
+				"tos_disrespect",
+				"stolen_content",
+				"misleading_information",
+				"intellectual_property_violation",
+				"illegal_activity",
+				"harassment",
+				"discrimination",
+				"inappropriate_content",
+				"abusive_behavior"
+			]
+		}
+	},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {
+		"public.creator_top": {
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"username": {
+					"name": "username",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"definition": "with \"user_topic_cte\" as (select \"user_topic\".\"user_id\", json_agg(json_build_object('id', \"topic\".\"id\", 'name', \"topic\".\"name\")) as \"topics\", array_agg(\"topic\".\"id\") as \"topic_ids\" from \"user_topic\" inner join \"topic\" on \"topic\".\"id\" = \"user_topic\".\"topic_id\" group by \"user_topic\".\"user_id\"), \"creator_donation_cte\" as (select \"creator_donation\".\"creator_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"creator_donation\" inner join \"donation\" on \"donation\".\"id\" = \"creator_donation\".\"creator_id\" group by \"creator_donation\".\"creator_id\"), \"creator_last_day_donation_cte\" as (select \"creator_donation\".\"creator_id\", sum(\"donation\".\"amount\") as \"last_day_amount\", sum(\"donation\".\"value\") as \"last_day_value\" from \"creator_donation\" inner join \"donation\" on \"donation\".\"id\" = \"creator_donation\".\"donation_id\" where \"donation\".\"created_at\" >= NOW() - interval '1 day' group by \"creator_donation\".\"creator_id\") select \"user\".\"id\", \"user\".\"username\", \"user\".\"display_name\" as \"display_name\", \"user\".\"created_at\" as \"created_at\", case when \"user\".\"profile_pic_file_id\" is not null then json_build_object('id', \"profile_pic_file\".\"id\", 'bucket', \"profile_pic_file\".\"bucket\", 'isNsfw', \"profile_pic_file\".\"is_nsfw\") else null end as \"profile_pic\", case when \"user\".\"profile_banner_file_id\" is not null then json_build_object('id', \"profile_banner_file\".\"id\", 'bucket', \"profile_banner_file\".\"bucket\", 'isNsfw', \"profile_banner_file\".\"is_nsfw\") else null end as \"profile_banner\", \"user_detail\".\"description\" as \"description\", \"user_detail\".\"custom_thanks\" as \"custom_thanks\", \"user_detail\".\"location\" as \"location\", \"user_detail\".\"quotation\" as \"quotation\", \"user_detail\".\"personal_url\" as \"personal_url\", \"user_detail\".\"instagram_user\" as \"instagram_user\", \"user_detail\".\"facebook_user\" as \"facebook_user\", \"user_detail\".\"x_user\" as \"x_user\", \"user_detail\".\"tiktok_user\" as \"tiktok_user\", \"user_detail\".\"github_user\" as \"github_user\", coalesce(\"amount\", 0) as \"donations_amount\", coalesce(\"value\", 0) as \"donations_value\", coalesce(\"last_day_amount\", 0) as \"last_day_donations_amount\", coalesce(\"last_day_value\", 0) as \"last_day_donations_value\", coalesce(case when \"user_integration\".\"mercado_pago_refresh_token\" is not null then true else null end, false) as \"has_mercado_pago\", coalesce((select count(*) from \"favorite_creator\" where \"favorite_creator\".\"creator_id\" = \"user\".\"id\"), 0) as \"favorites\", coalesce(\"topics\", '[]'::json) as \"topics\", coalesce(\"topic_ids\", ARRAY[]::smallint[]) as \"topic_ids\", coalesce((select count(*) from \"creator_interaction\" where \"creator_interaction\".\"creator_id\" = \"user\".\"id\"), 0) as \"interactions\" from \"user\" inner join \"user_detail\" on \"user_detail\".\"id\" = \"user\".\"id\" inner join \"user_integration\" on \"user_integration\".\"id\" = \"user\".\"id\" left join \"file\" \"profile_pic_file\" on \"profile_pic_file\".\"id\" = \"user\".\"profile_pic_file_id\" left join \"file\" \"profile_banner_file\" on \"profile_banner_file\".\"id\" = \"user\".\"profile_banner_file_id\" left join \"user_topic_cte\" on \"user_topic_cte\".\"user_id\" = \"user\".\"id\" left join \"creator_donation_cte\" on \"creator_donation_cte\".\"creator_id\" = \"user\".\"id\" left join \"creator_last_day_donation_cte\" on \"creator_last_day_donation_cte\".\"creator_id\" = \"user\".\"id\"",
+			"name": "creator_top",
+			"schema": "public",
+			"isExisting": false,
+			"materialized": false
+		},
+		"public.donator_top": {
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"username": {
+					"name": "username",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"definition": "with \"creator_donation_cte\" as ((select \"donation\".\"user_id\", \"creator_donation\".\"creator_id\" as \"creator_id\", null as \"project_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"creator_donation\" inner join \"donation\" on \"donation\".\"id\" = \"creator_donation\".\"donation_id\" group by \"donation\".\"user_id\", \"creator_donation\".\"creator_id\") union all (select \"donation\".\"user_id\", null as \"creator_id\", \"project_donation\".\"project_id\" as \"project_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"project_donation\" inner join \"donation\" on \"donation\".\"id\" = \"project_donation\".\"donation_id\" group by \"donation\".\"user_id\", \"project_donation\".\"project_id\")), \"user_topic_cte\" as (select \"user_topic\".\"user_id\", json_agg(json_build_object('id', \"topic\".\"id\", 'name', \"topic\".\"name\")) as \"topics\", array_agg(\"topic\".\"id\") as \"topic_ids\" from \"user_topic\" inner join \"topic\" on \"topic\".\"id\" = \"user_topic\".\"topic_id\" group by \"user_topic\".\"user_id\") select \"user\".\"id\", \"creator_id\" as \"creator_id\", \"project_id\" as \"project_id\", \"amount\", \"value\", \"user\".\"username\", \"user\".\"display_name\" as \"display_name\", \"user\".\"created_at\", case when \"user\".\"profile_pic_file_id\" is not null then json_build_object('id', \"profile_pic_file\".\"id\", 'bucket', \"profile_pic_file\".\"bucket\", 'isNsfw', \"profile_pic_file\".\"is_nsfw\") else null end as \"profile_pic\", case when \"user\".\"profile_banner_file_id\" is not null then json_build_object('id', \"profile_banner_file\".\"id\", 'bucket', \"profile_banner_file\".\"bucket\", 'isNsfw', \"profile_banner_file\".\"is_nsfw\") else null end as \"profile_banner\", \"user_detail\".\"location\" as \"location\", \"user_detail\".\"personal_url\" as \"personal_url\", \"user_detail\".\"instagram_user\" as \"instagram_user\", \"user_detail\".\"facebook_user\" as \"facebook_user\", \"user_detail\".\"x_user\" as \"x_user\", \"user_detail\".\"tiktok_user\" as \"tiktok_user\", \"user_detail\".\"github_user\" as \"github_user\", coalesce(\"topics\", '[]'::json) as \"topics\", coalesce(\"topic_ids\", ARRAY[]::smallint[]) as \"topic_ids\" from \"user\" inner join \"user_detail\" on \"user_detail\".\"id\" = \"user\".\"id\" left join \"file\" \"profile_pic_file\" on \"profile_pic_file\".\"id\" = \"user\".\"profile_pic_file_id\" left join \"file\" \"profile_banner_file\" on \"profile_banner_file\".\"id\" = \"user\".\"profile_banner_file_id\" inner join \"creator_donation_cte\" on \"creator_donation_cte\".\"user_id\" = \"user\".\"id\" left join \"user_topic_cte\" on \"user_topic_cte\".\"user_id\" = \"user\".\"id\"",
+			"name": "donator_top",
+			"schema": "public",
+			"isExisting": false,
+			"materialized": false
+		},
+		"public.project_top": {
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "varchar(64)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "varchar(10000)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"deadline": {
+					"name": "deadline",
+					"type": "timestamp(0)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"goal": {
+					"name": "goal",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"quotation": {
+					"name": "quotation",
+					"type": "numeric",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'1'"
+				}
+			},
+			"definition": "with \"project_topic_cte\" as (select \"project_topic\".\"project_id\", json_agg(json_build_object('id', \"topic\".\"id\", 'name', \"topic\".\"name\")) as \"topics\", array_agg(\"topic\".\"id\") as \"topic_ids\" from \"project_topic\" inner join \"topic\" on \"topic\".\"id\" = \"project_topic\".\"topic_id\" group by \"project_topic\".\"project_id\"), \"project_file_cte\" as (select \"project_file\".\"project_id\", json_agg(json_build_object('id', \"file\".\"id\", 'isNsfw', \"file\".\"is_nsfw\")) as \"files\", array_agg(\"file\".\"id\") as \"file_ids\" from \"project_file\" inner join \"file\" on \"file\".\"id\" = \"project_file\".\"file_id\" group by \"project_file\".\"project_id\"), \"project_donation_cte\" as (select \"project_donation\".\"project_id\", sum(\"donation\".\"amount\") as \"amount\", sum(\"donation\".\"value\") as \"value\" from \"project_donation\" inner join \"donation\" on \"donation\".\"id\" = \"project_donation\".\"project_id\" group by \"project_donation\".\"project_id\") select \"project\".\"id\", \"project\".\"title\", \"project\".\"description\", \"project\".\"created_at\", \"project\".\"deadline\", case when \"project\".\"thumbnail_file_id\" is not null then json_build_object('id', \"project_thumbnail_file\".\"id\", 'bucket', \"project_thumbnail_file\".\"bucket\", 'isNsfw', \"project_thumbnail_file\".\"is_nsfw\") else null end as \"thumbnail\", case when \"project\".\"is_canceled\" = true then 'canceled' when \"amount\" >= \"project\".\"goal\" then 'completed' when \"project\".\"deadline\" <= NOW() then 'failed' else 'open' end as \"status\", \"project\".\"goal\", \"project\".\"quotation\", coalesce(\"amount\", 0) as \"donations_amount\", coalesce(\"value\", 0) as \"donations_value\", coalesce((select count(*) from \"favorite_project\" where \"favorite_project\".\"project_id\" = \"project\".\"id\"), 0) as \"favorites\", \"user\".\"id\" as \"creator_id\", json_build_object('id', \"user\".\"id\", 'username', \"user\".\"username\", 'displayName', \"user\".\"display_name\", 'profilePic', case when \"user\".\"profile_pic_file_id\" is not null then json_build_object('id', \"profile_pic_file\".\"id\", 'bucket', \"profile_pic_file\".\"bucket\", 'isNsfw', \"profile_pic_file\".\"is_nsfw\") else null end) as \"creator\", coalesce(case when \"user_integration\".\"mercado_pago_refresh_token\" is not null then true else null end, false) as \"has_mercado_pago\", coalesce(\"topics\", '[]'::json) as \"topics\", coalesce(\"topic_ids\", ARRAY[]::smallint[]) as \"topic_ids\", coalesce(\"files\", '[]'::json) as \"files\", coalesce((select count(*) from \"project_interaction\" where \"project_interaction\".\"project_id\" = \"project\".\"id\"), 0) as \"interactions\" from \"project\" left join \"file\" \"project_thumbnail_file\" on \"project_thumbnail_file\".\"id\" = \"project\".\"thumbnail_file_id\" inner join \"user\" on \"user\".\"id\" = \"project\".\"creator_id\" inner join \"user_integration\" on \"user_integration\".\"id\" = \"project\".\"creator_id\" left join \"file\" \"profile_pic_file\" on \"profile_pic_file\".\"id\" = \"user\".\"profile_pic_file_id\" left join \"project_topic_cte\" on \"project_topic_cte\".\"project_id\" = \"project\".\"id\" left join \"project_file_cte\" on \"project_file_cte\".\"project_id\" = \"project\".\"id\" left join \"project_donation_cte\" on \"project_donation_cte\".\"project_id\" = \"project\".\"id\"",
+			"name": "project_top",
+			"schema": "public",
+			"isExisting": false,
+			"materialized": false
+		},
+		"public.creator_top_mv": {
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"username": {
+					"name": "username",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"definition": "select \"id\", \"username\", \"display_name\", \"created_at\", \"profile_pic\", \"profile_banner\", \"donations_amount\", \"donations_value\", \"last_day_donations_amount\", \"last_day_donations_value\", \"favorites\", \"topics\", \"topic_ids\", \"interactions\" from \"creator_top\" where \"creator_top\".\"username\" is not null",
+			"name": "creator_top_mv",
+			"schema": "public",
+			"isExisting": false,
+			"materialized": true
+		}
+	},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
 }
