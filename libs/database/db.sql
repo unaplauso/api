@@ -13,6 +13,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE UNIQUE INDEX creator_top_mv_id_idx ON creator_top_mv (id);
 CREATE INDEX creator_top_mv_topic_ids_idx ON creator_top_mv USING GIN (topic_ids);
 CREATE INDEX creator_top_mv_donations_value_idx ON creator_top_mv (donations_value DESC);
+CREATE INDEX creator_top_mv_last_day_donations_value_idx ON creator_top_mv (last_day_donations_value DESC);
 CREATE INDEX creator_top_mv_interactions_idx ON creator_top_mv (interactions DESC);
 CREATE INDEX creator_top_user_search_trgm_idx ON public.creator_top_mv
   USING gin (lower(username || '|' || coalesce(display_name, '')) gin_trgm_ops);

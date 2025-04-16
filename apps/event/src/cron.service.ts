@@ -26,13 +26,22 @@ export class CronService {
 		if (refresh)
 			await this.db.refreshMaterializedView(CreatorTopMv).concurrently();
 
-		const { createdAt, donationsValue, topicIds, interactions, ...selection } =
-			getViewSelectedFields(CreatorTopMv);
+		const {
+			createdAt,
+			donationsValue,
+			lastDayDonationsValue,
+			topicIds,
+			interactions,
+			...selection
+		} = getViewSelectedFields(CreatorTopMv);
 
 		const top = await this.db
 			.select(selection)
 			.from(CreatorTopMv)
-			.orderBy(desc(CreatorTopMv.donationsValue))
+			.orderBy(
+				desc(CreatorTopMv.lastDayDonationsValue),
+				desc(CreatorTopMv.interactions),
+			)
 			.limit(10);
 
 		return this.cache.set('top_creator', top, days(1));

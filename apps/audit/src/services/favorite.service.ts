@@ -48,6 +48,8 @@ export class FavoriteService {
 			tiktokUser,
 			githubUser,
 			donationsValue,
+			lastDayDonationsAmount,
+			lastDayDonationsValue,
 			hasMercadoPago,
 			topicIds,
 			interactions,

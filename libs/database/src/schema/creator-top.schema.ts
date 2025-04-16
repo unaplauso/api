@@ -1,4 +1,11 @@
-import { eq, getViewSelectedFields, isNotNull, sum } from 'drizzle-orm';
+import {
+	eq,
+	getViewSelectedFields,
+	gte,
+	isNotNull,
+	sql,
+	sum,
+} from 'drizzle-orm';
 import { pgMaterializedView, pgView } from 'drizzle-orm/pg-core';
 import {
 	arrayAgg,
@@ -8,6 +15,7 @@ import {
 	jsonBuildObject,
 	sqlFalse,
 	sqlJsonArray,
+	sqlNow,
 	sqlSmallintArray,
 	sqlStr0,
 	sqlTrue,
@@ -55,8 +63,23 @@ export const CreatorTop = pgView('creator_top').as((qb) => {
 			.groupBy(CreatorDonation.creatorId),
 	);
 
+	const CreatorLastDayDonationCte = qb
+		.$with('creator_last_day_donation_cte')
+		.as((sqb) =>
+			sqb
+				.select({
+					creatorId: CreatorDonation.creatorId,
+					amount: sum(Donation.amount).as('last_day_amount'),
+					value: sum(Donation.value).as('last_day_value'),
+				})
+				.from(CreatorDonation)
+				.innerJoin(Donation, eq(Donation.id, CreatorDonation.donationId))
+				.where(gte(Donation.createdAt, sql`${sqlNow} - interval '1 day'`))
+				.groupBy(CreatorDonation.creatorId),
+		);
+
 	return qb
-		.with(UserTopicCte, CreatorDonationCte)
+		.with(UserTopicCte, CreatorDonationCte, CreatorLastDayDonationCte)
 		.select({
 			id: User.id,
 			username: User.username,
@@ -94,6 +117,14 @@ export const CreatorTop = pgView('creator_top').as((qb) => {
 			donationsValue: coalesce(CreatorDonationCte.value, sqlStr0).as(
 				'donations_value',
 			),
+			lastDayDonationsAmount: coalesce(
+				CreatorLastDayDonationCte.amount,
+				sqlStr0,
+			).as('last_day_donations_amount'),
+			lastDayDonationsValue: coalesce(
+				CreatorLastDayDonationCte.value,
+				sqlStr0,
+			).as('last_day_donations_value'),
 			hasMercadoPago: coalesce(
 				caseWhenNull(UserIntegration.mercadoPagoRefreshToken, sqlTrue),
 				sqlFalse,
@@ -120,7 +151,11 @@ export const CreatorTop = pgView('creator_top').as((qb) => {
 			eq(ProfileBannerFile.id, User.profileBannerFileId),
 		)
 		.leftJoin(UserTopicCte, eq(UserTopicCte.userId, User.id))
-		.leftJoin(CreatorDonationCte, eq(CreatorDonationCte.creatorId, User.id));
+		.leftJoin(CreatorDonationCte, eq(CreatorDonationCte.creatorId, User.id))
+		.leftJoin(
+			CreatorLastDayDonationCte,
+			eq(CreatorLastDayDonationCte.creatorId, User.id),
+		);
 });
 
 export const CreatorTopMv = pgMaterializedView('creator_top_mv').as((qb) => {

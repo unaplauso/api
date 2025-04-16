@@ -28,6 +28,8 @@ export class CreatorService {
 			createdAt,
 			customThanks,
 			donationsValue,
+			lastDayDonationsAmount,
+			lastDayDonationsValue,
 			topicIds,
 			interactions,
 			...selection
@@ -46,8 +48,14 @@ export class CreatorService {
 	}
 
 	async listCreator(dto: ListCreator) {
-		const { createdAt, donationsValue, topicIds, interactions, ...selection } =
-			getViewSelectedFields(CreatorTopMv);
+		const {
+			createdAt,
+			donationsValue,
+			lastDayDonationsValue,
+			topicIds,
+			interactions,
+			...selection
+		} = getViewSelectedFields(CreatorTopMv);
 
 		const similarityTrait = sql<string>`lower(${CreatorTopMv.username} || '|' || ${coalesce(CreatorTopMv.displayName, sqlEmptyStr)})`;
 
@@ -78,8 +86,15 @@ export class CreatorService {
 								? CreatorTopMv.createdAt
 								: dto.orderBy === 'interactions'
 									? CreatorTopMv.interactions
-									: CreatorTopMv.donationsValue,
+									: dto.orderBy === 'donations'
+										? CreatorTopMv.donationsValue
+										: CreatorTopMv.lastDayDonationsValue,
 						),
+				desc(
+					dto.orderBy === 'interactions'
+						? CreatorTopMv.createdAt
+						: CreatorTopMv.interactions,
+				),
 			)
 			.limit(dto.pageSize)
 			.offset((dto.page - 1) * dto.pageSize);
