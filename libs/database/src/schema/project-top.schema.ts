@@ -66,7 +66,7 @@ export const ProjectTop = pgView('project_top').as((qb) => {
 				value: sum(Donation.value).as('value'),
 			})
 			.from(ProjectDonation)
-			.innerJoin(Donation, eq(Donation.id, ProjectDonation.projectId))
+			.innerJoin(Donation, eq(Donation.id, ProjectDonation.donationId))
 			.groupBy(ProjectDonation.projectId),
 	);
 

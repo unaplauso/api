@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreatorTop, CreatorTopMv } from '@unaplauso/database';
+import {
+	CreatorTop,
+	CreatorTopMv,
+	User,
+	UserDetail,
+} from '@unaplauso/database';
 import {
 	coalesce,
 	sqlArray,
@@ -47,6 +52,19 @@ export class CreatorService {
 		).at(0);
 	}
 
+	async readCreatorCustomThanks(idOrUsername: string | number) {
+		return (
+			await this.db
+				.select({ customThanks: UserDetail.customThanks })
+				.from(UserDetail)
+				.innerJoin(User, eq(User.id, UserDetail.id))
+				.where(
+					typeof idOrUsername === 'number'
+						? eq(User.id, idOrUsername)
+						: eq(User.username, idOrUsername),
+				)
+		).at(0)?.customThanks;
+	}
 	async listCreator(dto: ListCreator) {
 		const {
 			createdAt,

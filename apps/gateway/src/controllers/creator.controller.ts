@@ -35,6 +35,19 @@ export class CreatorController {
 		return this.client.send(Service.OPEN, 'read_creator', idOrUsername);
 	}
 
+	@ValidateParam(
+		'id',
+		v.union([v.pipe(v.string(), v.regex(USERNAME_REGEX)), vStringInt]),
+	)
+	@Get('custom-thanks/:id')
+	async readCreatorCustomThanks(@Param('id') idOrUsername: string | number) {
+		return this.client.send(
+			Service.OPEN,
+			'read_creator_custom_thanks',
+			idOrUsername,
+		);
+	}
+
 	@Validate('query', ListCreatorSchema)
 	@UseCache()
 	@Get()

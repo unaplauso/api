@@ -42,6 +42,11 @@ export class OpenController {
 		return this.creator.readCreator(idOrUsername);
 	}
 
+	@Pattern('read_creator_custom_thanks')
+	async readCreatorCustomThanks(@Payload() idOrUsername: string | number) {
+		return this.creator.readCreatorCustomThanks(idOrUsername);
+	}
+
 	@Pattern('read_user_profile_pic')
 	async readUserProfilePic(@Payload() userId: number) {
 		return this.user.readUserProfilePic(userId);
