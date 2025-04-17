@@ -24,9 +24,11 @@ export class JwtGuard implements CanActivate {
 		const strict =
 			this.reflector.get<boolean>('strict', context.getHandler()) ?? true;
 
+		console.log('HOLA!', strict);
 		const request = context.switchToHttp().getRequest();
 		const [method, token] = request.headers.authorization?.split(' ') ?? [];
-		if (method !== 'Bearer' || !token) throw new UnauthorizedException();
+		if (strict && (method !== 'Bearer' || !token))
+			throw new UnauthorizedException();
 
 		try {
 			request.user = await this.jwt.verifyAsync(token, {

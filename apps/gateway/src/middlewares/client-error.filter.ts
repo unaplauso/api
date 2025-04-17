@@ -8,15 +8,20 @@ export class ClientErrorFilter extends BaseExceptionFilter {
 	private readonly logger = new Logger(ClientErrorFilter.name);
 
 	catch(
-		e: { status?: number; response: { statusCode?: number } },
+		e: {
+			status?: number;
+			response: { statusCode?: number; status: string | number };
+		},
 		host: ArgumentsHost,
 	) {
-		const code = (e?.response?.statusCode ?? e?.status) || 500;
+		const code =
+			(e?.response?.statusCode ?? e.response.status ?? e?.status) || 500;
+
 		this.logger.error(e);
 		return host
 			.switchToHttp()
 			.getResponse<FastifyReply>()
-			.status(code)
+			.status(typeof code === 'number' ? code : 500)
 			.send(IS_DEVELOPMENT ? { ...e } : undefined);
 	}
 }
