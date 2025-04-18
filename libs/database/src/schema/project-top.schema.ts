@@ -49,7 +49,11 @@ export const ProjectTop = pgView('project_top').as((qb) => {
 			.select({
 				projectId: ProjectFile.projectId,
 				files: jsonAgg(
-					jsonBuildObject({ id: File.id, isNsfw: File.isNsfw }),
+					jsonBuildObject({
+						id: File.id,
+						bucket: File.bucket,
+						isNsfw: File.isNsfw,
+					}),
 				).as('files'),
 				fileIds: arrayAgg(File.id).as('file_ids'),
 			})
