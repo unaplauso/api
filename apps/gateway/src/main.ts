@@ -26,6 +26,7 @@ import { NotFoundInterceptor } from './middlewares/not-found.interceptor';
 	);
 
 	app.setGlobalPrefix('api');
+	app.enableCors();
 	await app.register(fastifyHelmet);
 	await app.register(fastifyMultipart);
 

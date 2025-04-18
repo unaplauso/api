@@ -14,6 +14,7 @@ import { AuthModule } from './auth.module';
 	const app = await NestFactory.create<NestExpressApplication>(AuthModule);
 	app.setGlobalPrefix('api/auth');
 	app.set('trust proxy', true);
+	app.enableCors();
 
 	if (IS_DEVELOPMENT)
 		SwaggerModule.setup(
