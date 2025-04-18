@@ -74,14 +74,14 @@ export class MercadoPagoService {
 	private async saveCredentials(credentials: OAuthResponse, id: number) {
 		if (!credentials.access_token) throw new PreconditionFailedException();
 
-		this.cache.set(
+		await this.cache.set(
 			`mp-token-${id}`,
 			credentials.access_token,
 			credentials.expires_in ?? minutes(15),
 		);
 
 		if (credentials.refresh_token)
-			this.db
+			await this.db
 				.update(UserIntegration)
 				.set({ mercadoPagoRefreshToken: credentials.refresh_token })
 				.where(eq(UserIntegration.id, id));
@@ -111,9 +111,6 @@ export class MercadoPagoService {
 				client_secret: this.clientSecret,
 			},
 		});
-
-		if (!credentials?.access_token || !credentials.refresh_token)
-			throw new PreconditionFailedException();
 
 		return this.saveCredentials(credentials, creatorId);
 	}
